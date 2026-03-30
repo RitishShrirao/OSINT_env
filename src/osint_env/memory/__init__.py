@@ -1,0 +1,2 @@
+"""Structured memory package."""
+

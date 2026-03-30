@@ -1,0 +1,20 @@
+[project]
+name = "osint-rl-env"
+version = "0.1.0"
+description = "OSINT-style multi-platform information ecosystem environment for LLM agents."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["openenv"]
+
+[project.scripts]
+osint-env = "osint_env.cli:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
