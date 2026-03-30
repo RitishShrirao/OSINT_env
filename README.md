@@ -13,7 +13,7 @@ A professional, scalable prototype of a simulated multi-platform information eco
 
 ## Quick Start
 ```bash
-source ~/arl/bin/activate
+source ~/test/bin/activate
 uv pip install -e .
 osint-env demo
 osint-env eval --episodes 20
