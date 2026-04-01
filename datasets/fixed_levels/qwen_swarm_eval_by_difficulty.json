@@ -1,0 +1,53 @@
+{
+  "by_difficulty": {
+    "easy": {
+      "avg_graph_f1": 1.0,
+      "avg_reward": 3.610490808845623,
+      "avg_steps": 9.0,
+      "avg_tool_calls": 4.0,
+      "episodes": 5,
+      "task_success_rate": 1.0
+    },
+    "high": {
+      "avg_graph_f1": 0.5476190476190477,
+      "avg_reward": 4.207102815893519,
+      "avg_steps": 9.0,
+      "avg_tool_calls": 4.0,
+      "episodes": 5,
+      "task_success_rate": 1.0
+    },
+    "mid": {
+      "avg_graph_f1": 1.0,
+      "avg_reward": 4.822687547070801,
+      "avg_steps": 9.0,
+      "avg_tool_calls": 4.0,
+      "episodes": 5,
+      "task_success_rate": 1.0
+    }
+  },
+  "overall": {
+    "avg_compactness_reward": 0.0,
+    "avg_connectivity_gain_reward": 0.16666666666666666,
+    "avg_connectivity_reward": 0.16999999999999998,
+    "avg_diversity_reward": 0.1157777777777778,
+    "avg_entity_informativeness_reward": -0.07289878447762359,
+    "avg_format_reward": 0.14999999999999997,
+    "avg_graph_f1": 0.8492063492063492,
+    "avg_knowledge_carrier_reward": 0.5,
+    "avg_knowledge_indexing_reward": 0.052000000000000005,
+    "avg_relation_informativeness_reward": 0.07157694332826091,
+    "avg_reward": 4.213427057269981,
+    "avg_soft_shaping_reward": 0.24999999999999994,
+    "avg_spawn_count": 4.0,
+    "avg_spawn_critical_steps": 6.0,
+    "avg_steps_to_solution": 9.0,
+    "deanonymization_accuracy": 1.0,
+    "leaderboard_score": 0.8546911504342771,
+    "retrieval_signal": 0.6932,
+    "spawn_completion_rate": 1.0,
+    "spawn_signal": 0.6666666666666666,
+    "structural_signal": 0.5762689651034608,
+    "task_success_rate": 1.0,
+    "tool_efficiency": 0.5
+  }
+}

@@ -133,12 +133,23 @@ def export_dashboard(
     truth_edges = task.supporting_edges if task else []
     pred_edges = env.memory_graph.edges if env.state else []
 
+    episode_graphs: list[dict[str, Any]] = []
+    for episode in episodes:
+      pred_from_eval = [Edge(str(e.get("src", "")), str(e.get("rel", "")), str(e.get("dst", "")), float(e.get("confidence", 1.0))) for e in episode.get("pred_edges", []) if isinstance(e, dict)]
+      truth_from_eval = [Edge(str(e.get("src", "")), str(e.get("rel", "")), str(e.get("dst", "")), float(e.get("confidence", 1.0))) for e in episode.get("truth_edges", []) if isinstance(e, dict)]
+      if pred_from_eval or truth_from_eval:
+        episode_graphs.append(_episode_graph_payload(pred_from_eval, truth_from_eval, env.graph))
+
+    if not episode_graphs:
+      episode_graphs.append(_episode_graph_payload(pred_edges, truth_edges, env.graph))
+
     payload = {
         "summary": summary,
         "episodes": episodes,
         "leaderboard": _leaderboard_payload(leaderboard_records),
         "canonical_graph": _canonical_graph_payload(env.graph),
-        "episode_graph": _episode_graph_payload(pred_edges, truth_edges, env.graph),
+      "episode_graphs": episode_graphs,
+      "episode_graph": episode_graphs[-1],
         "views": _views_payload(env.views),
         "task": {
             "task_id": task.task_id if task else "n/a",
@@ -243,6 +254,9 @@ def export_dashboard(
     .legend {{ display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; }}
     .dot {{ width: 9px; height: 9px; border-radius: 999px; display: inline-block; margin-right: 4px; }}
     .mono {{ font-family: \"IBM Plex Mono\", monospace; font-size: 12px; }}
+    .mono-box {{ font-family: \"IBM Plex Mono\", monospace; font-size: 12px; line-height: 1.4; }}
+    .answer-ok {{ color: var(--ok); font-weight: 600; }}
+    .answer-bad {{ color: var(--danger); font-weight: 600; }}
     .inline {{ display: flex; gap: 8px; align-items: center; }}
     .split {{ display: grid; grid-template-columns: 2fr 1.3fr; gap: 14px; margin-bottom: 14px; }}
     .db-tabs {{ display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }}
@@ -299,12 +313,22 @@ def export_dashboard(
         <div class=\"stats\" id=\"stats\"></div>
       </section>
       <section class=\"card\">
-        <h2>Latest Task Snapshot</h2>
+        <h2>Episode Explorer</h2>
+        <div class=\"inline\" style=\"margin-bottom:8px\">
+          <label class=\"mono\" for=\"episode-select\">Episode</label>
+          <select id=\"episode-select\" style=\"flex:1\"></select>
+        </div>
+        <div class=\"inline\" style=\"gap:6px; margin-bottom:8px\">
+          <button id=\"episode-prev\">Prev</button>
+          <button id=\"episode-next\">Next</button>
+        </div>
         <div><strong>Task ID:</strong> <span id=\"task-id\"></span></div>
         <div><strong>Task Type:</strong> <span id=\"task-type\"></span></div>
         <div style=\"margin-top:8px\"><strong>Question</strong></div>
-        <div id=\"task-question\" class=\"muted\"></div>
-        <div style=\"margin-top:8px\"><strong>Answer</strong>: <span id=\"task-answer\"></span></div>
+        <div id=\"task-question\" class=\"muted mono-box\"></div>
+        <div style=\"margin-top:8px\"><strong>Ground Truth Answer</strong>: <span id=\"task-answer\"></span></div>
+        <div style=\"margin-top:8px\"><strong>Agent Answer</strong>: <span id=\"agent-answer\"></span></div>
+        <div style=\"margin-top:8px\"><strong>Correct</strong>: <span id=\"answer-correct\"></span></div>
       </section>
     </div>
 
@@ -466,15 +490,30 @@ def export_dashboard(
         canonical: payload.canonical_graph || {{ nodes: [], edges: [] }},
         episode: payload.episode_graph || {{ nodes: [], edges: [] }}
       }};
+      const episodeLayers = payload.episode_graphs || [];
 
-      const allGroups = Array.from(new Set((rawLayers.canonical.nodes || []).map(n => n.group || "unknown"))).sort();
+      const groupSet = new Set();
+      (rawLayers.canonical.nodes || []).forEach((n) => groupSet.add(n.group || "unknown"));
+      (episodeLayers || []).forEach((layer) => {{
+        (layer.nodes || []).forEach((n) => groupSet.add(n.group || "unknown"));
+      }});
+      const allGroups = Array.from(groupSet).sort();
       buildTypeFilters(allGroups);
 
       const state = {{
         mode: "canonical",
         relationQuery: "",
         nodeQuery: "",
+        selectedEpisode: Math.max(0, (payload.episodes || []).length - 1),
       }};
+
+      function currentEpisodeLayer() {{
+        if (!episodeLayers.length) {{
+          return rawLayers.episode;
+        }}
+        const idx = Math.max(0, Math.min(episodeLayers.length - 1, Number(state.selectedEpisode || 0)));
+        return episodeLayers[idx] || rawLayers.episode;
+      }}
 
       const nodesDS = new vis.DataSet([]);
       const edgesDS = new vis.DataSet([]);
@@ -501,7 +540,7 @@ def export_dashboard(
       }}
 
       function refresh() {{
-        const raw = rawLayers[state.mode] || {{ nodes: [], edges: [] }};
+        const raw = state.mode === "episode" ? currentEpisodeLayer() : rawLayers.canonical;
         const groups = activeGroups();
         const relQ = state.relationQuery.toLowerCase();
         const nodeQ = state.nodeQuery.toLowerCase();
@@ -521,6 +560,12 @@ def export_dashboard(
       modeSelect.addEventListener("change", () => {{
         state.mode = modeSelect.value;
         refresh();
+      }});
+      document.addEventListener("osint-episode-change", (event) => {{
+        state.selectedEpisode = Number(event.detail?.index || 0);
+        if (state.mode === "episode") {{
+          refresh();
+        }}
       }});
       relFilter.addEventListener("input", () => {{
         state.relationQuery = relFilter.value || "";
@@ -678,13 +723,62 @@ def export_dashboard(
       }});
     }}
 
+    function initEpisodeExplorer() {{
+      const episodes = payload.episodes || [];
+      const select = document.getElementById("episode-select");
+      const prevBtn = document.getElementById("episode-prev");
+      const nextBtn = document.getElementById("episode-next");
+
+      function fillFromEpisode(ep) {{
+        const fallback = payload.task || {{}};
+        const taskId = ep?.task_id || fallback.task_id || "n/a";
+        const taskType = ep?.task_type || fallback.task_type || "n/a";
+        const question = ep?.question || fallback.question || "n/a";
+        const truth = ep?.task_answer ?? fallback.answer ?? "n/a";
+        const agent = ep?.agent_answer ?? "";
+        const isCorrect = String(agent) === String(truth);
+
+        document.getElementById("task-id").textContent = taskId;
+        document.getElementById("task-type").textContent = taskType;
+        document.getElementById("task-question").textContent = question;
+        document.getElementById("task-answer").textContent = truth;
+        document.getElementById("agent-answer").textContent = agent || "(no answer)";
+
+        const correctEl = document.getElementById("answer-correct");
+        correctEl.textContent = isCorrect ? "yes" : "no";
+        correctEl.className = isCorrect ? "answer-ok" : "answer-bad";
+      }}
+
+      if (!episodes.length) {{
+        select.innerHTML = "<option value='-1'>latest</option>";
+        fillFromEpisode(null);
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+      }}
+
+      select.innerHTML = episodes
+        .map((ep, idx) => `<option value=\"${{idx}}\">ep_${{idx + 1}} | ${{ep.task_type || \"task\"}} | reward=${{Number(ep.reward || 0).toFixed(3)}}</option>`)
+        .join("");
+      select.value = String(Math.max(0, episodes.length - 1));
+
+      function sync(delta = 0) {{
+        const current = Math.max(0, Math.min(episodes.length - 1, Number(select.value || 0) + delta));
+        select.value = String(current);
+        fillFromEpisode(episodes[current]);
+        document.dispatchEvent(new CustomEvent("osint-episode-change", {{ detail: {{ index: current }} }}));
+      }}
+
+      select.addEventListener("change", () => sync(0));
+      prevBtn.addEventListener("click", () => sync(-1));
+      nextBtn.addEventListener("click", () => sync(1));
+      sync(0);
+    }}
+
     const summary = payload.summary || {{}};
     metricCards(summary);
 
-    document.getElementById("task-id").textContent = payload.task.task_id;
-    document.getElementById("task-type").textContent = payload.task.task_type;
-    document.getElementById("task-question").textContent = payload.task.question;
-    document.getElementById("task-answer").textContent = payload.task.answer;
+    initEpisodeExplorer();
 
     createNetworkController();
     initDatabaseExplorer();

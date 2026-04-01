@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 
 from osint_env.agents.single_agent import SingleAgentRunner
 from osint_env.agents.swarm_agent import SwarmAgentRunner
@@ -13,6 +14,28 @@ from osint_env.eval.leaderboard import append_leaderboard_record, load_leaderboa
 from osint_env.eval.runner import run_evaluation
 from osint_env.llm import build_llm_client
 from osint_env.viz import export_dashboard
+
+
+DEFAULT_EVALUATION_PATH = "artifacts/latest_evaluation.json"
+
+
+def _save_evaluation(path: str, payload: dict) -> None:
+    out = Path(path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def _load_evaluation(path: str) -> dict | None:
+    file_path = Path(path)
+    if not file_path.exists():
+        return None
+    try:
+        data = json.loads(file_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(data, dict):
+        return None
+    return data
 
 
 def _add_common_args(parser: argparse.ArgumentParser) -> None:
@@ -97,6 +120,12 @@ def build_parser() -> argparse.ArgumentParser:
     v.add_argument("--output", type=str, default="artifacts/osint_explorer.html")
     v.add_argument("--with-demo", action="store_true")
     v.add_argument("--leaderboard", type=str, default="")
+    v.add_argument(
+        "--evaluation",
+        type=str,
+        default=DEFAULT_EVALUATION_PATH,
+        help="Path to a saved evaluation payload with episode details.",
+    )
     return parser
 
 
@@ -152,6 +181,7 @@ def main() -> None:
     sweep_dashboard_dir = (
         str(args.dashboard_dir) if getattr(args, "dashboard_dir", "") else str(runtime["sweep_dashboard_dir"])
     )
+    evaluation_path = str(getattr(args, "evaluation", "") or DEFAULT_EVALUATION_PATH)
 
     if args.cmd == "leaderboard":
         records = load_leaderboard(leaderboard_path)
@@ -190,6 +220,7 @@ def main() -> None:
                 leaderboard_records=load_leaderboard(leaderboard_path),
                 output_path=f"{sweep_dashboard_dir}/{run_name}.html",
             )
+            _save_evaluation(DEFAULT_EVALUATION_PATH, evaluation)
             outputs.append({"seed": seed, "record": record, "dashboard": dashboard_path, "summary": summary})
 
         records = load_leaderboard(leaderboard_path)
@@ -239,6 +270,7 @@ def main() -> None:
             leaderboard_records=leaderboard,
             output_path=dashboard_path,
         )
+        _save_evaluation(DEFAULT_EVALUATION_PATH, evaluation)
         payload = {
             "record": record,
             "summary": summary,
@@ -246,26 +278,61 @@ def main() -> None:
         }
         print(json.dumps(payload, indent=2, sort_keys=True))
     elif args.cmd == "viz":
+        evaluation: dict | None = _load_evaluation(evaluation_path)
         if args.with_demo:
             _runner_for(env).run_episode()
+            info = {
+                "agent_answer": env.state.agent_answer if env.state else "",
+                "task_answer": env.state.task.answer if env.state else "",
+                "total_reward": env.state.total_reward if env.state else 0.0,
+                "step_count": env.state.step_count if env.state else 0,
+                "tool_calls": env.state.tool_calls if env.state else 0,
+            }
+            evaluation = {
+                "summary": {
+                    "task_success_rate": float(info["agent_answer"] == info["task_answer"]),
+                    "tool_efficiency": 0.0,
+                    "avg_graph_f1": 0.0,
+                    "avg_steps_to_solution": float(info["step_count"]),
+                    "deanonymization_accuracy": 0.0,
+                    "avg_reward": float(info["total_reward"]),
+                    "leaderboard_score": 0.0,
+                },
+                "episodes": [
+                    {
+                        "task_id": env.state.task.task_id if env.state else "n/a",
+                        "task_type": env.state.task.task_type if env.state else "n/a",
+                        "question": env.state.task.question if env.state else "n/a",
+                        "task_answer": str(info["task_answer"]),
+                        "agent_answer": str(info["agent_answer"]),
+                        "graph_f1": 0.0,
+                        "reward": float(info["total_reward"]),
+                        "steps": int(info["step_count"]),
+                        "tool_calls": int(info["tool_calls"]),
+                        "success": int(info["agent_answer"] == info["task_answer"]),
+                    }
+                ],
+            }
 
         graph_f1 = 0.0
         if env.state is not None:
             graph_f1 = compute_graph_f1(env.memory_graph.edges, env.state.task.supporting_edges)
 
-        summary = {
-            "task_success_rate": 0.0,
-            "tool_efficiency": 0.0,
-            "avg_graph_f1": graph_f1,
-            "avg_steps_to_solution": float(env.state.step_count) if env.state else 0.0,
-            "deanonymization_accuracy": 0.0,
-            "avg_reward": float(env.state.total_reward) if env.state else 0.0,
-            "leaderboard_score": 0.0,
-        }
-        evaluation = {"summary": summary, "episodes": []}
+        if evaluation is None:
+            summary = {
+                "task_success_rate": 0.0,
+                "tool_efficiency": 0.0,
+                "avg_graph_f1": graph_f1,
+                "avg_steps_to_solution": float(env.state.step_count) if env.state else 0.0,
+                "deanonymization_accuracy": 0.0,
+                "avg_reward": float(env.state.total_reward) if env.state else 0.0,
+                "leaderboard_score": 0.0,
+            }
+            evaluation = {"summary": summary, "episodes": []}
+
         leaderboard = load_leaderboard(leaderboard_path)
         out = export_dashboard(env=env, evaluation=evaluation, leaderboard_records=leaderboard, output_path=args.output)
-        print(json.dumps({"dashboard": out}, indent=2, sort_keys=True))
+        print(json.dumps({"dashboard": out, "evaluation": evaluation_path}, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

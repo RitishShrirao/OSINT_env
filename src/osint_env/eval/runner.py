@@ -32,6 +32,9 @@ def run_evaluation(
             {
                 "task_id": task_id,
                 "task_type": task_type,
+                "question": env.state.task.question if env.state else "",
+                "task_answer": str(info.get("task_answer", "")),
+                "agent_answer": str(info.get("agent_answer", "")) if info.get("agent_answer") is not None else "",
                 "graph_f1": graph_f1,
                 "reward": float(info.get("total_reward", 0.0)),
                 "steps": int(info.get("step_count", 0)),
@@ -40,6 +43,24 @@ def run_evaluation(
                 "reward_components": dict(info.get("reward_components", {})),
                 "spawn_count": int(info.get("spawn_count", 0)),
                 "spawn_critical_steps": int(info.get("spawn_critical_steps", 0)),
+                "pred_edges": [
+                    {
+                        "src": edge.src,
+                        "rel": edge.rel,
+                        "dst": edge.dst,
+                        "confidence": float(edge.confidence),
+                    }
+                    for edge in pred
+                ],
+                "truth_edges": [
+                    {
+                        "src": edge.src,
+                        "rel": edge.rel,
+                        "dst": edge.dst,
+                        "confidence": float(edge.confidence),
+                    }
+                    for edge in truth
+                ],
             }
         )
     summary = metrics.summary()

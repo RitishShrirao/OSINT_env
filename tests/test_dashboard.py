@@ -23,3 +23,4 @@ def test_dashboard_export(tmp_path: Path):
     assert "Canonical Graph" in text
     assert "Original Database Explorer" in text
     assert "Benchmark Leaderboard" in text
+    assert "Episode Explorer" in text

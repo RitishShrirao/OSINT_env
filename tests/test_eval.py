@@ -19,3 +19,15 @@ def test_eval_runner_swarm_mode():
     result = run_evaluation(env, episodes=2)
     assert "spawn_signal" in result
     assert "avg_spawn_count" in result
+
+
+def test_eval_runner_details_include_episode_answers():
+    env = OSINTEnvironment(EnvironmentConfig(seed=17))
+    result = run_evaluation(env, episodes=2, return_details=True)
+    assert "episodes" in result
+    assert len(result["episodes"]) == 2
+
+    row = result["episodes"][0]
+    assert "question" in row
+    assert "task_answer" in row
+    assert "agent_answer" in row
