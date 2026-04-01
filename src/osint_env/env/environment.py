@@ -1,15 +1,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from openenv.env import Env
 
 from osint_env.data.generator import DatasetGenerator
 from osint_env.domain.models import Action, ActionType, Edge, EnvironmentConfig, Observation, TaskInstance
-from osint_env.env.reward import compute_graph_f1, edge_in_truth
+from osint_env.env.reward import (
+    build_reward_model,
+    compute_answer_reward,
+    compute_edge_reward,
+    compute_graph_f1,
+)
 from osint_env.memory.store import MemoryGraph, SemanticMemory
 from osint_env.platforms.tools import ToolRegistry
+
+if TYPE_CHECKING:
+    from osint_env.llm.interface import LLMClient
 
 
 @dataclass(slots=True)
@@ -24,10 +32,11 @@ class EpisodeState:
     tool_outputs: list[dict[str, Any]] = field(default_factory=list)
     answer: str | None = None
     call_fingerprints: set[str] = field(default_factory=set)
+    reward_components: dict[str, float] = field(default_factory=dict)
 
 
 class OSINTEnvironment(Env):
-    def __init__(self, config: EnvironmentConfig):
+    def __init__(self, config: EnvironmentConfig, llm: "LLMClient | None" = None):
         super().__init__(
             name="OSINTEnvironment",
             state_space="json-observation",
@@ -35,10 +44,11 @@ class OSINTEnvironment(Env):
             episode_max_length=config.max_steps,
         )
         self.config = config
-        self.generator = DatasetGenerator(config)
+        self.generator = DatasetGenerator(config, llm=llm)
         self.graph = self.generator.build_canonical_graph()
         self.views = self.generator.build_platform_views(self.graph)
         self.tasks = self.generator.generate_tasks(self.graph, self.views, count=24)
+        self.reward_model = build_reward_model(self.graph)
         self.tools = ToolRegistry(self.views)
         self.memory_graph = MemoryGraph()
         self.semantic_memory = SemanticMemory()
@@ -96,16 +106,36 @@ class OSINTEnvironment(Env):
         output = self.tools.call(tool_name, args)
         self.state.tool_outputs.append({"tool": tool_name, "args": args, "output": output})
         self.semantic_memory.add(f"{tool_name} {args} {output}", {"tool": tool_name})
-        return penalty
+        relevance_bonus = 0.08 * self._tool_relevance(self.state.task, output)
+        total = penalty + relevance_bonus
+        self._accumulate_reward_components(
+            {
+                "tool_novelty": penalty,
+                "tool_relevance": relevance_bonus,
+            }
+        )
+        return total
 
     def _handle_add_edge(self, payload: dict[str, Any]) -> float:
         if self.state is None:
             return 0.0
         edge = Edge(payload["src"], payload["rel"], payload["dst"], float(payload.get("confidence", 1.0)))
+        existing_edges = list(self.memory_graph.edges)
         added = self.memory_graph.add_edge(edge)
         if not added:
+            self._accumulate_reward_components({"duplicate_edge_penalty": -0.15})
             return -0.15
-        return 0.3 if edge_in_truth(edge, self.state.task) else -0.25
+
+        breakdown = compute_edge_reward(
+            edge=edge,
+            task=self.state.task,
+            existing_edges=existing_edges,
+            step_count=self.state.step_count,
+            model=self.reward_model,
+            graph=self.graph,
+        )
+        self._accumulate_reward_components(breakdown.to_dict())
+        return breakdown.total
 
     def _handle_answer(self, payload: dict[str, Any]) -> float:
         if self.state is None:
@@ -113,9 +143,34 @@ class OSINTEnvironment(Env):
         proposed = str(payload.get("answer", "")).strip()
         self.state.answer = proposed
         self.state.done = True
-        final = 2.0 if proposed == self.state.task.answer else -1.0
-        f1 = compute_graph_f1(self.memory_graph.edges, self.state.task.supporting_edges)
-        return final + (0.5 * f1)
+        breakdown = compute_answer_reward(
+            proposed_answer=proposed,
+            task=self.state.task,
+            pred_edges=self.memory_graph.edges,
+            tool_outputs=self.state.tool_outputs,
+            step_count=self.state.step_count,
+            model=self.reward_model,
+        )
+        self._accumulate_reward_components(breakdown.to_dict())
+        return breakdown.total
+
+    def _tool_relevance(self, task: TaskInstance, output: dict[str, Any]) -> float:
+        haystack = str(output).lower()
+        clues = {task.answer.lower()}
+        for edge in task.supporting_edges:
+            clues.add(edge.src.lower())
+            clues.add(edge.dst.lower())
+            clues.add(edge.rel.lower())
+        if not clues:
+            return 0.0
+        matches = sum(1 for token in clues if token in haystack)
+        return matches / len(clues)
+
+    def _accumulate_reward_components(self, values: dict[str, float]) -> None:
+        if self.state is None:
+            return
+        for key, value in values.items():
+            self.state.reward_components[key] = self.state.reward_components.get(key, 0.0) + float(value)
 
     def _observation(self) -> Observation:
         if self.state is None:
@@ -137,4 +192,6 @@ class OSINTEnvironment(Env):
             "redundant_tool_calls": self.state.redundant_tool_calls,
             "task_answer": self.state.task.answer,
             "agent_answer": self.state.answer,
+            "graph_f1": compute_graph_f1(self.memory_graph.edges, self.state.task.supporting_edges),
+            "reward_components": dict(self.state.reward_components),
         }

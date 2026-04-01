@@ -1,0 +1,40 @@
+{
+  "environment": {
+    "n_users": 40,
+    "alias_density": 0.35,
+    "noise_level": 0.15,
+    "red_herring_rate": 0.1,
+    "max_steps": 18,
+    "seed": 7
+  },
+  "swarm": {
+    "enabled": true,
+    "max_agents": 3,
+    "max_breadth": 2,
+    "max_width": 2,
+    "max_depth": 2,
+    "planner_rounds": 2,
+    "tools_per_agent": 1
+  },
+  "spawn_reward": {
+    "lambda_parallel": 0.15,
+    "lambda_finish": 0.2,
+    "anneal": 1.0,
+    "max_parallel_hint": 3
+  },
+  "seeding": {
+    "seeded_nodes": [],
+    "seeded_edges": [],
+    "seeded_questions": [],
+    "llm_generate_remaining_graph": true,
+    "llm_generate_remaining_tasks": true,
+    "llm_generated_edge_budget": 6,
+    "llm_generated_task_budget": 8
+  },
+  "runtime": {
+    "default_episodes": 20,
+    "leaderboard_path": "artifacts/leaderboard.json",
+    "dashboard_path": "artifacts/osint_dashboard.html",
+    "sweep_dashboard_dir": "artifacts/sweep_dashboards"
+  }
+}

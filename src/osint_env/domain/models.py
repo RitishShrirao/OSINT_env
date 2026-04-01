@@ -73,6 +73,60 @@ class TaskInstance:
 
 
 @dataclass(slots=True)
+class SeedNodeSpec:
+    node_id: str
+    node_type: NodeType | str
+    attrs: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class SeedEdgeSpec:
+    src: str
+    rel: str
+    dst: str
+    confidence: float = 1.0
+
+
+@dataclass(slots=True)
+class SeedQuestionSpec:
+    question: str
+    answer: str | None = None
+    task_type: str = "seeded"
+    supporting_edges: list[SeedEdgeSpec] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class SeedingConfig:
+    seeded_nodes: list[SeedNodeSpec] = field(default_factory=list)
+    seeded_edges: list[SeedEdgeSpec] = field(default_factory=list)
+    seeded_questions: list[SeedQuestionSpec] = field(default_factory=list)
+    llm_generate_remaining_graph: bool = True
+    llm_generate_remaining_tasks: bool = True
+    llm_generated_edge_budget: int = 6
+    llm_generated_task_budget: int = 8
+
+
+@dataclass(slots=True)
+class SwarmConfig:
+    enabled: bool = False
+    max_agents: int = 3
+    max_breadth: int = 2
+    max_width: int = 2
+    max_depth: int = 2
+    planner_rounds: int = 2
+    tools_per_agent: int = 1
+
+
+@dataclass(slots=True)
+class SpawnRewardConfig:
+    lambda_parallel: float = 0.15
+    lambda_finish: float = 0.20
+    anneal: float = 1.0
+    max_parallel_hint: int = 3
+
+
+@dataclass(slots=True)
 class EnvironmentConfig:
     n_users: int = 40
     alias_density: float = 0.35
@@ -80,3 +134,6 @@ class EnvironmentConfig:
     red_herring_rate: float = 0.1
     max_steps: int = 18
     seed: int = 7
+    seeding: SeedingConfig = field(default_factory=SeedingConfig)
+    swarm: SwarmConfig = field(default_factory=SwarmConfig)
+    spawn_reward: SpawnRewardConfig = field(default_factory=SpawnRewardConfig)

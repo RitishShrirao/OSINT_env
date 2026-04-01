@@ -1,0 +1,51 @@
+{
+  "seeding": {
+    "seeded_nodes": [
+      {
+        "node_id": "alias_seed_001",
+        "node_type": "alias",
+        "attrs": {
+          "handle": "@shadow_seed"
+        }
+      },
+      {
+        "node_id": "user_seed_001",
+        "node_type": "user",
+        "attrs": {
+          "name": "Seed User",
+          "org": "Helios Labs",
+          "location": "Pune"
+        }
+      }
+    ],
+    "seeded_edges": [
+      {
+        "src": "alias_seed_001",
+        "rel": "alias_of",
+        "dst": "user_seed_001",
+        "confidence": 1.0
+      }
+    ],
+    "seeded_questions": [
+      {
+        "task_type": "identity_resolution",
+        "question": "Which canonical user owns alias alias_seed_001?",
+        "answer": "user_seed_001",
+        "supporting_edges": [
+          {
+            "src": "alias_seed_001",
+            "rel": "alias_of",
+            "dst": "user_seed_001"
+          }
+        ],
+        "metadata": {
+          "source": "manual_seed"
+        }
+      }
+    ],
+    "llm_generate_remaining_graph": true,
+    "llm_generate_remaining_tasks": true,
+    "llm_generated_edge_budget": 6,
+    "llm_generated_task_budget": 8
+  }
+}

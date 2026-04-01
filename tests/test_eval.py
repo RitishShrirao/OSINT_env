@@ -1,4 +1,4 @@
-from osint_env.domain.models import EnvironmentConfig
+from osint_env.domain.models import EnvironmentConfig, SwarmConfig
 from osint_env.env.environment import OSINTEnvironment
 from osint_env.eval.runner import run_evaluation
 
@@ -8,3 +8,14 @@ def test_eval_runner():
     result = run_evaluation(env, episodes=3)
     assert "task_success_rate" in result
     assert "deanonymization_accuracy" in result
+    assert "leaderboard_score" in result
+    assert "avg_knowledge_indexing_reward" in result
+
+
+def test_eval_runner_swarm_mode():
+    env = OSINTEnvironment(
+        EnvironmentConfig(seed=17, swarm=SwarmConfig(enabled=True, max_agents=3, max_breadth=2, max_width=2, max_depth=2))
+    )
+    result = run_evaluation(env, episodes=2)
+    assert "spawn_signal" in result
+    assert "avg_spawn_count" in result
