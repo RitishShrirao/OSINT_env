@@ -1,5 +1,63 @@
+import json
+import re
+from threading import Lock
+
 from osint_env.data.generator import DatasetGenerator
 from osint_env.domain.models import EnvironmentConfig
+from osint_env.llm.interface import LLMResponse
+
+
+class SharedContextLLM:
+    def __init__(self):
+        self.prompts: list[str] = []
+        self._lock = Lock()
+
+    def generate(self, messages, tools):
+        prompt = str(messages[0].get("content", "")) if messages else ""
+        with self._lock:
+            self.prompts.append(prompt)
+
+        if "SEED_GRAPH_EXPANSION_AGENT" in prompt:
+            worker_match = re.search(r"worker_id:\s*(\d+)", prompt)
+            worker_idx = int(worker_match.group(1)) if worker_match else 0
+            payload = {
+                "edges": [
+                    {
+                        "src": "user_0",
+                        "rel": f"llm_rel_{worker_idx}",
+                        "dst": "user_1",
+                        "confidence": 0.9,
+                    }
+                ]
+            }
+            return LLMResponse(content=json.dumps(payload), tool_calls=[])
+
+        if "SEED_TASK_EXPANSION_AGENT" in prompt:
+            worker_match = re.search(r"worker_id:\s*(\d+)", prompt)
+            worker_idx = int(worker_match.group(1)) if worker_match else 0
+            budget_match = re.search(r"task_budget:\s*(\d+)", prompt)
+            task_budget = int(budget_match.group(1)) if budget_match else 1
+            tasks = []
+            for local_idx in range(max(1, task_budget)):
+                tasks.append(
+                    {
+                        "task_type": "identity_resolution",
+                        "question": f"Which canonical user is tied to alias alias_seed_{worker_idx}_{local_idx}?",
+                        "answer": "user_1",
+                        "supporting_edges": [
+                            {
+                                "src": "alias_seed_0",
+                                "rel": "alias_of",
+                                "dst": "user_1",
+                                "confidence": 0.95,
+                            }
+                        ],
+                    }
+                )
+            payload = {"tasks": tasks}
+            return LLMResponse(content=json.dumps(payload), tool_calls=[])
+
+        return LLMResponse(content="{}", tool_calls=[])
 
 
 def test_generator_outputs():
@@ -10,3 +68,46 @@ def test_generator_outputs():
     assert len(graph.nodes) >= 20
     assert len(views.microblog_posts) == 20
     assert len(tasks) == 5
+
+
+def test_graph_generation_uses_parallel_shared_context_workers():
+    cfg = EnvironmentConfig(n_users=12, seed=9)
+    cfg.seeding.llm_generate_remaining_graph = True
+    cfg.seeding.llm_generated_edge_budget = 4
+    cfg.seeding.llm_generate_remaining_tasks = False
+    cfg.seeding.llm_generation_parallel = True
+    cfg.seeding.llm_generation_workers = 3
+    cfg.seeding.llm_generation_retries = 1
+    cfg.seeding.allow_template_fallback_on_llm_failure = False
+
+    llm = SharedContextLLM()
+    gen = DatasetGenerator(cfg, llm=llm)
+    graph = gen.build_canonical_graph()
+
+    assert any(edge.rel.startswith("llm_rel_") for edge in graph.edges)
+    graph_prompts = [prompt for prompt in llm.prompts if "SEED_GRAPH_EXPANSION_AGENT" in prompt]
+    assert len(graph_prompts) >= 2
+    assert all("SHARED_CONTEXT" in prompt for prompt in graph_prompts)
+
+
+def test_task_generation_uses_parallel_shared_context_workers():
+    cfg = EnvironmentConfig(n_users=12, seed=13)
+    cfg.seeding.llm_generate_remaining_graph = False
+    cfg.seeding.llm_generate_remaining_tasks = True
+    cfg.seeding.llm_generated_task_budget = 4
+    cfg.seeding.llm_generation_parallel = True
+    cfg.seeding.llm_generation_workers = 3
+    cfg.seeding.llm_generation_retries = 1
+    cfg.seeding.allow_template_fallback_on_llm_failure = False
+
+    llm = SharedContextLLM()
+    gen = DatasetGenerator(cfg, llm=llm)
+    graph = gen.build_canonical_graph()
+    views = gen.build_platform_views(graph)
+    tasks = gen.generate_tasks(graph, views, count=4)
+
+    assert len(tasks) == 4
+    assert any(task.metadata.get("shared_context") for task in tasks)
+    task_prompts = [prompt for prompt in llm.prompts if "SEED_TASK_EXPANSION_AGENT" in prompt]
+    assert len(task_prompts) >= 2
+    assert all("SHARED_CONTEXT" in prompt for prompt in task_prompts)

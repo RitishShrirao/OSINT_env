@@ -11,6 +11,7 @@ from osint_env.env.environment import OSINTEnvironment
 from osint_env.env.reward import compute_graph_f1
 from osint_env.eval.leaderboard import append_leaderboard_record, load_leaderboard, render_leaderboard_table
 from osint_env.eval.runner import run_evaluation
+from osint_env.llm import build_llm_client
 from osint_env.viz import export_dashboard
 
 
@@ -23,6 +24,24 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
         default="config",
         choices=["config", "single", "swarm"],
         help="Use shared config mode or override runner mode explicitly.",
+    )
+    parser.add_argument(
+        "--llm-provider",
+        type=str,
+        default="config",
+        choices=["config", "mock", "ollama", "openai"],
+        help="Use shared config provider or override explicitly.",
+    )
+    parser.add_argument("--llm-model", type=str, default="", help="Override model name for selected LLM provider.")
+    parser.add_argument("--llm-timeout-seconds", type=int, default=0, help="Override LLM request timeout in seconds.")
+    parser.add_argument("--ollama-base-url", type=str, default="", help="Override Ollama base URL.")
+    parser.add_argument("--openai-base-url", type=str, default="", help="Override OpenAI base URL.")
+    parser.add_argument("--openai-api-key", type=str, default="", help="OpenAI API key override.")
+    parser.add_argument(
+        "--openai-api-key-env",
+        type=str,
+        default="",
+        help="Environment variable name for OpenAI API key.",
     )
 
 
@@ -88,6 +107,21 @@ def _resolve_environment_config(args: argparse.Namespace) -> tuple[EnvironmentCo
     if args.seed_file:
         env_cfg.seeding = load_seeding_config(args.seed_file)
 
+    if args.llm_provider != "config":
+        env_cfg.llm.provider = args.llm_provider
+    if args.llm_model:
+        env_cfg.llm.model = args.llm_model
+    if int(args.llm_timeout_seconds) > 0:
+        env_cfg.llm.timeout_seconds = int(args.llm_timeout_seconds)
+    if args.ollama_base_url:
+        env_cfg.llm.ollama_base_url = args.ollama_base_url
+    if args.openai_base_url:
+        env_cfg.llm.openai_base_url = args.openai_base_url
+    if args.openai_api_key:
+        env_cfg.llm.openai_api_key = args.openai_api_key
+    if args.openai_api_key_env:
+        env_cfg.llm.openai_api_key_env = args.openai_api_key_env
+
     if args.agent_mode == "single":
         env_cfg.swarm.enabled = False
     elif args.agent_mode == "swarm":
@@ -104,8 +138,8 @@ def _resolve_environment_config(args: argparse.Namespace) -> tuple[EnvironmentCo
 
 def _runner_for(env: OSINTEnvironment) -> SingleAgentRunner | SwarmAgentRunner:
     if env.config.swarm.enabled:
-        return SwarmAgentRunner(env)
-    return SingleAgentRunner(env)
+        return SwarmAgentRunner(env, llm=build_llm_client(env.config.llm))
+    return SingleAgentRunner(env, llm=build_llm_client(env.config.llm))
 
 
 def main() -> None:
@@ -130,8 +164,8 @@ def main() -> None:
         for seed in seed_values:
             seeded_cfg = clone_environment_config(env_cfg)
             seeded_cfg.seed = seed
-            env = OSINTEnvironment(seeded_cfg)
-            evaluation = run_evaluation(env, episodes=episodes, return_details=True)
+            env = OSINTEnvironment(seeded_cfg, llm=build_llm_client(seeded_cfg.llm))
+            evaluation = run_evaluation(env, episodes=episodes, return_details=True, llm=build_llm_client(seeded_cfg.llm))
             summary = evaluation["summary"]
             run_name = f"{args.name_prefix}_seed{seed}"
             record = append_leaderboard_record(
@@ -171,15 +205,16 @@ def main() -> None:
         )
         return
 
-    env = OSINTEnvironment(env_cfg)
+    llm_client = build_llm_client(env_cfg.llm)
+    env = OSINTEnvironment(env_cfg, llm=llm_client)
     if args.cmd == "demo":
         info = _runner_for(env).run_episode()
         print(json.dumps(info, indent=2, sort_keys=True))
     elif args.cmd == "eval":
-        metrics = run_evaluation(env, episodes=episodes)
+        metrics = run_evaluation(env, episodes=episodes, llm=llm_client)
         print(json.dumps(metrics, indent=2, sort_keys=True))
     elif args.cmd == "benchmark":
-        evaluation = run_evaluation(env, episodes=episodes, return_details=True)
+        evaluation = run_evaluation(env, episodes=episodes, return_details=True, llm=llm_client)
         summary = evaluation["summary"]
         record = append_leaderboard_record(
             path=leaderboard_path,
@@ -212,7 +247,7 @@ def main() -> None:
         print(json.dumps(payload, indent=2, sort_keys=True))
     elif args.cmd == "viz":
         if args.with_demo:
-            SingleAgentRunner(env).run_episode()
+            _runner_for(env).run_episode()
 
         graph_f1 = 0.0
         if env.state is not None:

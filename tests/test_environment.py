@@ -13,3 +13,25 @@ def test_episode_flow():
     assert done is True
     assert "total_reward" in info
     assert isinstance(r2, float)
+
+
+def test_search_memory_tool_returns_results_after_tool_use():
+    env = OSINTEnvironment(EnvironmentConfig(max_steps=6, seed=5))
+    env.reset()
+    env.step(Action(ActionType.CALL_TOOL, {"tool_name": "search_posts", "args": {"query": "Update"}}))
+    obs, reward, done, _ = env.step(
+        Action(ActionType.CALL_TOOL, {"tool_name": "search_memory", "args": {"query": "Update", "k": 3}})
+    )
+    assert done is False
+    assert isinstance(reward, float)
+    assert obs.tool_outputs[-1]["tool"] == "search_memory"
+    assert obs.tool_outputs[-1]["output"]["count"] >= 1
+
+
+def test_invalid_tool_call_does_not_crash_episode():
+    env = OSINTEnvironment(EnvironmentConfig(max_steps=4, seed=8))
+    env.reset()
+    _, reward, done, info = env.step(Action(ActionType.CALL_TOOL, {"tool_name": "no_such_tool", "args": {}}))
+    assert done is False
+    assert reward < 0
+    assert "invalid_tool_penalty" in info["reward_components"]

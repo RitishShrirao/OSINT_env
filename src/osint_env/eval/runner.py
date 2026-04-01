@@ -5,14 +5,20 @@ from osint_env.agents.swarm_agent import SwarmAgentRunner
 from osint_env.env.environment import OSINTEnvironment
 from osint_env.env.reward import compute_graph_f1
 from osint_env.eval.metrics import EvalMetrics
+from osint_env.llm.interface import LLMClient
 
 
-def run_evaluation(env: OSINTEnvironment, episodes: int = 20, return_details: bool = False) -> dict:
+def run_evaluation(
+    env: OSINTEnvironment,
+    episodes: int = 20,
+    return_details: bool = False,
+    llm: LLMClient | None = None,
+) -> dict:
     metrics = EvalMetrics()
     if env.config.swarm.enabled:
-        runner = SwarmAgentRunner(env=env)
+        runner = SwarmAgentRunner(env=env, llm=llm)
     else:
-        runner = SingleAgentRunner(env=env)
+        runner = SingleAgentRunner(env=env, llm=llm)
     episode_rows: list[dict] = []
     for _ in range(episodes):
         info = runner.run_episode()

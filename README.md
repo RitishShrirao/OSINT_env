@@ -14,6 +14,10 @@ The environment models a realistic workflow for information discovery and linkin
 4. Let agents call tools, add graph edges, and submit answers.
 5. Score episodes using a composite reward that combines correctness, retrieval utility, graph quality, and efficiency.
 
+The tool layer also supports semantic-memory retrieval over prior observations:
+
+- search_memory(query, k): vector-style retrieval over accumulated tool outputs.
+
 ## 2. Current Capabilities
 
 - Single-agent baseline runner.
@@ -41,6 +45,46 @@ Example:
    uv pip install -e .
 
 The project requires Python 3.10+.
+
+## 3.1 LLM Backends
+
+The environment supports three LLM providers:
+
+- mock: deterministic fallback for reproducible local tests.
+- ollama: local model inference (recommended for offline development).
+- openai: remote API provider using an API key.
+
+The provider is configured through config/shared_config.json (llm block) and can be overridden from CLI.
+
+### Local Ollama Setup (Qwen 3 2B)
+
+1. Install Ollama.
+2. Start Ollama service.
+3. Pull the model:
+
+  ollama pull qwen3:2b
+
+If your local Ollama registry does not expose `qwen3:2b`, use:
+
+  ollama pull qwen3:1.7b
+  ollama cp qwen3:1.7b qwen3:2b
+
+4. Run demo in swarm mode with local model:
+
+  osint-env demo --agent-mode swarm --llm-provider ollama --llm-model qwen3:2b
+
+### OpenAI Setup
+
+1. Export API key:
+
+  export OPENAI_API_KEY="your_key_here"
+
+2. Run with OpenAI backend:
+
+  osint-env eval --episodes 10 --llm-provider openai --llm-model gpt-4o-mini
+
+You can also provide the key via config/shared_config.json using llm.openai_api_key,
+or specify a custom environment variable name via llm.openai_api_key_env.
 
 ## 4. Repository Layout
 
@@ -71,6 +115,7 @@ This file includes:
 - swarm limits,
 - spawn reward shaping hyperparameters,
 - seeding defaults,
+- llm backend defaults,
 - runtime output paths.
 
 Default swarm settings are intentionally conservative:
@@ -105,6 +150,10 @@ All commands accept:
 - --config for shared config path (default: config/shared_config.json)
 - --seed-file for seeded graph/task input JSON
 - --agent-mode with values: config, single, swarm
+- --llm-provider with values: config, mock, ollama, openai
+- --llm-model to override configured model
+- --ollama-base-url to override local Ollama endpoint
+- --openai-api-key or --openai-api-key-env for OpenAI authentication
 
 Main commands:
 
@@ -131,6 +180,14 @@ Main commands:
 6. Export explorer without full benchmark:
 
      osint-env viz --with-demo --output artifacts/osint_explorer.html
+
+  7. Benchmark with local Qwen model:
+
+    osint-env benchmark --episodes 20 --agent-mode swarm --llm-provider ollama --llm-model qwen3:2b --name qwen3_swarm
+
+8. Fast local smoke benchmark:
+
+    osint-env benchmark --episodes 1 --agent-mode swarm --llm-provider ollama --llm-model qwen3:2b --seed-file config/seed_ollama_smoke.json --name ollama_qwen_smoke
 
 ## 8. Multi-Agent Swarm Design
 

@@ -29,7 +29,22 @@
     "llm_generate_remaining_graph": true,
     "llm_generate_remaining_tasks": true,
     "llm_generated_edge_budget": 6,
-    "llm_generated_task_budget": 8
+    "llm_generated_task_budget": 8,
+    "llm_generation_parallel": true,
+    "llm_generation_workers": 3,
+    "llm_generation_retries": 2,
+    "allow_template_fallback_on_llm_failure": false
+  },
+  "llm": {
+    "provider": "ollama",
+    "model": "qwen3:2b",
+    "temperature": 0.1,
+    "max_tokens": 256,
+    "timeout_seconds": 240,
+    "ollama_base_url": "http://127.0.0.1:11434",
+    "openai_base_url": "https://api.openai.com/v1",
+    "openai_api_key_env": "OPENAI_API_KEY",
+    "openai_api_key": ""
   },
   "runtime": {
     "default_episodes": 20,

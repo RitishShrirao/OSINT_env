@@ -48,7 +48,13 @@ class SwarmAgentRunner:
                     break
 
                 steps_for_agent = 0
-                planned_calls = self._tool_plan(obs=obs, agent_idx=agent_idx, limit=swarm_cfg.tools_per_agent)
+                role = self._agent_role(agent_idx)
+                planned_calls = self._tool_plan(
+                    obs=obs,
+                    agent_idx=agent_idx,
+                    role=role,
+                    limit=swarm_cfg.tools_per_agent,
+                )
                 for call in planned_calls:
                     obs, _, done, info = self.env.step(Action(ActionType.CALL_TOOL, call))
                     steps_for_agent += 1
@@ -109,6 +115,7 @@ class SwarmAgentRunner:
         info["spawn_critical_steps"] = crit_steps
         info["spawn_depth"] = depth_used
         info["spawn_breadth"] = max_breadth_used
+        info["swarm_roles"] = [self._agent_role(i) for i in range(max_breadth_used)]
 
         if self.env.state is not None:
             self.env.state.total_reward = shaped_total
@@ -116,21 +123,29 @@ class SwarmAgentRunner:
 
         return info
 
-    def _tool_plan(self, obs: Any, agent_idx: int, limit: int) -> list[dict[str, Any]]:
+    @staticmethod
+    def _agent_role(agent_idx: int) -> str:
+        roles = ["explorer", "linker", "reasoner"]
+        return roles[agent_idx % len(roles)]
+
+    def _tool_plan(self, obs: Any, agent_idx: int, role: str, limit: int) -> list[dict[str, Any]]:
         messages = [
             {
                 "role": "system",
                 "content": (
                     f"question: {obs.task['question']}\n"
-                    f"agent_role: swarm_worker_{agent_idx}\n"
+                    f"agent_role: {role}_{agent_idx}\n"
                     "Return concise tool plan."
                 ),
             }
         ]
-        response = self.llm.generate(messages, tools=[])
+        try:
+            response = self.llm.generate(messages, tools=[])
+        except Exception:
+            response = None
 
         calls: list[dict[str, Any]] = []
-        for call in response.tool_calls:
+        for call in (response.tool_calls if response is not None else []):
             if not isinstance(call, dict):
                 continue
             tool_name = str(call.get("tool_name", "")).strip()
@@ -145,6 +160,19 @@ class SwarmAgentRunner:
             return calls
 
         question = str(obs.task.get("question", "")).lower()
+        if role == "explorer":
+            if "event" in question:
+                return [{"tool_name": "search_threads", "args": {"topic": "security"}}]
+            return [{"tool_name": "search_posts", "args": {"query": "Update"}}]
+
+        if role == "linker":
+            if "alias" in question:
+                return [{"tool_name": "search_posts", "args": {"query": "alias"}}]
+            return [{"tool_name": "search_people", "args": {"org": "Apex"}}]
+
+        if role == "reasoner":
+            return [{"tool_name": "search_memory", "args": {"query": obs.task.get("question", ""), "k": 5}}]
+
         if "alias" in question:
             return [{"tool_name": "search_posts", "args": {"query": "Update"}}]
 

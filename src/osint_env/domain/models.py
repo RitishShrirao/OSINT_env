@@ -105,6 +105,10 @@ class SeedingConfig:
     llm_generate_remaining_tasks: bool = True
     llm_generated_edge_budget: int = 6
     llm_generated_task_budget: int = 8
+    llm_generation_parallel: bool = True
+    llm_generation_workers: int = 3
+    llm_generation_retries: int = 2
+    allow_template_fallback_on_llm_failure: bool = False
 
 
 @dataclass(slots=True)
@@ -127,6 +131,19 @@ class SpawnRewardConfig:
 
 
 @dataclass(slots=True)
+class LLMConfig:
+    provider: str = "mock"
+    model: str = "qwen3:2b"
+    temperature: float = 0.1
+    max_tokens: int = 256
+    timeout_seconds: int = 240
+    ollama_base_url: str = "http://127.0.0.1:11434"
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_api_key_env: str = "OPENAI_API_KEY"
+    openai_api_key: str = ""
+
+
+@dataclass(slots=True)
 class EnvironmentConfig:
     n_users: int = 40
     alias_density: float = 0.35
@@ -137,3 +154,4 @@ class EnvironmentConfig:
     seeding: SeedingConfig = field(default_factory=SeedingConfig)
     swarm: SwarmConfig = field(default_factory=SwarmConfig)
     spawn_reward: SpawnRewardConfig = field(default_factory=SpawnRewardConfig)
+    llm: LLMConfig = field(default_factory=LLMConfig)

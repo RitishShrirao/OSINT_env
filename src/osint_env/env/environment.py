@@ -103,15 +103,27 @@ class OSINTEnvironment(Env):
             penalty = 0.05
             self.state.call_fingerprints.add(fp)
 
-        output = self.tools.call(tool_name, args)
+        invalid_tool_penalty = 0.0
+        try:
+            if tool_name == "search_memory":
+                query = str(args.get("query", "")).strip()
+                top_k = int(args.get("k", 5)) if str(args.get("k", "")).strip() else 5
+                results = self.semantic_memory.search(query=query, k=max(1, top_k)) if query else []
+                output = {"results": results, "count": len(results)}
+            else:
+                output = self.tools.call(tool_name, args)
+        except Exception as exc:
+            output = {"error": str(exc)}
+            invalid_tool_penalty = -0.25
         self.state.tool_outputs.append({"tool": tool_name, "args": args, "output": output})
         self.semantic_memory.add(f"{tool_name} {args} {output}", {"tool": tool_name})
         relevance_bonus = 0.08 * self._tool_relevance(self.state.task, output)
-        total = penalty + relevance_bonus
+        total = penalty + relevance_bonus + invalid_tool_penalty
         self._accumulate_reward_components(
             {
                 "tool_novelty": penalty,
                 "tool_relevance": relevance_bonus,
+                "invalid_tool_penalty": invalid_tool_penalty,
             }
         )
         return total

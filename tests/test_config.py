@@ -23,9 +23,14 @@ def test_shared_config_parses_swarm_and_seeding(tmp_path: Path):
                             "question": "Which canonical user owns alias alias_seed_001?",
                             "answer": "user_seed_001",
                         }
-                    ]
+                    ],
+                    "llm_generation_parallel": True,
+                    "llm_generation_workers": 4,
+                    "llm_generation_retries": 3,
+                    "allow_template_fallback_on_llm_failure": False
                 },
                 "runtime": {"default_episodes": 5},
+                "llm": {"provider": "ollama", "model": "qwen3:2b", "timeout_seconds": 333},
             }
         ),
         encoding="utf-8",
@@ -37,6 +42,13 @@ def test_shared_config_parses_swarm_and_seeding(tmp_path: Path):
     assert config.environment.swarm.max_width == 2
     assert len(config.environment.seeding.seeded_questions) == 1
     assert config.runtime.default_episodes == 5
+    assert config.environment.llm.provider == "ollama"
+    assert config.environment.llm.model == "qwen3:2b"
+    assert config.environment.llm.timeout_seconds == 333
+    assert config.environment.seeding.llm_generation_parallel is True
+    assert config.environment.seeding.llm_generation_workers == 4
+    assert config.environment.seeding.llm_generation_retries == 3
+    assert config.environment.seeding.allow_template_fallback_on_llm_failure is False
 
 
 def test_load_seeding_config_supports_top_level_object(tmp_path: Path):

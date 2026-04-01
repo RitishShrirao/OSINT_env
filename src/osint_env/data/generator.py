@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import random
 import re
@@ -133,6 +134,72 @@ class DatasetGenerator:
             items.append(SeedEdgeSpec(src=src, rel=rel, dst=dst, confidence=confidence))
         return items
 
+    @staticmethod
+    def _split_budget(total: int, parts: int) -> list[int]:
+        if total <= 0:
+            return []
+        slots = max(1, parts)
+        base = total // slots
+        remainder = total % slots
+        chunks = [base + (1 if i < remainder else 0) for i in range(slots)]
+        return [chunk for chunk in chunks if chunk > 0]
+
+    @staticmethod
+    def _shared_context_blob(graph: CanonicalGraph, node_limit: int = 100, edge_limit: int = 80) -> str:
+        payload = {
+            "known_nodes": sorted(graph.nodes.keys())[:node_limit],
+            "known_edges": [
+                {"src": edge.src, "rel": edge.rel, "dst": edge.dst}
+                for edge in graph.edges[: min(edge_limit, len(graph.edges))]
+            ],
+        }
+        return json.dumps(payload)
+
+    def _llm_generate_json_with_retry(self, prompt: str) -> Any:
+        if self.llm is None:
+            return None
+
+        attempts = max(1, int(self.config.seeding.llm_generation_retries))
+        for _ in range(attempts):
+            try:
+                response = self.llm.generate([{"role": "system", "content": prompt}], tools=[])
+            except Exception:
+                continue
+            parsed = self._extract_json_blob(response.content)
+            if parsed is not None:
+                return parsed
+        return None
+
+    def _run_generation_workers(self, prompts: list[str]) -> list[Any]:
+        if not prompts:
+            return []
+
+        max_workers = max(1, min(self.config.seeding.llm_generation_workers, len(prompts)))
+        if not self.config.seeding.llm_generation_parallel or max_workers == 1:
+            output: list[Any] = []
+            for prompt in prompts:
+                parsed = self._llm_generate_json_with_retry(prompt)
+                if parsed is not None:
+                    output.append(parsed)
+            return output
+
+        output = []
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(self._llm_generate_json_with_retry, prompt) for prompt in prompts]
+            for future in as_completed(futures):
+                try:
+                    parsed = future.result()
+                except Exception:
+                    parsed = None
+                if parsed is not None:
+                    output.append(parsed)
+        return output
+
+    def _template_fallback_allowed(self) -> bool:
+        if self.llm is None:
+            return True
+        return bool(self.config.seeding.allow_template_fallback_on_llm_failure)
+
     def _template_generated_edges(self, graph: CanonicalGraph, budget: int) -> list[Edge]:
         if budget <= 0:
             return []
@@ -168,30 +235,79 @@ class DatasetGenerator:
         if self.llm is None:
             return self._template_generated_edges(graph, budget)
 
-        sample_edges = [
-            {"src": edge.src, "rel": edge.rel, "dst": edge.dst}
-            for edge in graph.edges[: min(40, len(graph.edges))]
-        ]
-        sample_nodes = sorted(graph.nodes.keys())[:80]
-        prompt = (
-            "SEED_GRAPH_EXPANSION\n"
-            "Generate additional plausible graph edges to improve retrieval for OSINT tasks.\n"
-            "Return STRICT JSON object: {\"edges\": [{\"src\": str, \"rel\": str, \"dst\": str, \"confidence\": float}]}.\n"
-            "Use only known node ids when possible. Avoid duplicates.\n"
-            f"Budget: {budget}\n"
-            f"Known nodes: {json.dumps(sample_nodes)}\n"
-            f"Known edges sample: {json.dumps(sample_edges)}"
-        )
-        response = self.llm.generate([{"role": "system", "content": prompt}], tools=[])
-        parsed = self._extract_json_blob(response.content)
-        if isinstance(parsed, dict):
-            edges = self._normalize_edge_candidates(parsed.get("edges"))
-            if edges:
-                return [
-                    Edge(src=e.src, rel=e.rel, dst=e.dst, confidence=float(e.confidence))
-                    for e in edges[:budget]
-                ]
-        return self._template_generated_edges(graph, budget)
+        shared_context = self._shared_context_blob(graph)
+        workers = max(1, min(self.config.seeding.llm_generation_workers, budget))
+        chunks = self._split_budget(budget, workers)
+        focus_tracks = ["entity_linking", "network_expansion", "org_location", "event_trace"]
+
+        prompts: list[str] = []
+        for idx, chunk_budget in enumerate(chunks):
+            focus = focus_tracks[idx % len(focus_tracks)]
+            prompts.append(
+                (
+                    "SEED_GRAPH_EXPANSION_AGENT\n"
+                    "SHARED_CONTEXT\n"
+                    f"{shared_context}\n"
+                    f"worker_id: {idx}\n"
+                    f"focus: {focus}\n"
+                    f"budget: {chunk_budget}\n"
+                    "Generate plausible graph edges for OSINT retrieval.\n"
+                    "Return STRICT JSON object: {\"edges\": [{\"src\": str, \"rel\": str, \"dst\": str, \"confidence\": float}]}.\n"
+                    "Prefer known nodes from SHARED_CONTEXT and avoid duplicates."
+                )
+            )
+
+        generated: list[Edge] = []
+        seen: set[tuple[str, str, str]] = set()
+        for payload in self._run_generation_workers(prompts):
+            raw_edges: Any = None
+            if isinstance(payload, dict):
+                raw_edges = payload.get("edges")
+            elif isinstance(payload, list):
+                raw_edges = payload
+            for edge_spec in self._normalize_edge_candidates(raw_edges):
+                key = (edge_spec.src, edge_spec.rel, edge_spec.dst)
+                if key in seen:
+                    continue
+                seen.add(key)
+                generated.append(Edge(edge_spec.src, edge_spec.rel, edge_spec.dst, float(edge_spec.confidence)))
+                if len(generated) >= budget:
+                    break
+            if len(generated) >= budget:
+                break
+
+        if len(generated) < budget:
+            residual = budget - len(generated)
+            residual_prompt = (
+                "SEED_GRAPH_EXPANSION_AGENT\n"
+                "SHARED_CONTEXT\n"
+                f"{shared_context}\n"
+                f"budget: {residual}\n"
+                "Generate any remaining high-utility edges.\n"
+                "Return STRICT JSON object: {\"edges\": [{\"src\": str, \"rel\": str, \"dst\": str, \"confidence\": float}]}."
+            )
+            payload = self._llm_generate_json_with_retry(residual_prompt)
+            raw_edges: Any = payload.get("edges") if isinstance(payload, dict) else payload
+            for edge_spec in self._normalize_edge_candidates(raw_edges):
+                key = (edge_spec.src, edge_spec.rel, edge_spec.dst)
+                if key in seen:
+                    continue
+                seen.add(key)
+                generated.append(Edge(edge_spec.src, edge_spec.rel, edge_spec.dst, float(edge_spec.confidence)))
+                if len(generated) >= budget:
+                    break
+
+        if len(generated) < budget and self._template_fallback_allowed():
+            for edge in self._template_generated_edges(graph, budget - len(generated)):
+                key = (edge.src, edge.rel, edge.dst)
+                if key in seen:
+                    continue
+                seen.add(key)
+                generated.append(edge)
+                if len(generated) >= budget:
+                    break
+
+        return generated[:budget]
 
     @staticmethod
     def _extract_entity_tokens(question: str) -> list[str]:
@@ -311,24 +427,53 @@ class DatasetGenerator:
             for edge in graph.edges
             if edge.rel in {"alias_of", "connected_to", "works_at"}
         ][:60]
-        prompt = (
-            "SEED_TASK_EXPANSION\n"
-            "Generate additional OSINT QA tasks from this graph sample.\n"
-            "Return STRICT JSON object: {\"tasks\": [{\"task_type\": str, \"question\": str, \"answer\": str, \"supporting_edges\": [{\"src\": str, \"rel\": str, \"dst\": str}]}]}.\n"
-            f"Task budget: {count}\n"
-            f"Edge sample: {json.dumps(candidate_edges)}"
+        shared_context = json.dumps(
+            {
+                "known_nodes": sorted(graph.nodes.keys())[:100],
+                "edge_sample": candidate_edges,
+            }
         )
-        response = self.llm.generate([{"role": "system", "content": prompt}], tools=[])
-        parsed = self._extract_json_blob(response.content)
+        workers = max(1, min(self.config.seeding.llm_generation_workers, count))
+        chunks = self._split_budget(count, workers)
+        focus_tracks = ["identity_resolution", "network_discovery", "event_tracing", "deanonymization"]
+
+        prompts: list[str] = []
+        for idx, chunk_budget in enumerate(chunks):
+            focus = focus_tracks[idx % len(focus_tracks)]
+            prompts.append(
+                (
+                    "SEED_TASK_EXPANSION_AGENT\n"
+                    "SHARED_CONTEXT\n"
+                    f"{shared_context}\n"
+                    f"worker_id: {idx}\n"
+                    f"focus: {focus}\n"
+                    f"task_budget: {chunk_budget}\n"
+                    "Generate OSINT QA tasks with answers and support edges.\n"
+                    "Return STRICT JSON object: {\"tasks\": [{\"task_type\": str, \"question\": str, \"answer\": str, \"supporting_edges\": [{\"src\": str, \"rel\": str, \"dst\": str, \"confidence\": float}]}]}."
+                )
+            )
 
         llm_tasks: list[TaskInstance] = []
-        if isinstance(parsed, dict) and isinstance(parsed.get("tasks"), list):
-            for i, row in enumerate(parsed["tasks"]):
+        seen_questions: set[str] = set()
+        for payload in self._run_generation_workers(prompts):
+            raw_tasks: Any = None
+            if isinstance(payload, dict):
+                raw_tasks = payload.get("tasks")
+            elif isinstance(payload, list):
+                raw_tasks = payload
+            if not isinstance(raw_tasks, list):
+                continue
+
+            for row in raw_tasks:
                 if not isinstance(row, dict):
                     continue
                 question = str(row.get("question", "")).strip()
                 if not question:
                     continue
+                key = question.lower()
+                if key in seen_questions:
+                    continue
+                seen_questions.add(key)
                 answer = str(row.get("answer", "")).strip() or self._infer_answer_from_question(question, graph)
                 task_type = str(row.get("task_type", "llm_generated")).strip() or "llm_generated"
                 support_specs = self._normalize_edge_candidates(row.get("supporting_edges"))
@@ -338,18 +483,63 @@ class DatasetGenerator:
                     support = self._infer_support_edges(question, answer, graph)
                 llm_tasks.append(
                     TaskInstance(
-                        task_id=f"task_{start_idx + i}",
+                        task_id=f"task_{start_idx + len(llm_tasks)}",
                         task_type=task_type,
                         question=question,
                         answer=answer,
                         supporting_edges=support,
-                        metadata={"generated_by": "llm"},
+                        metadata={"generated_by": "llm", "shared_context": True},
                     )
                 )
                 if len(llm_tasks) >= count:
                     break
+            if len(llm_tasks) >= count:
+                break
 
         if len(llm_tasks) < count:
+            residual = count - len(llm_tasks)
+            residual_prompt = (
+                "SEED_TASK_EXPANSION_AGENT\n"
+                "SHARED_CONTEXT\n"
+                f"{shared_context}\n"
+                f"task_budget: {residual}\n"
+                "Generate additional tasks not already present in SHARED_CONTEXT.\n"
+                "Return STRICT JSON object: {\"tasks\": [{\"task_type\": str, \"question\": str, \"answer\": str, \"supporting_edges\": [{\"src\": str, \"rel\": str, \"dst\": str, \"confidence\": float}]}]}."
+            )
+            payload = self._llm_generate_json_with_retry(residual_prompt)
+            raw_tasks: Any = payload.get("tasks") if isinstance(payload, dict) else payload
+            if isinstance(raw_tasks, list):
+                for row in raw_tasks:
+                    if not isinstance(row, dict):
+                        continue
+                    question = str(row.get("question", "")).strip()
+                    if not question:
+                        continue
+                    key = question.lower()
+                    if key in seen_questions:
+                        continue
+                    seen_questions.add(key)
+                    answer = str(row.get("answer", "")).strip() or self._infer_answer_from_question(question, graph)
+                    task_type = str(row.get("task_type", "llm_generated")).strip() or "llm_generated"
+                    support_specs = self._normalize_edge_candidates(row.get("supporting_edges"))
+                    if support_specs:
+                        support = [Edge(e.src, e.rel, e.dst, e.confidence) for e in support_specs]
+                    else:
+                        support = self._infer_support_edges(question, answer, graph)
+                    llm_tasks.append(
+                        TaskInstance(
+                            task_id=f"task_{start_idx + len(llm_tasks)}",
+                            task_type=task_type,
+                            question=question,
+                            answer=answer,
+                            supporting_edges=support,
+                            metadata={"generated_by": "llm", "shared_context": True},
+                        )
+                    )
+                    if len(llm_tasks) >= count:
+                        break
+
+        if len(llm_tasks) < count and self._template_fallback_allowed():
             llm_tasks.extend(
                 self._template_tasks(
                     graph,
@@ -464,7 +654,7 @@ class DatasetGenerator:
 
     def generate_tasks(self, graph: CanonicalGraph, views: PlatformViews, count: int = 12) -> list[TaskInstance]:
         tasks = self._seeded_tasks(graph)
-        target_count = max(count, len(tasks))
+        target_count = max(1, count, len(tasks))
 
         llm_budget = min(
             max(0, self.config.seeding.llm_generated_task_budget),
@@ -473,7 +663,10 @@ class DatasetGenerator:
         if self.config.seeding.llm_generate_remaining_tasks and llm_budget > 0:
             tasks.extend(self._llm_generated_tasks(graph, count=llm_budget, start_idx=len(tasks)))
 
-        if len(tasks) < target_count:
+        if len(tasks) < target_count and self._template_fallback_allowed():
             tasks.extend(self._template_tasks(graph, count=target_count - len(tasks), start_idx=len(tasks)))
+
+        if not tasks:
+            tasks.extend(self._template_tasks(graph, count=target_count, start_idx=0))
 
         return tasks[:target_count]

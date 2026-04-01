@@ -8,6 +8,7 @@ from typing import Any
 
 from osint_env.domain.models import (
     EnvironmentConfig,
+    LLMConfig,
     NodeType,
     SeedingConfig,
     SeedEdgeSpec,
@@ -154,6 +155,13 @@ def _parse_seeding(data: dict[str, Any]) -> SeedingConfig:
         llm_generate_remaining_tasks=_parse_bool(data.get("llm_generate_remaining_tasks"), True),
         llm_generated_edge_budget=max(0, _parse_int(data.get("llm_generated_edge_budget"), 6)),
         llm_generated_task_budget=max(0, _parse_int(data.get("llm_generated_task_budget"), 8)),
+        llm_generation_parallel=_parse_bool(data.get("llm_generation_parallel"), True),
+        llm_generation_workers=max(1, _parse_int(data.get("llm_generation_workers"), 3)),
+        llm_generation_retries=max(1, _parse_int(data.get("llm_generation_retries"), 2)),
+        allow_template_fallback_on_llm_failure=_parse_bool(
+            data.get("allow_template_fallback_on_llm_failure"),
+            False,
+        ),
     )
 
 
@@ -170,6 +178,7 @@ def _parse_environment(payload: dict[str, Any]) -> EnvironmentConfig:
     swarm_data = _as_dict(payload.get("swarm", env_data.get("swarm", {})))
     spawn_data = _as_dict(payload.get("spawn_reward", env_data.get("spawn_reward", {})))
     seeding_data = _as_dict(payload.get("seeding", env_data.get("seeding", {})))
+    llm_data = _as_dict(payload.get("llm", env_data.get("llm", {})))
 
     env = EnvironmentConfig(
         n_users=max(4, _parse_int(env_data.get("n_users"), 40)),
@@ -198,6 +207,19 @@ def _parse_environment(payload: dict[str, Any]) -> EnvironmentConfig:
     )
 
     env.seeding = _parse_seeding(seeding_data)
+    env.llm = LLMConfig(
+        provider=str(llm_data.get("provider", "mock")).strip() or "mock",
+        model=str(llm_data.get("model", "qwen3:2b")).strip() or "qwen3:2b",
+        temperature=_parse_float(llm_data.get("temperature"), 0.1),
+        max_tokens=max(1, _parse_int(llm_data.get("max_tokens"), 256)),
+        timeout_seconds=max(1, _parse_int(llm_data.get("timeout_seconds"), 240)),
+        ollama_base_url=str(llm_data.get("ollama_base_url", "http://127.0.0.1:11434")).strip()
+        or "http://127.0.0.1:11434",
+        openai_base_url=str(llm_data.get("openai_base_url", "https://api.openai.com/v1")).strip()
+        or "https://api.openai.com/v1",
+        openai_api_key_env=str(llm_data.get("openai_api_key_env", "OPENAI_API_KEY")).strip() or "OPENAI_API_KEY",
+        openai_api_key=str(llm_data.get("openai_api_key", "")).strip(),
+    )
     return env
 
 

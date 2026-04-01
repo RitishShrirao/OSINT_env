@@ -18,6 +18,7 @@
         }
       }
     ],
+    "_note": "Use with --seed-file. LLM provider and API keys are configured in config/shared_config.json or CLI flags.",
     "seeded_edges": [
       {
         "src": "alias_seed_001",

@@ -17,8 +17,13 @@ class SingleAgentRunner:
         while not done:
             messages = [{"role": "system", "content": f"question: {obs.task['question']}"}]
             tools = []
-            llm_resp = self.llm.generate(messages, tools)
-            for call in llm_resp.tool_calls[:2]:
+            try:
+                llm_resp = self.llm.generate(messages, tools)
+                planned_calls = llm_resp.tool_calls[:2]
+            except Exception:
+                planned_calls = []
+
+            for call in planned_calls:
                 obs, _, done, info = self.env.step(Action(ActionType.CALL_TOOL, call))
                 if done:
                     break
