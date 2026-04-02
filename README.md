@@ -109,6 +109,12 @@ Run tests:
 python -m pytest -q
 ```
 
+Run the automated release gate:
+
+```bash
+python scripts/validate_release.py
+```
+
 ## Usage
 
 Run one demo episode:
@@ -173,6 +179,29 @@ The FastAPI app serves:
 - `/dashboard`: generated benchmark dashboard
 - `/api/environment`: environment metadata
 - `/healthz`: health check
+
+## Automated Validation
+
+The repository includes a pass/fail validation gate for the core delivery requirements:
+
+- Hugging Face Space readiness
+- OpenEnv spec compliance
+- reproducible baseline behavior
+- at least 3 fixed tasks with working graders
+- Docker image build in CI
+
+Local gate:
+
+```bash
+python scripts/validate_release.py
+```
+
+CI gate:
+
+- `.github/workflows/validation.yml`
+- runs `pytest`
+- runs the validation script
+- runs `docker build`
 
 ## Baseline Scores
 
