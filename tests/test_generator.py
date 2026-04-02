@@ -66,8 +66,29 @@ def test_generator_outputs():
     views = gen.build_platform_views(graph)
     tasks = gen.generate_tasks(graph, views, count=5)
     assert len(graph.nodes) >= 20
-    assert len(views.microblog_posts) == 20
+    assert len(views.microblog_posts) >= 20
     assert len(tasks) == 5
+
+
+def test_seeded_views_include_seeded_posts_and_threads():
+    from osint_env.config import clone_environment_config, load_seeding_config, load_shared_config
+
+    shared = load_shared_config("datasets/fixed_levels/shared_config_fixed_levels.json")
+    cfg = clone_environment_config(shared.environment)
+    cfg.seeding = load_seeding_config("datasets/fixed_levels/seed_fixed_levels.json")
+    cfg.llm.provider = "mock"
+
+    gen = DatasetGenerator(cfg)
+    graph = gen.build_canonical_graph()
+    views = gen.build_platform_views(graph)
+
+    seeded_post = next((post for post in views.microblog_posts if post["post_id"] == "post_midnight_manifest"), None)
+    seeded_thread = next((thread for thread in views.forum_threads if thread["thread_id"] == "thr_supply_leak"), None)
+
+    assert seeded_post is not None
+    assert "loc_dockyard17" in seeded_post["references"]
+    assert seeded_thread is not None
+    assert "org_northbridge_logistics" in seeded_thread["references"]
 
 
 def test_graph_generation_uses_parallel_shared_context_workers():

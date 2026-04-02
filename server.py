@@ -37,6 +37,13 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return payload if isinstance(payload, dict) else None
 
 
+def _path_mtime(path: Path) -> float:
+    try:
+        return path.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
 def _build_environment() -> OSINTEnvironment:
     shared = load_shared_config(SPACE_CONFIG_PATH)
     env_cfg = clone_environment_config(shared.environment)
@@ -97,31 +104,37 @@ def _space_snapshot() -> dict[str, Any]:
     snapshot = dict(_base_environment_snapshot())
 
     baseline_payload = _load_json(LATEST_BASELINE_OUTPUT)
-    if baseline_payload is not None and isinstance(baseline_payload.get("summary"), dict):
-        dashboard_path = Path(
-            str(
-                ((baseline_payload.get("run") or {}).get("dashboard_path"))
-                or "artifacts/baselines/openai_fixed_levels_dashboard.html"
-            )
-        )
-        if dashboard_path.exists():
-            snapshot["dashboard_path"] = str(dashboard_path)
-        snapshot["summary"] = dict(baseline_payload["summary"])
-        snapshot["source"] = "baseline_output"
-        return snapshot
-
     evaluation_payload = _load_json(LATEST_EVALUATION_OUTPUT)
+
+    candidates: list[tuple[float, str, dict[str, Any]]] = []
+    if baseline_payload is not None and isinstance(baseline_payload.get("summary"), dict):
+        candidates.append((_path_mtime(LATEST_BASELINE_OUTPUT), "baseline_output", baseline_payload))
     if evaluation_payload is not None and isinstance(evaluation_payload.get("summary"), dict):
+        candidates.append((_path_mtime(LATEST_EVALUATION_OUTPUT), "latest_evaluation", evaluation_payload))
+
+    if candidates:
+        _, source, payload = max(candidates, key=lambda item: item[0])
+        snapshot["summary"] = dict(payload["summary"])
+        snapshot["source"] = source
+        if source == "baseline_output":
+            dashboard_path = Path(
+                str(
+                    ((payload.get("run") or {}).get("dashboard_path"))
+                    or "artifacts/baselines/openai_fixed_levels_dashboard.html"
+                )
+            )
+            if dashboard_path.exists():
+                snapshot["dashboard_path"] = str(dashboard_path)
+            return snapshot
+
         env = _build_environment()
         dashboard_path = export_dashboard(
             env=env,
-            evaluation=evaluation_payload,
+            evaluation=payload,
             leaderboard_records=[],
             output_path=str(SPACE_DASHBOARD),
         )
-        snapshot["summary"] = dict(evaluation_payload["summary"])
         snapshot["dashboard_path"] = dashboard_path
-        snapshot["source"] = "latest_evaluation"
         return snapshot
 
     preview = _preview_snapshot()

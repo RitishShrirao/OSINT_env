@@ -22,6 +22,9 @@ Available actions are provided as function tools. On every turn, call exactly on
 Rules:
 - Solve the question using only tool outputs and the current graph snapshot.
 - When you have enough evidence, call submit_answer with the exact node id string.
+- Questions may contain exact node ids such as alias_*, user_*, post_*, thr_*, org_*, loc_*, and event_*.
+- Prefer direct id lookups when an exact id is present in the question.
+- get_post and get_thread retrieve exact seeded records by id.
 - Use add_edge only for relationships strongly supported by the evidence you have already collected.
 - Prefer concise, high-signal tool queries.
 - Never guess free-form prose when a node id answer is required.
@@ -74,13 +77,19 @@ def build_action_tools() -> list[dict[str, Any]]:
     return [
         _tool_schema(
             "search_posts",
-            "Search microblog posts by substring query.",
+            "Search microblog posts by substring over post text, post id, author id, canonical user id, or referenced entity ids/names.",
             {"query": {"type": "string", "description": "Substring to search for in post text."}},
             ["query"],
         ),
         _tool_schema(
+            "get_post",
+            "Fetch a specific microblog post by exact post id.",
+            {"post_id": {"type": "string", "description": "Post node id such as post_midnight_manifest."}},
+            ["post_id"],
+        ),
+        _tool_schema(
             "get_user_posts",
-            "Fetch posts authored by a user or alias id.",
+            "Fetch posts authored by a user or alias id. Alias ids are resolved to the canonical user and vice versa.",
             {"user_id": {"type": "string", "description": "User or alias node id."}},
             ["user_id"],
         ),
@@ -110,13 +119,13 @@ def build_action_tools() -> list[dict[str, Any]]:
         ),
         _tool_schema(
             "get_profile",
-            "Fetch a profile record by canonical user id.",
-            {"user_id": {"type": "string", "description": "Canonical user node id."}},
+            "Fetch a profile record by canonical user id or alias id.",
+            {"user_id": {"type": "string", "description": "Canonical user node id or alias id."}},
             ["user_id"],
         ),
         _tool_schema(
             "search_people",
-            "Search profiles by name and or organization.",
+            "Search profiles by name, alias id, organization name, or organization id.",
             {
                 "name": {"type": "string", "description": "Optional name substring.", "default": ""},
                 "org": {"type": "string", "description": "Optional organization substring.", "default": ""},
@@ -125,8 +134,8 @@ def build_action_tools() -> list[dict[str, Any]]:
         ),
         _tool_schema(
             "get_connections",
-            "Fetch explicit profile connections for a user.",
-            {"user_id": {"type": "string", "description": "Canonical user node id."}},
+            "Fetch explicit profile connections for a user or alias id.",
+            {"user_id": {"type": "string", "description": "Canonical user node id or alias id."}},
             ["user_id"],
         ),
         _tool_schema(
@@ -284,11 +293,12 @@ class OpenAIBaselineRunner:
 
     def _episode(self, env: OSINTEnvironment, episode_index: int) -> tuple[dict[str, Any], dict[str, Any]]:
         obs = env.reset()
+        initial_observation = _observation_payload(env, obs, env.config.max_steps)
         messages: list[dict[str, Any]] = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {
                 "role": "user",
-                "content": json.dumps(_observation_payload(env, obs, env.config.max_steps), indent=2, sort_keys=True),
+                "content": json.dumps(initial_observation, indent=2, sort_keys=True),
             },
         ]
 
@@ -322,7 +332,14 @@ class OpenAIBaselineRunner:
                 }
                 messages.append({"role": "assistant", "content": content})
                 messages.append({"role": "tool", "tool_call_id": "fallback_submit", "content": json.dumps(tool_result)})
-                turn_trace.append({"assistant_content": content, "tool_name": "submit_answer", "args": {"answer": fallback_answer}})
+                turn_trace.append(
+                    {
+                        "assistant_content": content,
+                        "tool_name": "submit_answer",
+                        "args": {"answer": fallback_answer},
+                        "tool_payload": tool_result,
+                    }
+                )
                 break
 
             tool_call = tool_calls[0]
@@ -360,16 +377,41 @@ class OpenAIBaselineRunner:
             }
             messages.append(assistant_message)
             messages.append({"role": "tool", "tool_call_id": tool_call.id, "content": json.dumps(tool_payload, sort_keys=True)})
-            turn_trace.append({"assistant_content": content, "tool_name": tool_name, "args": args, "reward": reward, "done": done})
+            turn_trace.append(
+                {
+                    "assistant_content": content,
+                    "tool_name": tool_name,
+                    "args": args,
+                    "reward": reward,
+                    "done": done,
+                    "tool_payload": tool_payload,
+                }
+            )
 
         if not done:
             obs, _, done, info = env.step(Action(ActionType.ANSWER, {"answer": "unknown"}))
-            turn_trace.append({"assistant_content": "", "tool_name": "submit_answer", "args": {"answer": "unknown"}, "reward": 0.0, "done": done})
+            final_payload = {
+                "submitted_answer": "unknown",
+                "reward": 0.0,
+                "done": done,
+                "observation": _observation_payload(env, obs, env.config.max_steps),
+                "info": _safe_info(info),
+            }
+            turn_trace.append(
+                {
+                    "assistant_content": "",
+                    "tool_name": "submit_answer",
+                    "args": {"answer": "unknown"},
+                    "reward": 0.0,
+                    "done": done,
+                    "tool_payload": final_payload,
+                }
+            )
 
         info = dict(info)
         info["openai_system_fingerprints"] = raw_fingerprints
         info["usage"] = usage_totals
-        return info, {"turns": turn_trace}
+        return info, {"initial_observation": initial_observation, "turns": turn_trace}
 
     def run(self) -> dict[str, Any]:
         env = self._build_environment()

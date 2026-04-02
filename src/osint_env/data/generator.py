@@ -27,6 +27,7 @@ class PlatformViews:
     microblog_posts: list[dict]
     forum_threads: list[dict]
     profiles: list[dict]
+    alias_lookup: dict[str, str]
 
 
 class DatasetGenerator:
@@ -589,6 +590,13 @@ class DatasetGenerator:
         users = [n for n in graph.nodes.values() if n.node_type == NodeType.USER]
         aliases = [n for n in graph.nodes.values() if n.node_type == NodeType.ALIAS]
         alias_owner = {e.src: e.dst for e in graph.edges if e.rel == "alias_of"}
+        user_aliases: dict[str, list[str]] = {}
+        for alias_id, user_id in alias_owner.items():
+            user_aliases.setdefault(user_id, []).append(alias_id)
+        node_names = {
+            node_id: str((node.attrs or {}).get("name") or (node.attrs or {}).get("handle") or node_id)
+            for node_id, node in graph.nodes.items()
+        }
 
         microblog_posts: list[dict] = []
         for i, user in enumerate(users):
@@ -605,10 +613,45 @@ class DatasetGenerator:
                     "user_id": poster,
                     "canonical_user": alias_owner.get(poster, user.node_id),
                     "text": text,
+                    "references": [],
+                    "reference_names": [],
                     "mentions": [f"user_{self.rng.randint(0, self.config.n_users - 1)}"],
                     "timestamp": 1000 + i,
                 }
             )
+
+        authored_posts: dict[str, str] = {}
+        post_references: dict[str, list[str]] = {}
+        for edge in graph.edges:
+            if edge.rel == "authored_post":
+                authored_posts[edge.dst] = edge.src
+            elif edge.rel == "references" and edge.src.startswith("post_"):
+                post_references.setdefault(edge.src, []).append(edge.dst)
+
+        for post_id, author_id in authored_posts.items():
+            refs = post_references.get(post_id, [])
+            ref_names = [node_names.get(ref, ref) for ref in refs]
+            author_label = node_names.get(author_id, author_id)
+            text_parts = [f"{post_id} update from {author_label}"]
+            if ref_names:
+                text_parts.append("references " + ", ".join(ref_names))
+            if refs:
+                text_parts.append("ids " + ", ".join(refs))
+            post_payload = {
+                "post_id": post_id,
+                "user_id": author_id,
+                "canonical_user": alias_owner.get(author_id, author_id),
+                "text": ". ".join(text_parts),
+                "references": refs,
+                "reference_names": ref_names,
+                "mentions": [],
+                "timestamp": 5000 + len(microblog_posts),
+            }
+            existing_idx = next((idx for idx, row in enumerate(microblog_posts) if row["post_id"] == post_id), None)
+            if existing_idx is None:
+                microblog_posts.append(post_payload)
+            else:
+                microblog_posts[existing_idx] = post_payload
 
         forum_threads: list[dict] = []
         for i in range(max(8, self.config.n_users // 3)):
@@ -622,18 +665,60 @@ class DatasetGenerator:
                         {"user_id": self.rng.choice(users).node_id, "text": "Following this."},
                         {"user_id": self.rng.choice(users).node_id, "text": "Interesting link."},
                     ],
+                    "references": [],
+                    "discusses": [],
                 }
             )
+
+        authored_threads: dict[str, str] = {}
+        thread_refs: dict[str, list[str]] = {}
+        thread_discusses: dict[str, list[str]] = {}
+        for edge in graph.edges:
+            if edge.rel == "authored_thread":
+                authored_threads[edge.dst] = edge.src
+            elif edge.rel == "references" and edge.src.startswith(("thr_", "thread_")):
+                thread_refs.setdefault(edge.src, []).append(edge.dst)
+            elif edge.rel == "discusses" and edge.src.startswith(("thr_", "thread_")):
+                thread_discusses.setdefault(edge.src, []).append(edge.dst)
+
+        for thread_id, author_id in authored_threads.items():
+            node = graph.nodes.get(thread_id)
+            refs = thread_refs.get(thread_id, [])
+            discussed = thread_discusses.get(thread_id, [])
+            comments = []
+            for ref in refs:
+                comments.append({"user_id": author_id, "text": f"Reference: {node_names.get(ref, ref)} ({ref})"})
+            for item in discussed:
+                comments.append({"user_id": author_id, "text": f"Discusses: {node_names.get(item, item)} ({item})"})
+            thread_payload = {
+                "thread_id": thread_id,
+                "topic": str((node.attrs or {}).get("topic", "seeded")) if node else "seeded",
+                "author_id": author_id,
+                "title": node_names.get(thread_id, thread_id),
+                "comments": comments,
+                "references": refs,
+                "discusses": discussed,
+            }
+            existing_idx = next((idx for idx, row in enumerate(forum_threads) if row["thread_id"] == thread_id), None)
+            if existing_idx is None:
+                forum_threads.append(thread_payload)
+            else:
+                forum_threads[existing_idx] = thread_payload
 
         profiles: list[dict] = []
         for user in users:
             conns = [e.dst for e in graph.edges if e.src == user.node_id and e.rel == "connected_to"][:5]
+            org_id = next((e.dst for e in graph.edges if e.src == user.node_id and e.rel == "works_at"), "")
+            location_id = next((e.dst for e in graph.edges if e.src == user.node_id and e.rel == "located_in"), "")
             profiles.append(
                 {
                     "user_id": user.node_id,
                     "name": user.attrs["name"],
                     "org": user.attrs["org"],
+                    "org_id": org_id,
                     "location": user.attrs["location"],
+                    "location_id": location_id,
+                    "alias_ids": sorted(user_aliases.get(user.node_id, [])),
                     "connections": conns,
                     "work_history": [user.attrs["org"]],
                 }
@@ -645,12 +730,15 @@ class DatasetGenerator:
                     "user_id": f"noise_{i}",
                     "name": f"P{self.rng.randint(100,999)}",
                     "org": self.rng.choice(["Stealth Co", "Unknown Ventures"]),
+                    "org_id": "",
                     "location": self.rng.choice(["Remote", "Unknown"]),
+                    "location_id": "",
+                    "alias_ids": [],
                     "connections": [],
                     "work_history": [],
                 }
             )
-        return PlatformViews(microblog_posts, forum_threads, profiles)
+        return PlatformViews(microblog_posts, forum_threads, profiles, alias_lookup=alias_owner)
 
     def generate_tasks(self, graph: CanonicalGraph, views: PlatformViews, count: int = 12) -> list[TaskInstance]:
         tasks = self._seeded_tasks(graph)

@@ -7,6 +7,7 @@ def test_openai_baseline_toolset_contains_answer_and_graph_actions():
     assert "submit_answer" in names
     assert "add_edge" in names
     assert "search_memory" in names
+    assert "get_post" in names
 
 
 def test_gpt5_request_kwargs_avoid_temperature_and_use_max_completion_tokens():

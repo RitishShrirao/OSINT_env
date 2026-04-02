@@ -1,5 +1,8 @@
+import json
+
 from fastapi.testclient import TestClient
 
+import server
 from server import app
 
 
@@ -20,3 +23,48 @@ def test_server_environment_metadata():
     assert "observation_space" in body
     assert "summary" in body
 
+
+def test_space_snapshot_prefers_newer_evaluation_payload(tmp_path, monkeypatch):
+    baseline_path = tmp_path / "baseline.json"
+    evaluation_path = tmp_path / "evaluation.json"
+    baseline_dashboard = tmp_path / "baseline_dashboard.html"
+    space_dashboard = tmp_path / "space_dashboard.html"
+
+    baseline_path.write_text(
+        json.dumps(
+            {
+                "run": {"dashboard_path": str(baseline_dashboard)},
+                "summary": {"leaderboard_score": 0.1, "task_success_rate": 0.1},
+            }
+        ),
+        encoding="utf-8",
+    )
+    baseline_dashboard.write_text("<html>baseline</html>", encoding="utf-8")
+    evaluation_path.write_text(
+        json.dumps({"summary": {"leaderboard_score": 0.9, "task_success_rate": 0.9}, "episodes": []}),
+        encoding="utf-8",
+    )
+    space_dashboard.write_text("<html>space</html>", encoding="utf-8")
+
+    monkeypatch.setattr(server, "LATEST_BASELINE_OUTPUT", baseline_path)
+    monkeypatch.setattr(server, "LATEST_EVALUATION_OUTPUT", evaluation_path)
+    monkeypatch.setattr(server, "SPACE_DASHBOARD", space_dashboard)
+    monkeypatch.setattr(
+        server,
+        "_base_environment_snapshot",
+        lambda: {
+            "task_count": 30,
+            "difficulty_counts": {},
+            "action_space": ["CALL_TOOL", "ADD_EDGE", "ANSWER"],
+            "observation_space": {},
+            "task_types": [],
+            "config": {},
+        },
+    )
+    monkeypatch.setattr(server, "_build_environment", lambda: object())
+    monkeypatch.setattr(server, "export_dashboard", lambda env, evaluation, leaderboard_records, output_path: str(space_dashboard))
+
+    snapshot = server._space_snapshot()
+    assert snapshot["source"] == "latest_evaluation"
+    assert snapshot["summary"]["leaderboard_score"] == 0.9
+    assert snapshot["dashboard_path"] == str(space_dashboard)
