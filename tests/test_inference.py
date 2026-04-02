@@ -1,4 +1,4 @@
-from inference import _looks_like_placeholder_api_key, _tool_result_message
+from inference import _format_action, _looks_like_placeholder_api_key, _tool_result_message
 
 
 def test_placeholder_api_key_detection():
@@ -25,3 +25,13 @@ def test_tool_result_message_reuses_assistant_tool_call_id():
     assert tool_message is not None
     assert tool_message["tool_call_id"] == "call_123"
     assert tool_message["role"] == "tool"
+
+
+def test_action_formatter_matches_single_line_style():
+    assert _format_action({"action_type": "ANSWER", "payload": {"answer": "user_bharat"}}) == "answer(user_bharat)"
+    assert _format_action(
+        {
+            "action_type": "CALL_TOOL",
+            "payload": {"tool_name": "get_post", "args": {"post_id": "post_midnight_manifest"}},
+        }
+    ) == "get_post(post_id=post_midnight_manifest)"
