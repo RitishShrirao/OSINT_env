@@ -232,6 +232,13 @@ class OpenAIBaselineRunner:
     def _is_gpt5_family(model: str) -> bool:
         return str(model).strip().lower().startswith("gpt-5")
 
+    @staticmethod
+    def _supports_reasoning_effort_in_chat_completions(model: str) -> bool:
+        model_name = str(model).strip().lower()
+        if model_name.startswith("gpt-5.4-mini"):
+            return False
+        return model_name.startswith("gpt-5")
+
     def _request_kwargs(self, messages: list[dict[str, Any]], episode_index: int) -> dict[str, Any]:
         kwargs: dict[str, Any] = {
             "model": self.config.model,
@@ -247,7 +254,8 @@ class OpenAIBaselineRunner:
         if self._is_gpt5_family(self.config.model):
             # GPT-5 family chat-completions compatibility:
             # use max_completion_tokens and avoid temperature for older GPT-5 models.
-            kwargs["reasoning_effort"] = "none"
+            if self._supports_reasoning_effort_in_chat_completions(self.config.model):
+                kwargs["reasoning_effort"] = "none"
         else:
             kwargs["temperature"] = self.config.temperature
 

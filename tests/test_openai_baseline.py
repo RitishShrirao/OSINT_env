@@ -18,3 +18,13 @@ def test_gpt5_request_kwargs_avoid_temperature_and_use_max_completion_tokens():
     assert kwargs["max_completion_tokens"] == 321
     assert kwargs["reasoning_effort"] == "none"
     assert "temperature" not in kwargs
+
+
+def test_gpt54_mini_request_kwargs_skip_reasoning_effort_for_chat_completions():
+    runner = OpenAIBaselineRunner.__new__(OpenAIBaselineRunner)
+    runner.config = OpenAIBaselineConfig(model="gpt-5.4-mini", max_tokens=321, temperature=0.0, seed=7)
+    runner.tools = build_action_tools()
+    kwargs = runner._request_kwargs(messages=[{"role": "user", "content": "hi"}], episode_index=0)
+    assert kwargs["max_completion_tokens"] == 321
+    assert "reasoning_effort" not in kwargs
+    assert "temperature" not in kwargs
