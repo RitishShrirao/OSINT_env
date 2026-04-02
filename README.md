@@ -5,6 +5,8 @@ colorFrom: teal
 colorTo: amber
 sdk: docker
 app_port: 7860
+pinned: false
+license: apache-2.0
 tags:
   - openenv
   - osint
@@ -24,7 +26,7 @@ The motivation is to provide a reproducible OpenEnv-compatible environment for e
 
 The environment generates or loads a hidden canonical graph of users, aliases, organizations, locations, posts, threads, and events. It then exposes partial platform views and a task list drawn from that graph.
 
-The default hosted Space uses the fixed-level benchmark in [`datasets/fixed_levels/seed_fixed_levels.json`](/c:/Users/SIDDESHWAR/Desktop/meta/OSINT_env/datasets/fixed_levels/seed_fixed_levels.json), which now contains 30 stable tasks over a larger shared seeded graph.
+The default hosted Space uses the fixed-level benchmark in `datasets/fixed_levels/seed_fixed_levels.json`, which now contains 30 stable tasks over a larger shared seeded graph.
 
 ## Action Space
 
@@ -129,7 +131,7 @@ osint-env benchmark --episodes 5 --agent-mode swarm --llm-provider mock --name q
 
 ## OpenAI Baseline
 
-The reproducible OpenAI baseline is implemented in [`scripts/run_openai_baseline.py`](/c:/Users/SIDDESHWAR/Desktop/meta/OSINT_env/scripts/run_openai_baseline.py). It runs on the fixed-level benchmark, uses a stable seeded graph/task set, writes a JSON artifact, appends a leaderboard record, and exports a dashboard.
+The reproducible OpenAI baseline is implemented in `scripts/run_openai_baseline.py`. It runs on the fixed-level benchmark, uses a stable seeded graph/task set, writes a JSON artifact, appends a leaderboard record, and exports a dashboard.
 
 Default behavior:
 
@@ -154,7 +156,7 @@ The repository is ready for a Docker-based Hugging Face Space:
 
 - `README.md` includes `sdk: docker`
 - `README.md` includes the `openenv` Space tag
-- `Dockerfile` serves [`server.py`](/c:/Users/SIDDESHWAR/Desktop/meta/OSINT_env/server.py) on port `7860`
+- `Dockerfile` serves `server.py` on port `7860`
 
 Local Docker smoke test:
 
@@ -178,8 +180,8 @@ The fixed-level benchmark was expanded from the earlier 15-question set to a 30-
 
 After you supply an OpenAI API key, the current baseline scores for the expanded benchmark will be written to:
 
-- [`artifacts/baselines/openai_fixed_levels_latest.json`](/c:/Users/SIDDESHWAR/Desktop/meta/OSINT_env/artifacts/baselines/openai_fixed_levels_latest.json)
-- [`artifacts/baselines/openai_fixed_levels_dashboard.html`](/c:/Users/SIDDESHWAR/Desktop/meta/OSINT_env/artifacts/baselines/openai_fixed_levels_dashboard.html)
+- `artifacts/baselines/openai_fixed_levels_latest.json`
+- `artifacts/baselines/openai_fixed_levels_dashboard.html`
 
 ## Notes On `pyproject.toml`
 
