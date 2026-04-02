@@ -23,6 +23,18 @@ SPACE_PROVIDER = os.getenv("OSINT_SPACE_LLM_PROVIDER", "mock")
 SPACE_MODEL = os.getenv("OSINT_SPACE_LLM_MODEL", "gpt-4o-mini")
 SPACE_PORT = int(os.getenv("PORT", "7860"))
 SPACE_DASHBOARD = Path("artifacts/space_dashboard.html")
+LATEST_BASELINE_OUTPUT = Path("artifacts/baselines/openai_fixed_levels_latest.json")
+LATEST_EVALUATION_OUTPUT = Path("artifacts/latest_evaluation.json")
+
+
+def _load_json(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
 
 
 def _build_environment() -> OSINTEnvironment:
@@ -41,19 +53,10 @@ def _build_environment() -> OSINTEnvironment:
 
 
 @lru_cache(maxsize=1)
-def _space_snapshot() -> dict[str, Any]:
+def _base_environment_snapshot() -> dict[str, Any]:
     env = _build_environment()
-    evaluation = run_evaluation(env, episodes=3, return_details=True, llm=build_llm_client(env.config.llm))
-    dashboard_path = export_dashboard(
-        env=env,
-        evaluation=evaluation,
-        leaderboard_records=[],
-        output_path=str(SPACE_DASHBOARD),
-    )
     difficulty_counts = Counter(str(task.metadata.get("difficulty", "unknown")) for task in env.tasks)
     return {
-        "dashboard_path": dashboard_path,
-        "summary": evaluation["summary"],
         "task_count": len(env.tasks),
         "difficulty_counts": dict(difficulty_counts),
         "action_space": ["CALL_TOOL", "ADD_EDGE", "ANSWER"],
@@ -72,6 +75,58 @@ def _space_snapshot() -> dict[str, Any]:
             "llm_model": env.config.llm.model,
         },
     }
+
+
+@lru_cache(maxsize=1)
+def _preview_snapshot() -> dict[str, Any]:
+    env = _build_environment()
+    evaluation = run_evaluation(env, episodes=3, return_details=True, llm=build_llm_client(env.config.llm))
+    dashboard_path = export_dashboard(
+        env=env,
+        evaluation=evaluation,
+        leaderboard_records=[],
+        output_path=str(SPACE_DASHBOARD),
+    )
+    snapshot = dict(_base_environment_snapshot())
+    snapshot["summary"] = evaluation["summary"]
+    snapshot["dashboard_path"] = dashboard_path
+    return snapshot
+
+
+def _space_snapshot() -> dict[str, Any]:
+    snapshot = dict(_base_environment_snapshot())
+
+    baseline_payload = _load_json(LATEST_BASELINE_OUTPUT)
+    if baseline_payload is not None and isinstance(baseline_payload.get("summary"), dict):
+        dashboard_path = Path(
+            str(
+                ((baseline_payload.get("run") or {}).get("dashboard_path"))
+                or "artifacts/baselines/openai_fixed_levels_dashboard.html"
+            )
+        )
+        if dashboard_path.exists():
+            snapshot["dashboard_path"] = str(dashboard_path)
+        snapshot["summary"] = dict(baseline_payload["summary"])
+        snapshot["source"] = "baseline_output"
+        return snapshot
+
+    evaluation_payload = _load_json(LATEST_EVALUATION_OUTPUT)
+    if evaluation_payload is not None and isinstance(evaluation_payload.get("summary"), dict):
+        env = _build_environment()
+        dashboard_path = export_dashboard(
+            env=env,
+            evaluation=evaluation_payload,
+            leaderboard_records=[],
+            output_path=str(SPACE_DASHBOARD),
+        )
+        snapshot["summary"] = dict(evaluation_payload["summary"])
+        snapshot["dashboard_path"] = dashboard_path
+        snapshot["source"] = "latest_evaluation"
+        return snapshot
+
+    preview = _preview_snapshot()
+    preview["source"] = "preview"
+    return preview
 
 
 app = FastAPI(title="OSINT OpenEnv Space", version="0.1.0")
@@ -218,4 +273,3 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run("server:app", host="0.0.0.0", port=SPACE_PORT)
-

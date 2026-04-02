@@ -1,10 +1,10 @@
 {
   "environment": {
-    "n_users": 4,
-    "alias_density": 0.0,
-    "noise_level": 0.08,
-    "red_herring_rate": 0.04,
-    "max_steps": 20,
+    "n_users": 24,
+    "alias_density": 0.2,
+    "noise_level": 0.12,
+    "red_herring_rate": 0.08,
+    "max_steps": 24,
     "seed": 2026
   },
   "swarm": {
@@ -28,7 +28,7 @@
     "seeded_questions": [],
     "llm_generate_remaining_graph": true,
     "llm_generate_remaining_tasks": false,
-    "llm_generated_edge_budget": 28,
+    "llm_generated_edge_budget": 64,
     "llm_generated_task_budget": 0,
     "llm_generation_parallel": true,
     "llm_generation_workers": 4,
@@ -47,7 +47,7 @@
     "openai_api_key": ""
   },
   "runtime": {
-    "default_episodes": 15,
+    "default_episodes": 30,
     "leaderboard_path": "datasets/fixed_levels/leaderboard_fixed_levels.json",
     "dashboard_path": "datasets/fixed_levels/dashboard_fixed_levels.html",
     "sweep_dashboard_dir": "datasets/fixed_levels/sweep_dashboards"

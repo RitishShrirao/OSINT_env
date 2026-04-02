@@ -24,7 +24,7 @@ The motivation is to provide a reproducible OpenEnv-compatible environment for e
 
 The environment generates or loads a hidden canonical graph of users, aliases, organizations, locations, posts, threads, and events. It then exposes partial platform views and a task list drawn from that graph.
 
-The default hosted Space uses the fixed-level benchmark in [`datasets/fixed_levels/seed_fixed_levels.json`](/c:/Users/SIDDESHWAR/Desktop/meta/OSINT_env/datasets/fixed_levels/seed_fixed_levels.json), which contains 15 stable tasks over one shared seeded graph.
+The default hosted Space uses the fixed-level benchmark in [`datasets/fixed_levels/seed_fixed_levels.json`](/c:/Users/SIDDESHWAR/Desktop/meta/OSINT_env/datasets/fixed_levels/seed_fixed_levels.json), which now contains 30 stable tasks over a larger shared seeded graph.
 
 ## Action Space
 
@@ -134,7 +134,7 @@ The reproducible OpenAI baseline is implemented in [`scripts/run_openai_baseline
 Default behavior:
 
 - dataset: fixed-level benchmark
-- episodes: 15
+- episodes: 30
 - max steps per episode: 8
 - temperature: 0.0
 - output artifact: `artifacts/baselines/openai_fixed_levels_latest.json`
@@ -143,7 +143,7 @@ Run it with an API key:
 
 ```bash
 export OPENAI_API_KEY="your_key_here"
-python scripts/run_openai_baseline.py --model gpt-4o-mini
+python scripts/run_openai_baseline.py --model gpt-5-nano
 ```
 
 The script is designed to stay bounded enough for a normal benchmark pass to finish comfortably under 20 minutes on a lightweight chat model, while still using the full fixed task set. For repeatability it fixes the benchmark graph/tasks and uses deterministic decoding settings. Because remote model backends can still change over time, the output artifact also records model metadata and system fingerprints when available.
@@ -174,15 +174,9 @@ The FastAPI app serves:
 
 ## Baseline Scores
 
-Bundled fixed-level baseline artifact:
+The fixed-level benchmark was expanded from the earlier 15-question set to a 30-question set with a larger seeded graph, so older benchmark artifacts should be treated as legacy and regenerated on the new dataset before using them as reference scores.
 
-| baseline | provider | model | episodes | task success | avg graph f1 | leaderboard score |
-|---|---|---|---:|---:|---:|---:|
-| `fixed_levels_qwen_swarm` | Ollama | `qwen3:2b` | 15 | 1.000 | 0.849 | 0.854 |
-
-Source: [`datasets/fixed_levels/qwen_swarm_benchmark_fixed_levels.json`](/c:/Users/SIDDESHWAR/Desktop/meta/OSINT_env/datasets/fixed_levels/qwen_swarm_benchmark_fixed_levels.json)
-
-After you supply an OpenAI API key, the matching baseline scores will be written to:
+After you supply an OpenAI API key, the current baseline scores for the expanded benchmark will be written to:
 
 - [`artifacts/baselines/openai_fixed_levels_latest.json`](/c:/Users/SIDDESHWAR/Desktop/meta/OSINT_env/artifacts/baselines/openai_fixed_levels_latest.json)
 - [`artifacts/baselines/openai_fixed_levels_dashboard.html`](/c:/Users/SIDDESHWAR/Desktop/meta/OSINT_env/artifacts/baselines/openai_fixed_levels_dashboard.html)

@@ -15,11 +15,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--leaderboard", default="artifacts/baselines/openai_fixed_levels_leaderboard.json", help="Leaderboard JSON path.")
     parser.add_argument("--dashboard", default="artifacts/baselines/openai_fixed_levels_dashboard.html", help="Dashboard HTML path.")
     parser.add_argument("--run-name", default="openai_fixed_levels_baseline", help="Leaderboard run name.")
-    parser.add_argument("--model", default="gpt-4o-mini", help="OpenAI chat model name.")
+    parser.add_argument("--model", default="gpt-5-nano", help="OpenAI chat model name.")
     parser.add_argument("--openai-base-url", default="https://api.openai.com/v1", help="OpenAI-compatible base URL.")
     parser.add_argument("--openai-api-key", default="", help="OpenAI API key override.")
     parser.add_argument("--openai-api-key-env", default="OPENAI_API_KEY", help="Environment variable name for the API key.")
-    parser.add_argument("--episodes", type=int, default=15, help="Number of episodes to evaluate.")
+    parser.add_argument("--episodes", type=int, default=30, help="Number of episodes to evaluate.")
     parser.add_argument("--max-steps", type=int, default=8, help="Episode step budget to keep runs bounded.")
     parser.add_argument("--temperature", type=float, default=0.0, help="Sampling temperature.")
     parser.add_argument("--max-tokens", type=int, default=256, help="Maximum completion tokens per step.")
@@ -57,4 +57,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

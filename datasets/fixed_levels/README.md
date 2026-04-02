@@ -4,22 +4,22 @@ This folder contains a fixed three-level OSINT benchmark set built on one shared
 
 ## Files
 
-- `seed_fixed_levels.json`: master fixed seed with canonical nodes, edges, and 15 fixed questions.
+- `seed_fixed_levels.json`: master fixed seed with an expanded canonical graph and 30 fixed questions.
 - `fixed_graph_questions.json`: extracted fixed dataset snapshot for submission packaging.
 - `shared_config_fixed_levels.json`: run config used for generation and evaluation.
 - `complete_dataset_qwen_generated.json`: full dataset after Qwen (`qwen3:2b` via Ollama) expands the graph.
-- `qwen_swarm_eval_fixed_levels.json`: Qwen swarm evaluation summary on this set.
-- `qwen_swarm_benchmark_fixed_levels.json`: benchmark output with record and summary.
+- `qwen_swarm_eval_fixed_levels.json`: legacy Qwen swarm evaluation summary from the older smaller version of the set.
+- `qwen_swarm_benchmark_fixed_levels.json`: legacy benchmark output from the older smaller version of the set.
 - `leaderboard_fixed_levels.json`: leaderboard file for this dataset.
 - `dashboard_fixed_levels.html`: interactive dashboard generated from the benchmark run.
 
 ## Difficulty Design
 
-- Easy: 5 questions, mostly direct alias, org, location, and event lookup.
-- Mid: 5 questions, 2-hop linking across alias plus org or event relations.
-- High: 5 questions, multi-hop cross-platform traces with implicit collaboration context.
+- Easy: 10 questions. These now use the older hard-style multi-hop traces as the new floor.
+- Mid: 10 questions. Each question spans roughly 15-20 supporting nodes.
+- High: 10 questions. Each question spans roughly 50 supporting nodes.
 
-All 15 questions are fixed and share the same seeded graph.
+All 30 questions are fixed and share the same larger seeded graph.
 
 ## Regenerate Artifacts
 

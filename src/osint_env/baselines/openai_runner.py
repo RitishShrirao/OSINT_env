@@ -36,14 +36,14 @@ class OpenAIBaselineConfig:
     leaderboard_path: str = "artifacts/baselines/openai_fixed_levels_leaderboard.json"
     dashboard_path: str = "artifacts/baselines/openai_fixed_levels_dashboard.html"
     run_name: str = "openai_fixed_levels_baseline"
-    model: str = "gpt-4o-mini"
+    model: str = "gpt-5-nano"
     base_url: str = "https://api.openai.com/v1"
     api_key: str = ""
     api_key_env: str = "OPENAI_API_KEY"
     temperature: float = 0.0
     max_tokens: int = 256
     timeout_seconds: int = 60
-    episodes: int = 15
+    episodes: int = 30
     max_steps: int = 8
     seed: int | None = 7
     append_leaderboard: bool = True
@@ -428,6 +428,23 @@ class OpenAIBaselineRunner:
 
         summary = metrics.summary()
         duration_seconds = perf_counter() - started
+        if self.config.append_leaderboard:
+            record = append_leaderboard_record(
+                path=self.config.leaderboard_path,
+                summary=summary,
+                episodes=int(self.config.episodes),
+                run_name=self.config.run_name,
+                config={
+                    "provider": "openai",
+                    "model": self.config.model,
+                    "seed": self.config.seed,
+                    "max_steps": self.config.max_steps,
+                    "shared_config_path": self.config.shared_config_path,
+                    "seed_file": self.config.seed_file,
+                },
+            )
+        else:
+            record = None
         dashboard_path = export_dashboard(
             env=env,
             evaluation={"summary": summary, "episodes": episode_rows},
@@ -459,21 +476,7 @@ class OpenAIBaselineRunner:
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
 
-        if self.config.append_leaderboard:
-            record = append_leaderboard_record(
-                path=self.config.leaderboard_path,
-                summary=summary,
-                episodes=int(self.config.episodes),
-                run_name=self.config.run_name,
-                config={
-                    "provider": "openai",
-                    "model": self.config.model,
-                    "seed": self.config.seed,
-                    "max_steps": self.config.max_steps,
-                    "shared_config_path": self.config.shared_config_path,
-                    "seed_file": self.config.seed_file,
-                },
-            )
+        if record is not None:
             payload["record"] = record
             output.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
 

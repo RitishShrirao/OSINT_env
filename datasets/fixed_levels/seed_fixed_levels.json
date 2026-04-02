@@ -92,6 +92,96 @@
         }
       },
       {
+        "node_id": "user_kian",
+        "node_type": "user",
+        "attrs": {
+          "name": "Kian Bose",
+          "org": "Atlas Freight",
+          "location": "East Quay"
+        }
+      },
+      {
+        "node_id": "user_leena",
+        "node_type": "user",
+        "attrs": {
+          "name": "Leena Das",
+          "org": "Sunmesh Analytics",
+          "location": "Sector 9"
+        }
+      },
+      {
+        "node_id": "user_mika",
+        "node_type": "user",
+        "attrs": {
+          "name": "Mika Solanki",
+          "org": "Orion Customs",
+          "location": "North Basin"
+        }
+      },
+      {
+        "node_id": "user_nora",
+        "node_type": "user",
+        "attrs": {
+          "name": "Nora Iqbal",
+          "org": "Emberline Security",
+          "location": "Foundry Row"
+        }
+      },
+      {
+        "node_id": "user_omar",
+        "node_type": "user",
+        "attrs": {
+          "name": "Omar Sheikh",
+          "org": "Atlas Freight",
+          "location": "East Quay"
+        }
+      },
+      {
+        "node_id": "user_priya",
+        "node_type": "user",
+        "attrs": {
+          "name": "Priya Menon",
+          "org": "Sunmesh Analytics",
+          "location": "Sector 9"
+        }
+      },
+      {
+        "node_id": "user_quinn",
+        "node_type": "user",
+        "attrs": {
+          "name": "Quinn Rao",
+          "org": "Orion Customs",
+          "location": "North Basin"
+        }
+      },
+      {
+        "node_id": "user_rhea",
+        "node_type": "user",
+        "attrs": {
+          "name": "Rhea Kapoor",
+          "org": "Emberline Security",
+          "location": "Foundry Row"
+        }
+      },
+      {
+        "node_id": "user_soren",
+        "node_type": "user",
+        "attrs": {
+          "name": "Soren Malik",
+          "org": "Harborlight Transit",
+          "location": "Uplink Yard"
+        }
+      },
+      {
+        "node_id": "user_tara",
+        "node_type": "user",
+        "attrs": {
+          "name": "Tara Dey",
+          "org": "Harborlight Transit",
+          "location": "Uplink Yard"
+        }
+      },
+      {
         "node_id": "alias_orchidfox",
         "node_type": "alias",
         "attrs": {
@@ -141,6 +231,69 @@
         }
       },
       {
+        "node_id": "alias_emberglass",
+        "node_type": "alias",
+        "attrs": {
+          "handle": "@emberglass"
+        }
+      },
+      {
+        "node_id": "alias_basinraven",
+        "node_type": "alias",
+        "attrs": {
+          "handle": "@basinraven"
+        }
+      },
+      {
+        "node_id": "alias_tideshard",
+        "node_type": "alias",
+        "attrs": {
+          "handle": "@tideshard"
+        }
+      },
+      {
+        "node_id": "alias_hollowsignal",
+        "node_type": "alias",
+        "attrs": {
+          "handle": "@hollowsignal"
+        }
+      },
+      {
+        "node_id": "alias_ironwhisper",
+        "node_type": "alias",
+        "attrs": {
+          "handle": "@ironwhisper"
+        }
+      },
+      {
+        "node_id": "alias_cinderveil",
+        "node_type": "alias",
+        "attrs": {
+          "handle": "@cinderveil"
+        }
+      },
+      {
+        "node_id": "alias_sablekeel",
+        "node_type": "alias",
+        "attrs": {
+          "handle": "@sablekeel"
+        }
+      },
+      {
+        "node_id": "alias_lanternmoth",
+        "node_type": "alias",
+        "attrs": {
+          "handle": "@lanternmoth"
+        }
+      },
+      {
+        "node_id": "alias_frostledger",
+        "node_type": "alias",
+        "attrs": {
+          "handle": "@frostledger"
+        }
+      },
+      {
         "node_id": "org_helios_labs",
         "node_type": "org",
         "attrs": {
@@ -183,6 +336,41 @@
         }
       },
       {
+        "node_id": "org_atlas_freight",
+        "node_type": "org",
+        "attrs": {
+          "name": "Atlas Freight"
+        }
+      },
+      {
+        "node_id": "org_sunmesh_analytics",
+        "node_type": "org",
+        "attrs": {
+          "name": "Sunmesh Analytics"
+        }
+      },
+      {
+        "node_id": "org_orion_customs",
+        "node_type": "org",
+        "attrs": {
+          "name": "Orion Customs"
+        }
+      },
+      {
+        "node_id": "org_emberline_security",
+        "node_type": "org",
+        "attrs": {
+          "name": "Emberline Security"
+        }
+      },
+      {
+        "node_id": "org_harborlight_transit",
+        "node_type": "org",
+        "attrs": {
+          "name": "Harborlight Transit"
+        }
+      },
+      {
         "node_id": "loc_dockyard17",
         "node_type": "location",
         "attrs": {
@@ -211,6 +399,34 @@
         }
       },
       {
+        "node_id": "loc_east_quay",
+        "node_type": "location",
+        "attrs": {
+          "name": "East Quay"
+        }
+      },
+      {
+        "node_id": "loc_foundry_row",
+        "node_type": "location",
+        "attrs": {
+          "name": "Foundry Row"
+        }
+      },
+      {
+        "node_id": "loc_north_basin",
+        "node_type": "location",
+        "attrs": {
+          "name": "North Basin"
+        }
+      },
+      {
+        "node_id": "loc_uplink_yard",
+        "node_type": "location",
+        "attrs": {
+          "name": "Uplink Yard"
+        }
+      },
+      {
         "node_id": "event_project_lantern",
         "node_type": "event",
         "attrs": {
@@ -232,6 +448,41 @@
         }
       },
       {
+        "node_id": "event_amber_veil",
+        "node_type": "event",
+        "attrs": {
+          "name": "Amber Veil"
+        }
+      },
+      {
+        "node_id": "event_glass_harbor",
+        "node_type": "event",
+        "attrs": {
+          "name": "Glass Harbor"
+        }
+      },
+      {
+        "node_id": "event_ember_tide",
+        "node_type": "event",
+        "attrs": {
+          "name": "Ember Tide"
+        }
+      },
+      {
+        "node_id": "event_iron_wharf",
+        "node_type": "event",
+        "attrs": {
+          "name": "Iron Wharf"
+        }
+      },
+      {
+        "node_id": "event_ghost_signal",
+        "node_type": "event",
+        "attrs": {
+          "name": "Ghost Signal"
+        }
+      },
+      {
         "node_id": "thr_supply_leak",
         "node_type": "thread",
         "attrs": {
@@ -243,6 +494,62 @@
         "node_type": "thread",
         "attrs": {
           "topic": "port_audit"
+        }
+      },
+      {
+        "node_id": "thr_customs_breach",
+        "node_type": "thread",
+        "attrs": {
+          "topic": "customs_breach"
+        }
+      },
+      {
+        "node_id": "thr_relay_map",
+        "node_type": "thread",
+        "attrs": {
+          "topic": "relay_map"
+        }
+      },
+      {
+        "node_id": "thr_foundry_watch",
+        "node_type": "thread",
+        "attrs": {
+          "topic": "foundry_watch"
+        }
+      },
+      {
+        "node_id": "thr_basin_shift",
+        "node_type": "thread",
+        "attrs": {
+          "topic": "basin_shift"
+        }
+      },
+      {
+        "node_id": "thr_quiet_manifest",
+        "node_type": "thread",
+        "attrs": {
+          "topic": "quiet_manifest"
+        }
+      },
+      {
+        "node_id": "thr_uplink_route",
+        "node_type": "thread",
+        "attrs": {
+          "topic": "uplink_route"
+        }
+      },
+      {
+        "node_id": "thr_ember_tide_watch",
+        "node_type": "thread",
+        "attrs": {
+          "topic": "ember_tide"
+        }
+      },
+      {
+        "node_id": "thr_ghost_signal_net",
+        "node_type": "thread",
+        "attrs": {
+          "topic": "ghost_signal"
         }
       },
       {
@@ -275,6 +582,55 @@
       },
       {
         "node_id": "post_relay_schedule",
+        "node_type": "post",
+        "attrs": {
+          "channel": "microblog"
+        }
+      },
+      {
+        "node_id": "post_quay_ledgers",
+        "node_type": "post",
+        "attrs": {
+          "channel": "microblog"
+        }
+      },
+      {
+        "node_id": "post_customs_tag",
+        "node_type": "post",
+        "attrs": {
+          "channel": "microblog"
+        }
+      },
+      {
+        "node_id": "post_hull_signal",
+        "node_type": "post",
+        "attrs": {
+          "channel": "microblog"
+        }
+      },
+      {
+        "node_id": "post_basin_photo",
+        "node_type": "post",
+        "attrs": {
+          "channel": "microblog"
+        }
+      },
+      {
+        "node_id": "post_foundry_map",
+        "node_type": "post",
+        "attrs": {
+          "channel": "microblog"
+        }
+      },
+      {
+        "node_id": "post_lantern_route",
+        "node_type": "post",
+        "attrs": {
+          "channel": "microblog"
+        }
+      },
+      {
+        "node_id": "post_uplink_note",
         "node_type": "post",
         "attrs": {
           "channel": "microblog"
@@ -325,9 +681,69 @@
         "confidence": 1.0
       },
       {
+        "src": "alias_emberglass",
+        "rel": "alias_of",
+        "dst": "user_nora",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_basinraven",
+        "rel": "alias_of",
+        "dst": "user_mika",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_tideshard",
+        "rel": "alias_of",
+        "dst": "user_soren",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_hollowsignal",
+        "rel": "alias_of",
+        "dst": "user_priya",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_ironwhisper",
+        "rel": "alias_of",
+        "dst": "user_omar",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_cinderveil",
+        "rel": "alias_of",
+        "dst": "user_rhea",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_sablekeel",
+        "rel": "alias_of",
+        "dst": "user_tara",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_lanternmoth",
+        "rel": "alias_of",
+        "dst": "user_kian",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_frostledger",
+        "rel": "alias_of",
+        "dst": "user_leena",
+        "confidence": 1.0
+      },
+      {
         "src": "user_aria",
         "rel": "works_at",
         "dst": "org_helios_labs",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_aria",
+        "rel": "located_in",
+        "dst": "loc_sector9",
         "confidence": 1.0
       },
       {
@@ -337,9 +753,21 @@
         "confidence": 1.0
       },
       {
+        "src": "user_bharat",
+        "rel": "located_in",
+        "dst": "loc_dockyard17",
+        "confidence": 1.0
+      },
+      {
         "src": "user_cyrus",
         "rel": "works_at",
         "dst": "org_apex_dynamics",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_cyrus",
+        "rel": "located_in",
+        "dst": "loc_old_town",
         "confidence": 1.0
       },
       {
@@ -349,9 +777,21 @@
         "confidence": 1.0
       },
       {
+        "src": "user_diya",
+        "rel": "located_in",
+        "dst": "loc_old_town",
+        "confidence": 1.0
+      },
+      {
         "src": "user_elin",
         "rel": "works_at",
         "dst": "org_helios_labs",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_elin",
+        "rel": "located_in",
+        "dst": "loc_sector9",
         "confidence": 1.0
       },
       {
@@ -361,9 +801,21 @@
         "confidence": 1.0
       },
       {
+        "src": "user_faris",
+        "rel": "located_in",
+        "dst": "loc_rivergate",
+        "confidence": 1.0
+      },
+      {
         "src": "user_gita",
         "rel": "works_at",
         "dst": "org_apex_dynamics",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_gita",
+        "rel": "located_in",
+        "dst": "loc_old_town",
         "confidence": 1.0
       },
       {
@@ -373,9 +825,21 @@
         "confidence": 1.0
       },
       {
+        "src": "user_hiro",
+        "rel": "located_in",
+        "dst": "loc_dockyard17",
+        "confidence": 1.0
+      },
+      {
         "src": "user_ivy",
         "rel": "works_at",
         "dst": "org_kestrel_works",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_ivy",
+        "rel": "located_in",
+        "dst": "loc_rivergate",
         "confidence": 1.0
       },
       {
@@ -385,63 +849,129 @@
         "confidence": 1.0
       },
       {
-        "src": "user_aria",
-        "rel": "located_in",
-        "dst": "loc_sector9",
-        "confidence": 1.0
-      },
-      {
-        "src": "user_bharat",
-        "rel": "located_in",
-        "dst": "loc_dockyard17",
-        "confidence": 1.0
-      },
-      {
-        "src": "user_cyrus",
-        "rel": "located_in",
-        "dst": "loc_old_town",
-        "confidence": 1.0
-      },
-      {
-        "src": "user_diya",
-        "rel": "located_in",
-        "dst": "loc_old_town",
-        "confidence": 1.0
-      },
-      {
-        "src": "user_elin",
-        "rel": "located_in",
-        "dst": "loc_sector9",
-        "confidence": 1.0
-      },
-      {
-        "src": "user_faris",
-        "rel": "located_in",
-        "dst": "loc_rivergate",
-        "confidence": 1.0
-      },
-      {
-        "src": "user_gita",
-        "rel": "located_in",
-        "dst": "loc_old_town",
-        "confidence": 1.0
-      },
-      {
-        "src": "user_hiro",
-        "rel": "located_in",
-        "dst": "loc_dockyard17",
-        "confidence": 1.0
-      },
-      {
-        "src": "user_ivy",
-        "rel": "located_in",
-        "dst": "loc_rivergate",
-        "confidence": 1.0
-      },
-      {
         "src": "user_jules",
         "rel": "located_in",
         "dst": "loc_old_town",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_kian",
+        "rel": "works_at",
+        "dst": "org_atlas_freight",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_kian",
+        "rel": "located_in",
+        "dst": "loc_east_quay",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_leena",
+        "rel": "works_at",
+        "dst": "org_sunmesh_analytics",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_leena",
+        "rel": "located_in",
+        "dst": "loc_sector9",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_mika",
+        "rel": "works_at",
+        "dst": "org_orion_customs",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_mika",
+        "rel": "located_in",
+        "dst": "loc_north_basin",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_nora",
+        "rel": "works_at",
+        "dst": "org_emberline_security",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_nora",
+        "rel": "located_in",
+        "dst": "loc_foundry_row",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_omar",
+        "rel": "works_at",
+        "dst": "org_atlas_freight",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_omar",
+        "rel": "located_in",
+        "dst": "loc_east_quay",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_priya",
+        "rel": "works_at",
+        "dst": "org_sunmesh_analytics",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_priya",
+        "rel": "located_in",
+        "dst": "loc_sector9",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_quinn",
+        "rel": "works_at",
+        "dst": "org_orion_customs",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_quinn",
+        "rel": "located_in",
+        "dst": "loc_north_basin",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_rhea",
+        "rel": "works_at",
+        "dst": "org_emberline_security",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_rhea",
+        "rel": "located_in",
+        "dst": "loc_foundry_row",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_soren",
+        "rel": "works_at",
+        "dst": "org_harborlight_transit",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_soren",
+        "rel": "located_in",
+        "dst": "loc_uplink_yard",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_tara",
+        "rel": "works_at",
+        "dst": "org_harborlight_transit",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_tara",
+        "rel": "located_in",
+        "dst": "loc_uplink_yard",
         "confidence": 1.0
       },
       {
@@ -481,6 +1011,36 @@
         "confidence": 1.0
       },
       {
+        "src": "org_atlas_freight",
+        "rel": "operates_in",
+        "dst": "loc_east_quay",
+        "confidence": 1.0
+      },
+      {
+        "src": "org_sunmesh_analytics",
+        "rel": "operates_in",
+        "dst": "loc_sector9",
+        "confidence": 1.0
+      },
+      {
+        "src": "org_orion_customs",
+        "rel": "operates_in",
+        "dst": "loc_north_basin",
+        "confidence": 1.0
+      },
+      {
+        "src": "org_emberline_security",
+        "rel": "operates_in",
+        "dst": "loc_foundry_row",
+        "confidence": 1.0
+      },
+      {
+        "src": "org_harborlight_transit",
+        "rel": "operates_in",
+        "dst": "loc_uplink_yard",
+        "confidence": 1.0
+      },
+      {
         "src": "user_ivy",
         "rel": "connected_to",
         "dst": "user_bharat",
@@ -496,7 +1056,7 @@
         "src": "user_hiro",
         "rel": "connected_to",
         "dst": "user_faris",
-        "confidence": 0.9
+        "confidence": 0.92
       },
       {
         "src": "user_faris",
@@ -508,37 +1068,37 @@
         "src": "user_diya",
         "rel": "connected_to",
         "dst": "user_elin",
-        "confidence": 0.88
+        "confidence": 0.89
       },
       {
         "src": "user_elin",
         "rel": "connected_to",
         "dst": "user_aria",
-        "confidence": 0.85
+        "confidence": 0.87
       },
       {
         "src": "user_aria",
         "rel": "connected_to",
         "dst": "user_cyrus",
-        "confidence": 0.82
+        "confidence": 0.84
       },
       {
         "src": "user_cyrus",
         "rel": "connected_to",
         "dst": "user_gita",
-        "confidence": 0.82
+        "confidence": 0.83
       },
       {
         "src": "user_gita",
         "rel": "connected_to",
         "dst": "user_jules",
-        "confidence": 0.8
+        "confidence": 0.82
       },
       {
         "src": "user_jules",
         "rel": "connected_to",
         "dst": "user_bharat",
-        "confidence": 0.8
+        "confidence": 0.81
       },
       {
         "src": "user_diya",
@@ -551,6 +1111,90 @@
         "rel": "connected_to",
         "dst": "user_elin",
         "confidence": 0.86
+      },
+      {
+        "src": "user_kian",
+        "rel": "connected_to",
+        "dst": "user_omar",
+        "confidence": 0.93
+      },
+      {
+        "src": "user_omar",
+        "rel": "connected_to",
+        "dst": "user_mika",
+        "confidence": 0.9
+      },
+      {
+        "src": "user_mika",
+        "rel": "connected_to",
+        "dst": "user_quinn",
+        "confidence": 0.89
+      },
+      {
+        "src": "user_quinn",
+        "rel": "connected_to",
+        "dst": "user_nora",
+        "confidence": 0.88
+      },
+      {
+        "src": "user_nora",
+        "rel": "connected_to",
+        "dst": "user_rhea",
+        "confidence": 0.87
+      },
+      {
+        "src": "user_rhea",
+        "rel": "connected_to",
+        "dst": "user_soren",
+        "confidence": 0.86
+      },
+      {
+        "src": "user_soren",
+        "rel": "connected_to",
+        "dst": "user_tara",
+        "confidence": 0.86
+      },
+      {
+        "src": "user_tara",
+        "rel": "connected_to",
+        "dst": "user_kian",
+        "confidence": 0.84
+      },
+      {
+        "src": "user_priya",
+        "rel": "connected_to",
+        "dst": "user_leena",
+        "confidence": 0.91
+      },
+      {
+        "src": "user_leena",
+        "rel": "connected_to",
+        "dst": "user_aria",
+        "confidence": 0.83
+      },
+      {
+        "src": "user_priya",
+        "rel": "connected_to",
+        "dst": "user_nora",
+        "confidence": 0.82
+      },
+      {
+        "src": "user_kian",
+        "rel": "connected_to",
+        "dst": "user_bharat",
+        "confidence": 0.8
+      },
+      {
+        "src": "user_soren",
+        "rel": "connected_to",
+        "dst": "user_faris",
+        "confidence": 0.79
+      },
+      {
+        "src": "user_quinn",
+        "rel": "connected_to",
+        "dst": "user_hiro",
+        "confidence": 0.78
       },
       {
         "src": "alias_orchidfox",
@@ -583,6 +1227,48 @@
         "confidence": 1.0
       },
       {
+        "src": "alias_lanternmoth",
+        "rel": "authored_post",
+        "dst": "post_quay_ledgers",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_basinraven",
+        "rel": "authored_post",
+        "dst": "post_customs_tag",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_tideshard",
+        "rel": "authored_post",
+        "dst": "post_hull_signal",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_emberglass",
+        "rel": "authored_post",
+        "dst": "post_basin_photo",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_cinderveil",
+        "rel": "authored_post",
+        "dst": "post_foundry_map",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_frostledger",
+        "rel": "authored_post",
+        "dst": "post_lantern_route",
+        "confidence": 1.0
+      },
+      {
+        "src": "alias_sablekeel",
+        "rel": "authored_post",
+        "dst": "post_uplink_note",
+        "confidence": 1.0
+      },
+      {
         "src": "post_midnight_manifest",
         "rel": "references",
         "dst": "loc_dockyard17",
@@ -601,9 +1287,21 @@
         "confidence": 1.0
       },
       {
+        "src": "post_shift_roster",
+        "rel": "references",
+        "dst": "org_northbridge_logistics",
+        "confidence": 1.0
+      },
+      {
         "src": "post_sat_phone_ping",
         "rel": "references",
         "dst": "loc_rivergate",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_sat_phone_ping",
+        "rel": "references",
+        "dst": "event_project_lantern",
         "confidence": 1.0
       },
       {
@@ -613,9 +1311,105 @@
         "confidence": 1.0
       },
       {
+        "src": "post_drone_parts",
+        "rel": "references",
+        "dst": "org_kestrel_works",
+        "confidence": 1.0
+      },
+      {
         "src": "post_relay_schedule",
         "rel": "references",
         "dst": "event_project_lantern",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_relay_schedule",
+        "rel": "references",
+        "dst": "loc_sector9",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_quay_ledgers",
+        "rel": "references",
+        "dst": "loc_east_quay",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_quay_ledgers",
+        "rel": "references",
+        "dst": "event_glass_harbor",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_customs_tag",
+        "rel": "references",
+        "dst": "loc_north_basin",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_customs_tag",
+        "rel": "references",
+        "dst": "event_iron_wharf",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_hull_signal",
+        "rel": "references",
+        "dst": "loc_uplink_yard",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_hull_signal",
+        "rel": "references",
+        "dst": "event_ghost_signal",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_basin_photo",
+        "rel": "references",
+        "dst": "loc_foundry_row",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_basin_photo",
+        "rel": "references",
+        "dst": "event_amber_veil",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_foundry_map",
+        "rel": "references",
+        "dst": "loc_foundry_row",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_foundry_map",
+        "rel": "references",
+        "dst": "event_ember_tide",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_lantern_route",
+        "rel": "references",
+        "dst": "event_project_lantern",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_lantern_route",
+        "rel": "references",
+        "dst": "org_sunmesh_analytics",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_uplink_note",
+        "rel": "references",
+        "dst": "loc_uplink_yard",
+        "confidence": 1.0
+      },
+      {
+        "src": "post_uplink_note",
+        "rel": "references",
+        "dst": "org_harborlight_transit",
         "confidence": 1.0
       },
       {
@@ -628,6 +1422,54 @@
         "src": "user_jules",
         "rel": "authored_thread",
         "dst": "thr_port_audit",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_mika",
+        "rel": "authored_thread",
+        "dst": "thr_customs_breach",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_leena",
+        "rel": "authored_thread",
+        "dst": "thr_relay_map",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_nora",
+        "rel": "authored_thread",
+        "dst": "thr_foundry_watch",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_quinn",
+        "rel": "authored_thread",
+        "dst": "thr_basin_shift",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_kian",
+        "rel": "authored_thread",
+        "dst": "thr_quiet_manifest",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_soren",
+        "rel": "authored_thread",
+        "dst": "thr_uplink_route",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_rhea",
+        "rel": "authored_thread",
+        "dst": "thr_ember_tide_watch",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_tara",
+        "rel": "authored_thread",
+        "dst": "thr_ghost_signal_net",
         "confidence": 1.0
       },
       {
@@ -655,16 +1497,112 @@
         "confidence": 1.0
       },
       {
+        "src": "thr_customs_breach",
+        "rel": "discusses",
+        "dst": "event_iron_wharf",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_customs_breach",
+        "rel": "references",
+        "dst": "org_orion_customs",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_relay_map",
+        "rel": "discusses",
+        "dst": "event_project_lantern",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_relay_map",
+        "rel": "references",
+        "dst": "org_sunmesh_analytics",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_foundry_watch",
+        "rel": "discusses",
+        "dst": "event_ember_tide",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_foundry_watch",
+        "rel": "references",
+        "dst": "org_emberline_security",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_basin_shift",
+        "rel": "discusses",
+        "dst": "event_amber_veil",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_basin_shift",
+        "rel": "references",
+        "dst": "loc_north_basin",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_quiet_manifest",
+        "rel": "discusses",
+        "dst": "event_glass_harbor",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_quiet_manifest",
+        "rel": "references",
+        "dst": "org_atlas_freight",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_uplink_route",
+        "rel": "discusses",
+        "dst": "event_ghost_signal",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_uplink_route",
+        "rel": "references",
+        "dst": "org_harborlight_transit",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_ember_tide_watch",
+        "rel": "discusses",
+        "dst": "event_ember_tide",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_ember_tide_watch",
+        "rel": "references",
+        "dst": "loc_foundry_row",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_ghost_signal_net",
+        "rel": "discusses",
+        "dst": "event_ghost_signal",
+        "confidence": 1.0
+      },
+      {
+        "src": "thr_ghost_signal_net",
+        "rel": "references",
+        "dst": "loc_uplink_yard",
+        "confidence": 1.0
+      },
+      {
         "src": "user_bharat",
         "rel": "collaborates_on",
         "dst": "event_project_lantern",
-        "confidence": 0.95
+        "confidence": 0.9
       },
       {
         "src": "user_hiro",
         "rel": "collaborates_on",
         "dst": "event_project_lantern",
-        "confidence": 0.95
+        "confidence": 0.9
       },
       {
         "src": "user_faris",
@@ -679,10 +1617,16 @@
         "confidence": 0.9
       },
       {
+        "src": "user_leena",
+        "rel": "monitors",
+        "dst": "event_project_lantern",
+        "confidence": 0.9
+      },
+      {
         "src": "user_ivy",
         "rel": "collaborates_on",
         "dst": "event_black_kite",
-        "confidence": 0.94
+        "confidence": 0.9
       },
       {
         "src": "user_cyrus",
@@ -694,416 +1638,5336 @@
         "src": "user_elin",
         "rel": "investigates",
         "dst": "event_black_kite",
-        "confidence": 0.88
+        "confidence": 0.9
+      },
+      {
+        "src": "user_jules",
+        "rel": "reports_on",
+        "dst": "event_black_kite",
+        "confidence": 0.9
+      },
+      {
+        "src": "user_kian",
+        "rel": "collaborates_on",
+        "dst": "event_glass_harbor",
+        "confidence": 0.9
+      },
+      {
+        "src": "user_omar",
+        "rel": "collaborates_on",
+        "dst": "event_glass_harbor",
+        "confidence": 0.9
+      },
+      {
+        "src": "user_priya",
+        "rel": "monitors",
+        "dst": "event_glass_harbor",
+        "confidence": 0.9
+      },
+      {
+        "src": "user_mika",
+        "rel": "collaborates_on",
+        "dst": "event_iron_wharf",
+        "confidence": 0.9
+      },
+      {
+        "src": "user_quinn",
+        "rel": "collaborates_on",
+        "dst": "event_iron_wharf",
+        "confidence": 0.9
+      },
+      {
+        "src": "user_nora",
+        "rel": "investigates",
+        "dst": "event_amber_veil",
+        "confidence": 0.9
+      },
+      {
+        "src": "user_rhea",
+        "rel": "collaborates_on",
+        "dst": "event_ember_tide",
+        "confidence": 0.9
+      },
+      {
+        "src": "user_soren",
+        "rel": "collaborates_on",
+        "dst": "event_ghost_signal",
+        "confidence": 0.9
+      },
+      {
+        "src": "user_tara",
+        "rel": "reports_on",
+        "dst": "event_ghost_signal",
+        "confidence": 0.9
       },
       {
         "src": "user_gita",
         "rel": "monitors",
         "dst": "event_silent_current",
-        "confidence": 0.86
+        "confidence": 0.9
       },
       {
         "src": "user_jules",
         "rel": "reports_on",
         "dst": "event_silent_current",
-        "confidence": 0.86
+        "confidence": 0.9
+      },
+      {
+        "src": "event_project_lantern",
+        "rel": "connected_to",
+        "dst": "event_glass_harbor",
+        "confidence": 0.77
+      },
+      {
+        "src": "event_black_kite",
+        "rel": "connected_to",
+        "dst": "event_amber_veil",
+        "confidence": 0.77
+      },
+      {
+        "src": "event_ember_tide",
+        "rel": "connected_to",
+        "dst": "event_ghost_signal",
+        "confidence": 0.77
+      },
+      {
+        "src": "org_atlas_freight",
+        "rel": "connected_to",
+        "dst": "org_northbridge_logistics",
+        "confidence": 0.77
+      },
+      {
+        "src": "org_orion_customs",
+        "rel": "connected_to",
+        "dst": "org_emberline_security",
+        "confidence": 0.77
+      },
+      {
+        "src": "org_harborlight_transit",
+        "rel": "connected_to",
+        "dst": "org_tidewatch_ops",
+        "confidence": 0.77
       }
     ],
     "seeded_questions": [
       {
-        "task_type": "identity_resolution",
-        "question": "Which canonical user owns alias alias_orchidfox?",
-        "answer": "user_ivy",
-        "supporting_edges": [
-          {
-            "src": "alias_orchidfox",
-            "rel": "alias_of",
-            "dst": "user_ivy"
-          }
-        ],
-        "metadata": {
-          "difficulty": "easy",
-          "difficulty_level": 1,
-          "question_id": "easy_01"
-        }
-      },
-      {
-        "task_type": "entity_lookup",
-        "question": "Which organization does user_bharat work at?",
-        "answer": "org_northbridge_logistics",
-        "supporting_edges": [
-          {
-            "src": "user_bharat",
-            "rel": "works_at",
-            "dst": "org_northbridge_logistics"
-          }
-        ],
-        "metadata": {
-          "difficulty": "easy",
-          "difficulty_level": 1,
-          "question_id": "easy_02"
-        }
-      },
-      {
-        "task_type": "network_discovery",
-        "question": "Who is directly connected to user_ivy in the logistics chain?",
-        "answer": "user_bharat",
-        "supporting_edges": [
-          {
-            "src": "user_ivy",
-            "rel": "connected_to",
-            "dst": "user_bharat"
-          }
-        ],
-        "metadata": {
-          "difficulty": "easy",
-          "difficulty_level": 1,
-          "question_id": "easy_03"
-        }
-      },
-      {
-        "task_type": "event_tracing",
-        "question": "Which event is discussed in thread thr_supply_leak?",
-        "answer": "event_project_lantern",
-        "supporting_edges": [
-          {
-            "src": "thr_supply_leak",
-            "rel": "discusses",
-            "dst": "event_project_lantern"
-          }
-        ],
-        "metadata": {
-          "difficulty": "easy",
-          "difficulty_level": 1,
-          "question_id": "easy_04"
-        }
-      },
-      {
-        "task_type": "location_trace",
-        "question": "Which location is referenced by post post_shift_roster?",
-        "answer": "loc_dockyard17",
-        "supporting_edges": [
-          {
-            "src": "post_shift_roster",
-            "rel": "references",
-            "dst": "loc_dockyard17"
-          }
-        ],
-        "metadata": {
-          "difficulty": "easy",
-          "difficulty_level": 1,
-          "question_id": "easy_05"
-        }
-      },
-      {
-        "task_type": "identity_resolution",
-        "question": "Alias alias_monsoonbyte belongs to which user and where does that user work? Return only the organization node id.",
-        "answer": "org_blueharbor_media",
-        "supporting_edges": [
-          {
-            "src": "alias_monsoonbyte",
-            "rel": "alias_of",
-            "dst": "user_diya"
-          },
-          {
-            "src": "user_diya",
-            "rel": "works_at",
-            "dst": "org_blueharbor_media"
-          }
-        ],
-        "metadata": {
-          "difficulty": "mid",
-          "difficulty_level": 2,
-          "question_id": "mid_01"
-        }
-      },
-      {
-        "task_type": "event_tracing",
-        "question": "Which user both authored thread thr_supply_leak and investigates event_project_lantern?",
-        "answer": "user_diya",
-        "supporting_edges": [
-          {
-            "src": "user_diya",
-            "rel": "authored_thread",
-            "dst": "thr_supply_leak"
-          },
-          {
-            "src": "user_diya",
-            "rel": "investigates",
-            "dst": "event_project_lantern"
-          }
-        ],
-        "metadata": {
-          "difficulty": "mid",
-          "difficulty_level": 2,
-          "question_id": "mid_02"
-        }
-      },
-      {
-        "task_type": "cross_platform_linking",
-        "question": "Which organization operates in the location referenced by post_midnight_manifest?",
-        "answer": "org_northbridge_logistics",
-        "supporting_edges": [
-          {
-            "src": "post_midnight_manifest",
-            "rel": "references",
-            "dst": "loc_dockyard17"
-          },
-          {
-            "src": "org_northbridge_logistics",
-            "rel": "operates_in",
-            "dst": "loc_dockyard17"
-          }
-        ],
-        "metadata": {
-          "difficulty": "mid",
-          "difficulty_level": 2,
-          "question_id": "mid_03"
-        }
-      },
-      {
-        "task_type": "network_discovery",
-        "question": "user_ivy is directly connected to which collaborator on event_project_lantern?",
-        "answer": "user_bharat",
-        "supporting_edges": [
-          {
-            "src": "user_ivy",
-            "rel": "connected_to",
-            "dst": "user_bharat"
-          },
-          {
-            "src": "user_bharat",
-            "rel": "collaborates_on",
-            "dst": "event_project_lantern"
-          }
-        ],
-        "metadata": {
-          "difficulty": "mid",
-          "difficulty_level": 2,
-          "question_id": "mid_04"
-        }
-      },
-      {
-        "task_type": "deanonymization",
-        "question": "Which canonical user is behind alias_docksparrow and collaborates on event_project_lantern?",
-        "answer": "user_hiro",
-        "supporting_edges": [
-          {
-            "src": "alias_docksparrow",
-            "rel": "alias_of",
-            "dst": "user_hiro"
-          },
-          {
-            "src": "user_hiro",
-            "rel": "collaborates_on",
-            "dst": "event_project_lantern"
-          }
-        ],
-        "metadata": {
-          "difficulty": "mid",
-          "difficulty_level": 2,
-          "question_id": "mid_05"
-        }
-      },
-      {
-        "task_type": "convoluted_trace",
-        "question": "An alias authored post_midnight_manifest referencing loc_dockyard17; through a direct connection from that alias owner, which user collaborates on event_project_lantern?",
+        "task_type": "fixed_trace",
+        "question": "alias_orchidfox -> post_midnight_manifest -> loc_dockyard17 -> connected collaborator on event_project_lantern. Who is it?",
         "answer": "user_bharat",
         "supporting_edges": [
           {
             "src": "alias_orchidfox",
             "rel": "alias_of",
-            "dst": "user_ivy"
+            "dst": "user_ivy",
+            "confidence": 1.0
           },
           {
             "src": "alias_orchidfox",
             "rel": "authored_post",
-            "dst": "post_midnight_manifest"
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
           },
           {
             "src": "post_midnight_manifest",
             "rel": "references",
-            "dst": "loc_dockyard17"
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
           },
           {
             "src": "user_ivy",
             "rel": "connected_to",
-            "dst": "user_bharat"
+            "dst": "user_bharat",
+            "confidence": 0.95
           },
           {
             "src": "user_bharat",
             "rel": "collaborates_on",
-            "dst": "event_project_lantern"
+            "dst": "event_project_lantern",
+            "confidence": 0.9
           }
         ],
         "metadata": {
-          "difficulty": "high",
-          "difficulty_level": 3,
-          "question_id": "high_01"
+          "difficulty": "easy",
+          "difficulty_level": 1,
+          "question_id": "easy_01",
+          "support_nodes": 6
         }
       },
       {
-        "task_type": "convoluted_trace",
-        "question": "Thread thr_supply_leak references org_northbridge_logistics. Identify the canonical user behind alias_docksparrow who works there and collaborates on event_project_lantern.",
+        "task_type": "fixed_trace",
+        "question": "thr_supply_leak references org_northbridge_logistics. Which alias_docksparrow user works there and collaborates on event_project_lantern?",
         "answer": "user_hiro",
         "supporting_edges": [
           {
             "src": "thr_supply_leak",
             "rel": "references",
-            "dst": "org_northbridge_logistics"
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
           },
           {
             "src": "alias_docksparrow",
             "rel": "alias_of",
-            "dst": "user_hiro"
+            "dst": "user_hiro",
+            "confidence": 1.0
           },
           {
             "src": "user_hiro",
             "rel": "works_at",
-            "dst": "org_northbridge_logistics"
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
           },
           {
             "src": "user_hiro",
             "rel": "collaborates_on",
-            "dst": "event_project_lantern"
+            "dst": "event_project_lantern",
+            "confidence": 0.9
           }
         ],
         "metadata": {
-          "difficulty": "high",
-          "difficulty_level": 3,
-          "question_id": "high_02"
+          "difficulty": "easy",
+          "difficulty_level": 1,
+          "question_id": "easy_02",
+          "support_nodes": 5
         }
       },
       {
-        "task_type": "convoluted_trace",
-        "question": "Cross-platform Black Kite linkage: alias_monsoonbyte authored post_drone_parts referencing event_black_kite. Which canonical user behind that alias is directly connected to the Kestrel Works collaborator on the same event?",
+        "task_type": "fixed_trace",
+        "question": "alias_monsoonbyte authored post_drone_parts about event_black_kite. Which user behind that alias is directly connected to the Kestrel collaborator?",
         "answer": "user_diya",
         "supporting_edges": [
           {
             "src": "alias_monsoonbyte",
             "rel": "alias_of",
-            "dst": "user_diya"
+            "dst": "user_diya",
+            "confidence": 1.0
           },
           {
             "src": "alias_monsoonbyte",
             "rel": "authored_post",
-            "dst": "post_drone_parts"
+            "dst": "post_drone_parts",
+            "confidence": 1.0
           },
           {
             "src": "post_drone_parts",
             "rel": "references",
-            "dst": "event_black_kite"
+            "dst": "event_black_kite",
+            "confidence": 1.0
           },
           {
             "src": "user_ivy",
             "rel": "works_at",
-            "dst": "org_kestrel_works"
+            "dst": "org_kestrel_works",
+            "confidence": 1.0
           },
           {
             "src": "user_ivy",
             "rel": "collaborates_on",
-            "dst": "event_black_kite"
+            "dst": "event_black_kite",
+            "confidence": 0.9
           },
           {
-            "src": "user_diya",
+            "src": "user_ivy",
             "rel": "connected_to",
-            "dst": "user_ivy"
+            "dst": "user_elin",
+            "confidence": 0.86
           }
         ],
         "metadata": {
-          "difficulty": "high",
-          "difficulty_level": 3,
-          "question_id": "high_03"
+          "difficulty": "easy",
+          "difficulty_level": 1,
+          "question_id": "easy_03",
+          "support_nodes": 7
         }
       },
       {
-        "task_type": "convoluted_trace",
-        "question": "A sat-phone ping alias references loc_rivergate. Which canonical user behind alias_nightrelay works at an organization operating there and collaborates on event_project_lantern?",
+        "task_type": "fixed_trace",
+        "question": "alias_nightrelay references loc_rivergate. Which user behind it works at an org operating there and collaborates on event_project_lantern?",
         "answer": "user_faris",
         "supporting_edges": [
           {
             "src": "alias_nightrelay",
             "rel": "alias_of",
-            "dst": "user_faris"
+            "dst": "user_faris",
+            "confidence": 1.0
           },
           {
             "src": "alias_nightrelay",
             "rel": "authored_post",
-            "dst": "post_sat_phone_ping"
+            "dst": "post_sat_phone_ping",
+            "confidence": 1.0
           },
           {
             "src": "post_sat_phone_ping",
             "rel": "references",
-            "dst": "loc_rivergate"
+            "dst": "loc_rivergate",
+            "confidence": 1.0
           },
           {
             "src": "user_faris",
             "rel": "works_at",
-            "dst": "org_tidewatch_ops"
+            "dst": "org_tidewatch_ops",
+            "confidence": 1.0
           },
           {
             "src": "org_tidewatch_ops",
             "rel": "operates_in",
-            "dst": "loc_rivergate"
+            "dst": "loc_rivergate",
+            "confidence": 1.0
           },
           {
             "src": "user_faris",
             "rel": "collaborates_on",
-            "dst": "event_project_lantern"
+            "dst": "event_project_lantern",
+            "confidence": 0.9
           }
         ],
         "metadata": {
-          "difficulty": "high",
-          "difficulty_level": 3,
-          "question_id": "high_04"
+          "difficulty": "easy",
+          "difficulty_level": 1,
+          "question_id": "easy_04",
+          "support_nodes": 6
         }
       },
       {
-        "task_type": "convoluted_trace",
-        "question": "From thread thr_port_audit discussing event_black_kite and referencing org_kestrel_works, identify the canonical user whose alias authored post_midnight_manifest and who collaborates on event_black_kite.",
+        "task_type": "fixed_trace",
+        "question": "thr_port_audit discusses Black Kite and references Kestrel Works. Which alias_orchidfox user authored post_midnight_manifest and collaborates on Black Kite?",
         "answer": "user_ivy",
         "supporting_edges": [
           {
             "src": "thr_port_audit",
             "rel": "discusses",
-            "dst": "event_black_kite"
+            "dst": "event_black_kite",
+            "confidence": 1.0
           },
           {
             "src": "thr_port_audit",
             "rel": "references",
-            "dst": "org_kestrel_works"
+            "dst": "org_kestrel_works",
+            "confidence": 1.0
           },
           {
             "src": "alias_orchidfox",
             "rel": "alias_of",
-            "dst": "user_ivy"
+            "dst": "user_ivy",
+            "confidence": 1.0
           },
           {
             "src": "alias_orchidfox",
             "rel": "authored_post",
-            "dst": "post_midnight_manifest"
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
           },
           {
             "src": "user_ivy",
             "rel": "works_at",
-            "dst": "org_kestrel_works"
+            "dst": "org_kestrel_works",
+            "confidence": 1.0
           },
           {
             "src": "user_ivy",
             "rel": "collaborates_on",
-            "dst": "event_black_kite"
+            "dst": "event_black_kite",
+            "confidence": 0.9
+          }
+        ],
+        "metadata": {
+          "difficulty": "easy",
+          "difficulty_level": 1,
+          "question_id": "easy_05",
+          "support_nodes": 6
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Which Atlas Freight user behind alias_lanternmoth authored post_quay_ledgers and collaborates on event_glass_harbor?",
+        "answer": "user_kian",
+        "supporting_edges": [
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "authored_post",
+            "dst": "post_quay_ledgers",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "works_at",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "collaborates_on",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          }
+        ],
+        "metadata": {
+          "difficulty": "easy",
+          "difficulty_level": 1,
+          "question_id": "easy_06",
+          "support_nodes": 5
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Which Orion Customs user behind alias_basinraven authored post_customs_tag and collaborates on event_iron_wharf?",
+        "answer": "user_mika",
+        "supporting_edges": [
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "authored_post",
+            "dst": "post_customs_tag",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "works_at",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "collaborates_on",
+            "dst": "event_iron_wharf",
+            "confidence": 0.9
+          }
+        ],
+        "metadata": {
+          "difficulty": "easy",
+          "difficulty_level": 1,
+          "question_id": "easy_07",
+          "support_nodes": 5
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Which user behind alias_emberglass posted basin_photo from Foundry Row and investigates Amber Veil?",
+        "answer": "user_nora",
+        "supporting_edges": [
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "authored_post",
+            "dst": "post_basin_photo",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_basin_photo",
+            "rel": "references",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "investigates",
+            "dst": "event_amber_veil",
+            "confidence": 0.9
+          }
+        ],
+        "metadata": {
+          "difficulty": "easy",
+          "difficulty_level": 1,
+          "question_id": "easy_08",
+          "support_nodes": 5
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Which user behind alias_tideshard authored post_hull_signal and collaborates on Ghost Signal?",
+        "answer": "user_soren",
+        "supporting_edges": [
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "authored_post",
+            "dst": "post_hull_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "collaborates_on",
+            "dst": "event_ghost_signal",
+            "confidence": 0.9
+          }
+        ],
+        "metadata": {
+          "difficulty": "easy",
+          "difficulty_level": 1,
+          "question_id": "easy_09",
+          "support_nodes": 4
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Which Harborlight Transit user behind alias_sablekeel authored post_uplink_note and reports on Ghost Signal?",
+        "answer": "user_tara",
+        "supporting_edges": [
+          {
+            "src": "alias_sablekeel",
+            "rel": "alias_of",
+            "dst": "user_tara",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "authored_post",
+            "dst": "post_uplink_note",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "works_at",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "reports_on",
+            "dst": "event_ghost_signal",
+            "confidence": 0.9
+          }
+        ],
+        "metadata": {
+          "difficulty": "easy",
+          "difficulty_level": 1,
+          "question_id": "easy_10",
+          "support_nodes": 5
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Follow alias_docksparrow through post_shift_roster, Dockyard 17, and the Lantern chain. Return the org node id.",
+        "answer": "org_northbridge_logistics",
+        "supporting_edges": [
+          {
+            "src": "alias_docksparrow",
+            "rel": "alias_of",
+            "dst": "user_hiro",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "authored_post",
+            "dst": "post_shift_roster",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_shift_roster",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_shift_roster",
+            "rel": "references",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "references",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_bharat",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_bharat",
+            "rel": "connected_to",
+            "dst": "user_hiro",
+            "confidence": 0.95
+          },
+          {
+            "src": "user_hiro",
+            "rel": "connected_to",
+            "dst": "user_faris",
+            "confidence": 0.92
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "authored_post",
+            "dst": "post_quay_ledgers",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_quay_ledgers",
+            "rel": "references",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_quay_ledgers",
+            "rel": "references",
+            "dst": "event_glass_harbor",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "mid",
+          "difficulty_level": 2,
+          "question_id": "mid_01",
+          "support_nodes": 17
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Across the Glass Harbor cluster, which user behind alias_lanternmoth links to the Atlas Freight network from thr_quiet_manifest?",
+        "answer": "user_kian",
+        "supporting_edges": [
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "authored_post",
+            "dst": "post_quay_ledgers",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_quay_ledgers",
+            "rel": "references",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_quay_ledgers",
+            "rel": "references",
+            "dst": "event_glass_harbor",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "authored_thread",
+            "dst": "thr_quiet_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_quiet_manifest",
+            "rel": "discusses",
+            "dst": "event_glass_harbor",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_quiet_manifest",
+            "rel": "references",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "works_at",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_omar",
+            "rel": "works_at",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "collaborates_on",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_omar",
+            "rel": "collaborates_on",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_priya",
+            "rel": "monitors",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_kian",
+            "rel": "connected_to",
+            "dst": "user_omar",
+            "confidence": 0.93
+          },
+          {
+            "src": "user_omar",
+            "rel": "connected_to",
+            "dst": "user_mika",
+            "confidence": 0.9
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "authored_post",
+            "dst": "post_customs_tag",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "mid",
+          "difficulty_level": 2,
+          "question_id": "mid_02",
+          "support_nodes": 17
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Trace alias_basinraven through post_customs_tag, thr_customs_breach, and the Orion Customs collaboration chain. Who is it?",
+        "answer": "user_mika",
+        "supporting_edges": [
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "authored_post",
+            "dst": "post_customs_tag",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_customs_tag",
+            "rel": "references",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_customs_tag",
+            "rel": "references",
+            "dst": "event_iron_wharf",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "authored_thread",
+            "dst": "thr_customs_breach",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_customs_breach",
+            "rel": "discusses",
+            "dst": "event_iron_wharf",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_customs_breach",
+            "rel": "references",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "works_at",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_quinn",
+            "rel": "works_at",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "collaborates_on",
+            "dst": "event_iron_wharf",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_quinn",
+            "rel": "collaborates_on",
+            "dst": "event_iron_wharf",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_mika",
+            "rel": "connected_to",
+            "dst": "user_quinn",
+            "confidence": 0.89
+          },
+          {
+            "src": "user_quinn",
+            "rel": "connected_to",
+            "dst": "user_nora",
+            "confidence": 0.88
+          },
+          {
+            "src": "org_orion_customs",
+            "rel": "connected_to",
+            "dst": "org_emberline_security",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "mid",
+          "difficulty_level": 2,
+          "question_id": "mid_03",
+          "support_nodes": 17
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "In the Ember Tide and Amber Veil overlap, which Foundry Row user behind alias_cinderveil collaborates on Ember Tide?",
+        "answer": "user_rhea",
+        "supporting_edges": [
+          {
+            "src": "alias_cinderveil",
+            "rel": "alias_of",
+            "dst": "user_rhea",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "authored_post",
+            "dst": "post_foundry_map",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_foundry_map",
+            "rel": "references",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_foundry_map",
+            "rel": "references",
+            "dst": "event_ember_tide",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "authored_thread",
+            "dst": "thr_foundry_watch",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_foundry_watch",
+            "rel": "discusses",
+            "dst": "event_ember_tide",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_foundry_watch",
+            "rel": "references",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "authored_thread",
+            "dst": "thr_ember_tide_watch",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_ember_tide_watch",
+            "rel": "discusses",
+            "dst": "event_ember_tide",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_ember_tide_watch",
+            "rel": "references",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "investigates",
+            "dst": "event_amber_veil",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_rhea",
+            "rel": "collaborates_on",
+            "dst": "event_ember_tide",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_nora",
+            "rel": "connected_to",
+            "dst": "user_rhea",
+            "confidence": 0.87
+          },
+          {
+            "src": "event_ember_tide",
+            "rel": "connected_to",
+            "dst": "event_ghost_signal",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "mid",
+          "difficulty_level": 2,
+          "question_id": "mid_04",
+          "support_nodes": 18
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Follow alias_tideshard from post_hull_signal into thr_uplink_route and the Harborlight relay. Return the org node id.",
+        "answer": "org_harborlight_transit",
+        "supporting_edges": [
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "authored_post",
+            "dst": "post_hull_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_hull_signal",
+            "rel": "references",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_hull_signal",
+            "rel": "references",
+            "dst": "event_ghost_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "authored_thread",
+            "dst": "thr_uplink_route",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_uplink_route",
+            "rel": "discusses",
+            "dst": "event_ghost_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_uplink_route",
+            "rel": "references",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "works_at",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "works_at",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "collaborates_on",
+            "dst": "event_ghost_signal",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_tara",
+            "rel": "reports_on",
+            "dst": "event_ghost_signal",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_rhea",
+            "rel": "connected_to",
+            "dst": "user_soren",
+            "confidence": 0.86
+          },
+          {
+            "src": "user_soren",
+            "rel": "connected_to",
+            "dst": "user_tara",
+            "confidence": 0.86
+          },
+          {
+            "src": "org_harborlight_transit",
+            "rel": "operates_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_harborlight_transit",
+            "rel": "connected_to",
+            "dst": "org_tidewatch_ops",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "mid",
+          "difficulty_level": 2,
+          "question_id": "mid_05",
+          "support_nodes": 17
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Which Sunmesh user behind alias_frostledger connects post_lantern_route to thr_relay_map and the Sector 9 monitoring chain?",
+        "answer": "user_leena",
+        "supporting_edges": [
+          {
+            "src": "alias_frostledger",
+            "rel": "alias_of",
+            "dst": "user_leena",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "authored_post",
+            "dst": "post_lantern_route",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_lantern_route",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_lantern_route",
+            "rel": "references",
+            "dst": "org_sunmesh_analytics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_leena",
+            "rel": "authored_thread",
+            "dst": "thr_relay_map",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_relay_map",
+            "rel": "discusses",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_relay_map",
+            "rel": "references",
+            "dst": "org_sunmesh_analytics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_leena",
+            "rel": "works_at",
+            "dst": "org_sunmesh_analytics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_priya",
+            "rel": "works_at",
+            "dst": "org_sunmesh_analytics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_leena",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_sunmesh_analytics",
+            "rel": "operates_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_leena",
+            "rel": "monitors",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_priya",
+            "rel": "connected_to",
+            "dst": "user_leena",
+            "confidence": 0.91
+          },
+          {
+            "src": "user_leena",
+            "rel": "connected_to",
+            "dst": "user_aria",
+            "confidence": 0.83
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "authored_post",
+            "dst": "post_quay_ledgers",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_quay_ledgers",
+            "rel": "references",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "mid",
+          "difficulty_level": 2,
+          "question_id": "mid_06",
+          "support_nodes": 17
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Which user behind alias_emberglass is tied to Amber Veil after combining post_basin_photo, thr_basin_shift, and the Foundry Row investigation chain?",
+        "answer": "user_nora",
+        "supporting_edges": [
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "authored_post",
+            "dst": "post_basin_photo",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_basin_photo",
+            "rel": "references",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_basin_photo",
+            "rel": "references",
+            "dst": "event_amber_veil",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_quinn",
+            "rel": "authored_thread",
+            "dst": "thr_basin_shift",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_basin_shift",
+            "rel": "discusses",
+            "dst": "event_amber_veil",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_basin_shift",
+            "rel": "references",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_quinn",
+            "rel": "works_at",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "located_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "investigates",
+            "dst": "event_amber_veil",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_quinn",
+            "rel": "connected_to",
+            "dst": "user_nora",
+            "confidence": 0.88
+          },
+          {
+            "src": "user_nora",
+            "rel": "connected_to",
+            "dst": "user_rhea",
+            "confidence": 0.87
+          },
+          {
+            "src": "org_orion_customs",
+            "rel": "connected_to",
+            "dst": "org_emberline_security",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "mid",
+          "difficulty_level": 2,
+          "question_id": "mid_07",
+          "support_nodes": 18
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Combine alias_orchidfox, post_midnight_manifest, thr_supply_leak, and the Lantern to Glass Harbor bridge. Which user starts that chain?",
+        "answer": "user_ivy",
+        "supporting_edges": [
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "authored_thread",
+            "dst": "thr_supply_leak",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "discusses",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "references",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "works_at",
+            "dst": "org_kestrel_works",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "collaborates_on",
+            "dst": "event_black_kite",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_ivy",
+            "rel": "connected_to",
+            "dst": "user_bharat",
+            "confidence": 0.95
+          },
+          {
+            "src": "user_ivy",
+            "rel": "connected_to",
+            "dst": "user_elin",
+            "confidence": 0.86
+          },
+          {
+            "src": "event_project_lantern",
+            "rel": "connected_to",
+            "dst": "event_glass_harbor",
+            "confidence": 0.77
+          },
+          {
+            "src": "user_kian",
+            "rel": "collaborates_on",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_priya",
+            "rel": "monitors",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "authored_post",
+            "dst": "post_quay_ledgers",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "mid",
+          "difficulty_level": 2,
+          "question_id": "mid_08",
+          "support_nodes": 17
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Which user behind alias_monsoonbyte sits at the overlap of Blueharbor Media, Project Lantern, Black Kite, and the Ivy connection chain?",
+        "answer": "user_diya",
+        "supporting_edges": [
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "alias_of",
+            "dst": "user_diya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "authored_post",
+            "dst": "post_drone_parts",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_drone_parts",
+            "rel": "references",
+            "dst": "event_black_kite",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "authored_thread",
+            "dst": "thr_supply_leak",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "discusses",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_jules",
+            "rel": "authored_thread",
+            "dst": "thr_port_audit",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_port_audit",
+            "rel": "discusses",
+            "dst": "event_black_kite",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "works_at",
+            "dst": "org_blueharbor_media",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "works_at",
+            "dst": "org_kestrel_works",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_jules",
+            "rel": "works_at",
+            "dst": "org_blueharbor_media",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "investigates",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_ivy",
+            "rel": "collaborates_on",
+            "dst": "event_black_kite",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_jules",
+            "rel": "reports_on",
+            "dst": "event_black_kite",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_faris",
+            "rel": "connected_to",
+            "dst": "user_diya",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_ivy",
+            "rel": "connected_to",
+            "dst": "user_elin",
+            "confidence": 0.86
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "mid",
+          "difficulty_level": 2,
+          "question_id": "mid_09",
+          "support_nodes": 18
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Who is the Northbridge user behind alias_steelquill when combining post_relay_schedule, thr_supply_leak, Dockyard 17, and Lantern collaborator edges?",
+        "answer": "user_bharat",
+        "supporting_edges": [
+          {
+            "src": "alias_steelquill",
+            "rel": "alias_of",
+            "dst": "user_bharat",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_steelquill",
+            "rel": "authored_post",
+            "dst": "post_relay_schedule",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_relay_schedule",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_relay_schedule",
+            "rel": "references",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "authored_thread",
+            "dst": "thr_supply_leak",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "discusses",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "references",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_hiro",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_ivy",
+            "rel": "connected_to",
+            "dst": "user_bharat",
+            "confidence": 0.95
+          },
+          {
+            "src": "user_bharat",
+            "rel": "connected_to",
+            "dst": "user_hiro",
+            "confidence": 0.95
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "authored_post",
+            "dst": "post_quay_ledgers",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_quay_ledgers",
+            "rel": "references",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "mid",
+          "difficulty_level": 2,
+          "question_id": "mid_10",
+          "support_nodes": 17
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Lantern to Glass Harbor handoff: identify the user behind alias_orchidfox after combining Lantern logistics, Dockyard links, and Atlas Freight bridge evidence.",
+        "answer": "user_ivy",
+        "supporting_edges": [
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "authored_thread",
+            "dst": "thr_supply_leak",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "discusses",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "references",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "works_at",
+            "dst": "org_kestrel_works",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "works_at",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_omar",
+            "rel": "works_at",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "located_in",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "located_in",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_omar",
+            "rel": "located_in",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_northbridge_logistics",
+            "rel": "operates_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_kestrel_works",
+            "rel": "operates_in",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_atlas_freight",
+            "rel": "operates_in",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "connected_to",
+            "dst": "user_bharat",
+            "confidence": 0.95
+          },
+          {
+            "src": "user_bharat",
+            "rel": "connected_to",
+            "dst": "user_hiro",
+            "confidence": 0.95
+          },
+          {
+            "src": "user_hiro",
+            "rel": "connected_to",
+            "dst": "user_faris",
+            "confidence": 0.92
+          },
+          {
+            "src": "user_ivy",
+            "rel": "connected_to",
+            "dst": "user_elin",
+            "confidence": 0.86
+          },
+          {
+            "src": "user_kian",
+            "rel": "connected_to",
+            "dst": "user_omar",
+            "confidence": 0.93
+          },
+          {
+            "src": "user_omar",
+            "rel": "connected_to",
+            "dst": "user_mika",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_bharat",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_hiro",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_faris",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_ivy",
+            "rel": "collaborates_on",
+            "dst": "event_black_kite",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_kian",
+            "rel": "collaborates_on",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_omar",
+            "rel": "collaborates_on",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_priya",
+            "rel": "monitors",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_kian",
+            "rel": "authored_thread",
+            "dst": "thr_quiet_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_quiet_manifest",
+            "rel": "discusses",
+            "dst": "event_glass_harbor",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_quiet_manifest",
+            "rel": "references",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "authored_post",
+            "dst": "post_quay_ledgers",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_quay_ledgers",
+            "rel": "references",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_quay_ledgers",
+            "rel": "references",
+            "dst": "event_glass_harbor",
+            "confidence": 1.0
+          },
+          {
+            "src": "event_project_lantern",
+            "rel": "connected_to",
+            "dst": "event_glass_harbor",
+            "confidence": 0.77
+          },
+          {
+            "src": "org_atlas_freight",
+            "rel": "connected_to",
+            "dst": "org_northbridge_logistics",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_steelquill",
+            "rel": "alias_of",
+            "dst": "user_bharat",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "alias_of",
+            "dst": "user_hiro",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "alias_of",
+            "dst": "user_diya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_nightrelay",
+            "rel": "alias_of",
+            "dst": "user_faris",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_mapleghost",
+            "rel": "alias_of",
+            "dst": "user_elin",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_quartzlotus",
+            "rel": "alias_of",
+            "dst": "user_cyrus",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_hollowsignal",
+            "rel": "alias_of",
+            "dst": "user_priya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_ironwhisper",
+            "rel": "alias_of",
+            "dst": "user_omar",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "alias_of",
+            "dst": "user_rhea",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "alias_of",
+            "dst": "user_tara",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "alias_of",
+            "dst": "user_leena",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "works_at",
+            "dst": "org_helios_labs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "works_at",
+            "dst": "org_apex_dynamics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
           }
         ],
         "metadata": {
           "difficulty": "high",
           "difficulty_level": 3,
-          "question_id": "high_05"
+          "question_id": "high_01",
+          "support_nodes": 50
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "North Basin to Foundry Row escalation: which user behind alias_basinraven anchors the Iron Wharf side before the Emberline handoff?",
+        "answer": "user_mika",
+        "supporting_edges": [
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "authored_post",
+            "dst": "post_customs_tag",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_customs_tag",
+            "rel": "references",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_customs_tag",
+            "rel": "references",
+            "dst": "event_iron_wharf",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "authored_thread",
+            "dst": "thr_customs_breach",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_customs_breach",
+            "rel": "discusses",
+            "dst": "event_iron_wharf",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_customs_breach",
+            "rel": "references",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_quinn",
+            "rel": "authored_thread",
+            "dst": "thr_basin_shift",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_basin_shift",
+            "rel": "discusses",
+            "dst": "event_amber_veil",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_basin_shift",
+            "rel": "references",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "authored_thread",
+            "dst": "thr_foundry_watch",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_foundry_watch",
+            "rel": "discusses",
+            "dst": "event_ember_tide",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_foundry_watch",
+            "rel": "references",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "works_at",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_quinn",
+            "rel": "works_at",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "located_in",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_quinn",
+            "rel": "located_in",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "located_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "located_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_orion_customs",
+            "rel": "operates_in",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_emberline_security",
+            "rel": "operates_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "connected_to",
+            "dst": "user_quinn",
+            "confidence": 0.89
+          },
+          {
+            "src": "user_quinn",
+            "rel": "connected_to",
+            "dst": "user_nora",
+            "confidence": 0.88
+          },
+          {
+            "src": "user_nora",
+            "rel": "connected_to",
+            "dst": "user_rhea",
+            "confidence": 0.87
+          },
+          {
+            "src": "user_mika",
+            "rel": "collaborates_on",
+            "dst": "event_iron_wharf",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_quinn",
+            "rel": "collaborates_on",
+            "dst": "event_iron_wharf",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_nora",
+            "rel": "investigates",
+            "dst": "event_amber_veil",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_rhea",
+            "rel": "collaborates_on",
+            "dst": "event_ember_tide",
+            "confidence": 0.9
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "authored_post",
+            "dst": "post_basin_photo",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_basin_photo",
+            "rel": "references",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_basin_photo",
+            "rel": "references",
+            "dst": "event_amber_veil",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "authored_post",
+            "dst": "post_foundry_map",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_foundry_map",
+            "rel": "references",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_foundry_map",
+            "rel": "references",
+            "dst": "event_ember_tide",
+            "confidence": 1.0
+          },
+          {
+            "src": "event_black_kite",
+            "rel": "connected_to",
+            "dst": "event_amber_veil",
+            "confidence": 0.77
+          },
+          {
+            "src": "event_ember_tide",
+            "rel": "connected_to",
+            "dst": "event_ghost_signal",
+            "confidence": 0.77
+          },
+          {
+            "src": "org_orion_customs",
+            "rel": "connected_to",
+            "dst": "org_emberline_security",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "alias_of",
+            "dst": "user_rhea",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_priya",
+            "rel": "connected_to",
+            "dst": "user_nora",
+            "confidence": 0.82
+          },
+          {
+            "src": "user_kian",
+            "rel": "connected_to",
+            "dst": "user_bharat",
+            "confidence": 0.8
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_steelquill",
+            "rel": "alias_of",
+            "dst": "user_bharat",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "alias_of",
+            "dst": "user_diya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_nightrelay",
+            "rel": "alias_of",
+            "dst": "user_faris",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_mapleghost",
+            "rel": "alias_of",
+            "dst": "user_elin",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "alias_of",
+            "dst": "user_hiro",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_quartzlotus",
+            "rel": "alias_of",
+            "dst": "user_cyrus",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_hollowsignal",
+            "rel": "alias_of",
+            "dst": "user_priya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_ironwhisper",
+            "rel": "alias_of",
+            "dst": "user_omar",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "alias_of",
+            "dst": "user_tara",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "alias_of",
+            "dst": "user_leena",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "works_at",
+            "dst": "org_helios_labs",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "high",
+          "difficulty_level": 3,
+          "question_id": "high_02",
+          "support_nodes": 50
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Harborlight ghost-signal relay: identify the user behind alias_tideshard at the Harborlight / Tidewatch junction.",
+        "answer": "user_soren",
+        "supporting_edges": [
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "authored_post",
+            "dst": "post_hull_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_hull_signal",
+            "rel": "references",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_hull_signal",
+            "rel": "references",
+            "dst": "event_ghost_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "alias_of",
+            "dst": "user_tara",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "authored_post",
+            "dst": "post_uplink_note",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_uplink_note",
+            "rel": "references",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_uplink_note",
+            "rel": "references",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "authored_thread",
+            "dst": "thr_uplink_route",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_uplink_route",
+            "rel": "discusses",
+            "dst": "event_ghost_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_uplink_route",
+            "rel": "references",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "authored_thread",
+            "dst": "thr_ghost_signal_net",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_ghost_signal_net",
+            "rel": "discusses",
+            "dst": "event_ghost_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_ghost_signal_net",
+            "rel": "references",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "works_at",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "works_at",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_faris",
+            "rel": "works_at",
+            "dst": "org_tidewatch_ops",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "located_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "located_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_faris",
+            "rel": "located_in",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_harborlight_transit",
+            "rel": "operates_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_tidewatch_ops",
+            "rel": "operates_in",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "connected_to",
+            "dst": "user_soren",
+            "confidence": 0.86
+          },
+          {
+            "src": "user_soren",
+            "rel": "connected_to",
+            "dst": "user_tara",
+            "confidence": 0.86
+          },
+          {
+            "src": "user_tara",
+            "rel": "connected_to",
+            "dst": "user_kian",
+            "confidence": 0.84
+          },
+          {
+            "src": "user_soren",
+            "rel": "connected_to",
+            "dst": "user_faris",
+            "confidence": 0.79
+          },
+          {
+            "src": "user_faris",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_soren",
+            "rel": "collaborates_on",
+            "dst": "event_ghost_signal",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_tara",
+            "rel": "reports_on",
+            "dst": "event_ghost_signal",
+            "confidence": 0.9
+          },
+          {
+            "src": "alias_nightrelay",
+            "rel": "authored_post",
+            "dst": "post_sat_phone_ping",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_sat_phone_ping",
+            "rel": "references",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_sat_phone_ping",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "authored_thread",
+            "dst": "thr_supply_leak",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "discusses",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_hiro",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "event_ember_tide",
+            "rel": "connected_to",
+            "dst": "event_ghost_signal",
+            "confidence": 0.77
+          },
+          {
+            "src": "org_harborlight_transit",
+            "rel": "connected_to",
+            "dst": "org_tidewatch_ops",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_nightrelay",
+            "rel": "alias_of",
+            "dst": "user_faris",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_steelquill",
+            "rel": "alias_of",
+            "dst": "user_bharat",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "alias_of",
+            "dst": "user_diya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_mapleghost",
+            "rel": "alias_of",
+            "dst": "user_elin",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "alias_of",
+            "dst": "user_hiro",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_quartzlotus",
+            "rel": "alias_of",
+            "dst": "user_cyrus",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_hollowsignal",
+            "rel": "alias_of",
+            "dst": "user_priya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_ironwhisper",
+            "rel": "alias_of",
+            "dst": "user_omar",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "alias_of",
+            "dst": "user_rhea",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "alias_of",
+            "dst": "user_leena",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "works_at",
+            "dst": "org_helios_labs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "high",
+          "difficulty_level": 3,
+          "question_id": "high_03",
+          "support_nodes": 50
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Blueharbor to Black Kite to Lantern overlap: which user is the Blueharbor origin behind alias_monsoonbyte?",
+        "answer": "user_diya",
+        "supporting_edges": [
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "alias_of",
+            "dst": "user_diya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "authored_post",
+            "dst": "post_drone_parts",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_drone_parts",
+            "rel": "references",
+            "dst": "event_black_kite",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_drone_parts",
+            "rel": "references",
+            "dst": "org_kestrel_works",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_jules",
+            "rel": "authored_thread",
+            "dst": "thr_port_audit",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_port_audit",
+            "rel": "discusses",
+            "dst": "event_black_kite",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_port_audit",
+            "rel": "references",
+            "dst": "org_kestrel_works",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "authored_thread",
+            "dst": "thr_supply_leak",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "discusses",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "references",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "works_at",
+            "dst": "org_blueharbor_media",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_jules",
+            "rel": "works_at",
+            "dst": "org_blueharbor_media",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "works_at",
+            "dst": "org_kestrel_works",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "works_at",
+            "dst": "org_apex_dynamics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_jules",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "located_in",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_blueharbor_media",
+            "rel": "operates_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_kestrel_works",
+            "rel": "operates_in",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_apex_dynamics",
+            "rel": "operates_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_faris",
+            "rel": "connected_to",
+            "dst": "user_diya",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "connected_to",
+            "dst": "user_gita",
+            "confidence": 0.83
+          },
+          {
+            "src": "user_gita",
+            "rel": "connected_to",
+            "dst": "user_jules",
+            "confidence": 0.82
+          },
+          {
+            "src": "user_ivy",
+            "rel": "connected_to",
+            "dst": "user_elin",
+            "confidence": 0.86
+          },
+          {
+            "src": "user_diya",
+            "rel": "investigates",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_ivy",
+            "rel": "collaborates_on",
+            "dst": "event_black_kite",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "collaborates_on",
+            "dst": "event_black_kite",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_elin",
+            "rel": "investigates",
+            "dst": "event_black_kite",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_jules",
+            "rel": "reports_on",
+            "dst": "event_black_kite",
+            "confidence": 0.9
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "event_project_lantern",
+            "rel": "connected_to",
+            "dst": "event_glass_harbor",
+            "confidence": 0.77
+          },
+          {
+            "src": "event_black_kite",
+            "rel": "connected_to",
+            "dst": "event_amber_veil",
+            "confidence": 0.77
+          },
+          {
+            "src": "user_leena",
+            "rel": "authored_thread",
+            "dst": "thr_relay_map",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_relay_map",
+            "rel": "discusses",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_leena",
+            "rel": "works_at",
+            "dst": "org_sunmesh_analytics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_leena",
+            "rel": "monitors",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "alias_steelquill",
+            "rel": "alias_of",
+            "dst": "user_bharat",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_nightrelay",
+            "rel": "alias_of",
+            "dst": "user_faris",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_mapleghost",
+            "rel": "alias_of",
+            "dst": "user_elin",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "alias_of",
+            "dst": "user_hiro",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_quartzlotus",
+            "rel": "alias_of",
+            "dst": "user_cyrus",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_hollowsignal",
+            "rel": "alias_of",
+            "dst": "user_priya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_ironwhisper",
+            "rel": "alias_of",
+            "dst": "user_omar",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "alias_of",
+            "dst": "user_rhea",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "alias_of",
+            "dst": "user_tara",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "alias_of",
+            "dst": "user_leena",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "high",
+          "difficulty_level": 3,
+          "question_id": "high_04",
+          "support_nodes": 50
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Sector 9 to Dockyard 17 full relay: which user behind alias_steelquill links the Northbridge chain and the Sunmesh monitoring bridge?",
+        "answer": "user_bharat",
+        "supporting_edges": [
+          {
+            "src": "alias_steelquill",
+            "rel": "alias_of",
+            "dst": "user_bharat",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_steelquill",
+            "rel": "authored_post",
+            "dst": "post_relay_schedule",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_relay_schedule",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_relay_schedule",
+            "rel": "references",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "alias_of",
+            "dst": "user_leena",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "authored_post",
+            "dst": "post_lantern_route",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_lantern_route",
+            "rel": "references",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_lantern_route",
+            "rel": "references",
+            "dst": "org_sunmesh_analytics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_leena",
+            "rel": "authored_thread",
+            "dst": "thr_relay_map",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_relay_map",
+            "rel": "discusses",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_relay_map",
+            "rel": "references",
+            "dst": "org_sunmesh_analytics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "authored_thread",
+            "dst": "thr_supply_leak",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "discusses",
+            "dst": "event_project_lantern",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "references",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_leena",
+            "rel": "works_at",
+            "dst": "org_sunmesh_analytics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_priya",
+            "rel": "works_at",
+            "dst": "org_sunmesh_analytics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "works_at",
+            "dst": "org_helios_labs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_leena",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_priya",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_northbridge_logistics",
+            "rel": "operates_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_sunmesh_analytics",
+            "rel": "operates_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_helios_labs",
+            "rel": "operates_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "connected_to",
+            "dst": "user_bharat",
+            "confidence": 0.95
+          },
+          {
+            "src": "user_bharat",
+            "rel": "connected_to",
+            "dst": "user_hiro",
+            "confidence": 0.95
+          },
+          {
+            "src": "user_diya",
+            "rel": "connected_to",
+            "dst": "user_elin",
+            "confidence": 0.89
+          },
+          {
+            "src": "user_elin",
+            "rel": "connected_to",
+            "dst": "user_aria",
+            "confidence": 0.87
+          },
+          {
+            "src": "user_aria",
+            "rel": "connected_to",
+            "dst": "user_cyrus",
+            "confidence": 0.84
+          },
+          {
+            "src": "user_priya",
+            "rel": "connected_to",
+            "dst": "user_leena",
+            "confidence": 0.91
+          },
+          {
+            "src": "user_leena",
+            "rel": "connected_to",
+            "dst": "user_aria",
+            "confidence": 0.83
+          },
+          {
+            "src": "user_bharat",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_hiro",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_leena",
+            "rel": "monitors",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "event_project_lantern",
+            "rel": "connected_to",
+            "dst": "event_glass_harbor",
+            "confidence": 0.77
+          },
+          {
+            "src": "org_atlas_freight",
+            "rel": "connected_to",
+            "dst": "org_northbridge_logistics",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "alias_of",
+            "dst": "user_hiro",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_mapleghost",
+            "rel": "alias_of",
+            "dst": "user_elin",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_hollowsignal",
+            "rel": "alias_of",
+            "dst": "user_priya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "alias_of",
+            "dst": "user_diya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_nightrelay",
+            "rel": "alias_of",
+            "dst": "user_faris",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_quartzlotus",
+            "rel": "alias_of",
+            "dst": "user_cyrus",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_ironwhisper",
+            "rel": "alias_of",
+            "dst": "user_omar",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "alias_of",
+            "dst": "user_rhea",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "alias_of",
+            "dst": "user_tara",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "works_at",
+            "dst": "org_apex_dynamics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "works_at",
+            "dst": "org_blueharbor_media",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_elin",
+            "rel": "works_at",
+            "dst": "org_helios_labs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_elin",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_faris",
+            "rel": "works_at",
+            "dst": "org_tidewatch_ops",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_faris",
+            "rel": "located_in",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "high",
+          "difficulty_level": 3,
+          "question_id": "high_05",
+          "support_nodes": 50
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Foundry Row, North Basin, and Uplink Yard spread: identify the user behind alias_emberglass before the Harborlight relay takes over.",
+        "answer": "user_nora",
+        "supporting_edges": [
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "authored_post",
+            "dst": "post_basin_photo",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_basin_photo",
+            "rel": "references",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_basin_photo",
+            "rel": "references",
+            "dst": "event_amber_veil",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "alias_of",
+            "dst": "user_rhea",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "authored_post",
+            "dst": "post_foundry_map",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_foundry_map",
+            "rel": "references",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_foundry_map",
+            "rel": "references",
+            "dst": "event_ember_tide",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "alias_of",
+            "dst": "user_tara",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "authored_post",
+            "dst": "post_uplink_note",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_uplink_note",
+            "rel": "references",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_uplink_note",
+            "rel": "references",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "authored_thread",
+            "dst": "thr_foundry_watch",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_foundry_watch",
+            "rel": "discusses",
+            "dst": "event_ember_tide",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_foundry_watch",
+            "rel": "references",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "authored_thread",
+            "dst": "thr_ember_tide_watch",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_ember_tide_watch",
+            "rel": "discusses",
+            "dst": "event_ember_tide",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_ember_tide_watch",
+            "rel": "references",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "authored_thread",
+            "dst": "thr_uplink_route",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_uplink_route",
+            "rel": "discusses",
+            "dst": "event_ghost_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_uplink_route",
+            "rel": "references",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "works_at",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "works_at",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "located_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "located_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "located_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "located_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_emberline_security",
+            "rel": "operates_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_harborlight_transit",
+            "rel": "operates_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "connected_to",
+            "dst": "user_rhea",
+            "confidence": 0.87
+          },
+          {
+            "src": "user_rhea",
+            "rel": "connected_to",
+            "dst": "user_soren",
+            "confidence": 0.86
+          },
+          {
+            "src": "user_soren",
+            "rel": "connected_to",
+            "dst": "user_tara",
+            "confidence": 0.86
+          },
+          {
+            "src": "user_nora",
+            "rel": "investigates",
+            "dst": "event_amber_veil",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_rhea",
+            "rel": "collaborates_on",
+            "dst": "event_ember_tide",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_soren",
+            "rel": "collaborates_on",
+            "dst": "event_ghost_signal",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_tara",
+            "rel": "reports_on",
+            "dst": "event_ghost_signal",
+            "confidence": 0.9
+          },
+          {
+            "src": "event_ember_tide",
+            "rel": "connected_to",
+            "dst": "event_ghost_signal",
+            "confidence": 0.77
+          },
+          {
+            "src": "org_harborlight_transit",
+            "rel": "connected_to",
+            "dst": "org_tidewatch_ops",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_steelquill",
+            "rel": "alias_of",
+            "dst": "user_bharat",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "alias_of",
+            "dst": "user_diya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_nightrelay",
+            "rel": "alias_of",
+            "dst": "user_faris",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_mapleghost",
+            "rel": "alias_of",
+            "dst": "user_elin",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "alias_of",
+            "dst": "user_hiro",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_quartzlotus",
+            "rel": "alias_of",
+            "dst": "user_cyrus",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_hollowsignal",
+            "rel": "alias_of",
+            "dst": "user_priya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_ironwhisper",
+            "rel": "alias_of",
+            "dst": "user_omar",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "alias_of",
+            "dst": "user_leena",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "works_at",
+            "dst": "org_helios_labs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "high",
+          "difficulty_level": 3,
+          "question_id": "high_06",
+          "support_nodes": 50
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Freight and customs bridge: which Atlas Freight user behind alias_lanternmoth connects Glass Harbor with the Northbridge chain?",
+        "answer": "user_kian",
+        "supporting_edges": [
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "authored_post",
+            "dst": "post_quay_ledgers",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_quay_ledgers",
+            "rel": "references",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_quay_ledgers",
+            "rel": "references",
+            "dst": "event_glass_harbor",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "authored_thread",
+            "dst": "thr_quiet_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_quiet_manifest",
+            "rel": "discusses",
+            "dst": "event_glass_harbor",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_quiet_manifest",
+            "rel": "references",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "works_at",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_omar",
+            "rel": "works_at",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "located_in",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_omar",
+            "rel": "located_in",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_atlas_freight",
+            "rel": "operates_in",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_northbridge_logistics",
+            "rel": "operates_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "connected_to",
+            "dst": "user_omar",
+            "confidence": 0.93
+          },
+          {
+            "src": "user_omar",
+            "rel": "connected_to",
+            "dst": "user_mika",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_kian",
+            "rel": "connected_to",
+            "dst": "user_bharat",
+            "confidence": 0.8
+          },
+          {
+            "src": "user_bharat",
+            "rel": "connected_to",
+            "dst": "user_hiro",
+            "confidence": 0.95
+          },
+          {
+            "src": "user_kian",
+            "rel": "collaborates_on",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_omar",
+            "rel": "collaborates_on",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_priya",
+            "rel": "monitors",
+            "dst": "event_glass_harbor",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_bharat",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_hiro",
+            "rel": "collaborates_on",
+            "dst": "event_project_lantern",
+            "confidence": 0.9
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "authored_post",
+            "dst": "post_shift_roster",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_shift_roster",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_shift_roster",
+            "rel": "references",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "authored_post",
+            "dst": "post_midnight_manifest",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_midnight_manifest",
+            "rel": "references",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "authored_thread",
+            "dst": "thr_supply_leak",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_supply_leak",
+            "rel": "references",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_atlas_freight",
+            "rel": "connected_to",
+            "dst": "org_northbridge_logistics",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_ironwhisper",
+            "rel": "alias_of",
+            "dst": "user_omar",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_steelquill",
+            "rel": "alias_of",
+            "dst": "user_bharat",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "alias_of",
+            "dst": "user_hiro",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "alias_of",
+            "dst": "user_diya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_nightrelay",
+            "rel": "alias_of",
+            "dst": "user_faris",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_mapleghost",
+            "rel": "alias_of",
+            "dst": "user_elin",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_quartzlotus",
+            "rel": "alias_of",
+            "dst": "user_cyrus",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_hollowsignal",
+            "rel": "alias_of",
+            "dst": "user_priya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "alias_of",
+            "dst": "user_rhea",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "alias_of",
+            "dst": "user_tara",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "alias_of",
+            "dst": "user_leena",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "works_at",
+            "dst": "org_helios_labs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "works_at",
+            "dst": "org_apex_dynamics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "works_at",
+            "dst": "org_blueharbor_media",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_elin",
+            "rel": "works_at",
+            "dst": "org_helios_labs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_elin",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_faris",
+            "rel": "works_at",
+            "dst": "org_tidewatch_ops",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "high",
+          "difficulty_level": 3,
+          "question_id": "high_07",
+          "support_nodes": 50
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Black Kite, Amber Veil, and Iron Wharf overlap: which user behind alias_quartzlotus is the Apex-side collaborator?",
+        "answer": "user_cyrus",
+        "supporting_edges": [
+          {
+            "src": "alias_quartzlotus",
+            "rel": "alias_of",
+            "dst": "user_cyrus",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "works_at",
+            "dst": "org_apex_dynamics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_apex_dynamics",
+            "rel": "operates_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "collaborates_on",
+            "dst": "event_black_kite",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_jules",
+            "rel": "authored_thread",
+            "dst": "thr_port_audit",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_port_audit",
+            "rel": "discusses",
+            "dst": "event_black_kite",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "authored_post",
+            "dst": "post_drone_parts",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_drone_parts",
+            "rel": "references",
+            "dst": "event_black_kite",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "investigates",
+            "dst": "event_amber_veil",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_quinn",
+            "rel": "authored_thread",
+            "dst": "thr_basin_shift",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_basin_shift",
+            "rel": "discusses",
+            "dst": "event_amber_veil",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "collaborates_on",
+            "dst": "event_iron_wharf",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_mika",
+            "rel": "authored_thread",
+            "dst": "thr_customs_breach",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_customs_breach",
+            "rel": "discusses",
+            "dst": "event_iron_wharf",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "works_at",
+            "dst": "org_kestrel_works",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "works_at",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_quinn",
+            "rel": "works_at",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "located_in",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "located_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "located_in",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_quinn",
+            "rel": "located_in",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_kestrel_works",
+            "rel": "operates_in",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_emberline_security",
+            "rel": "operates_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_orion_customs",
+            "rel": "operates_in",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "connected_to",
+            "dst": "user_gita",
+            "confidence": 0.83
+          },
+          {
+            "src": "user_ivy",
+            "rel": "connected_to",
+            "dst": "user_elin",
+            "confidence": 0.86
+          },
+          {
+            "src": "user_mika",
+            "rel": "connected_to",
+            "dst": "user_quinn",
+            "confidence": 0.89
+          },
+          {
+            "src": "user_quinn",
+            "rel": "connected_to",
+            "dst": "user_nora",
+            "confidence": 0.88
+          },
+          {
+            "src": "user_nora",
+            "rel": "connected_to",
+            "dst": "user_rhea",
+            "confidence": 0.87
+          },
+          {
+            "src": "event_black_kite",
+            "rel": "connected_to",
+            "dst": "event_amber_veil",
+            "confidence": 0.77
+          },
+          {
+            "src": "org_orion_customs",
+            "rel": "connected_to",
+            "dst": "org_emberline_security",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_steelquill",
+            "rel": "alias_of",
+            "dst": "user_bharat",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "alias_of",
+            "dst": "user_diya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_nightrelay",
+            "rel": "alias_of",
+            "dst": "user_faris",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_mapleghost",
+            "rel": "alias_of",
+            "dst": "user_elin",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "alias_of",
+            "dst": "user_hiro",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_hollowsignal",
+            "rel": "alias_of",
+            "dst": "user_priya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_ironwhisper",
+            "rel": "alias_of",
+            "dst": "user_omar",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "alias_of",
+            "dst": "user_rhea",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "alias_of",
+            "dst": "user_tara",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "alias_of",
+            "dst": "user_leena",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "high",
+          "difficulty_level": 3,
+          "question_id": "high_08",
+          "support_nodes": 50
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "Ghost Signal and Ember Tide relay: which user behind alias_sablekeel is the Harborlight reporting endpoint?",
+        "answer": "user_tara",
+        "supporting_edges": [
+          {
+            "src": "alias_sablekeel",
+            "rel": "alias_of",
+            "dst": "user_tara",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "authored_post",
+            "dst": "post_uplink_note",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_uplink_note",
+            "rel": "references",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_uplink_note",
+            "rel": "references",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "authored_post",
+            "dst": "post_hull_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_hull_signal",
+            "rel": "references",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "post_hull_signal",
+            "rel": "references",
+            "dst": "event_ghost_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "authored_thread",
+            "dst": "thr_ghost_signal_net",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_ghost_signal_net",
+            "rel": "discusses",
+            "dst": "event_ghost_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_ghost_signal_net",
+            "rel": "references",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "authored_thread",
+            "dst": "thr_uplink_route",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_uplink_route",
+            "rel": "discusses",
+            "dst": "event_ghost_signal",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_uplink_route",
+            "rel": "references",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "authored_thread",
+            "dst": "thr_ember_tide_watch",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_ember_tide_watch",
+            "rel": "discusses",
+            "dst": "event_ember_tide",
+            "confidence": 1.0
+          },
+          {
+            "src": "thr_ember_tide_watch",
+            "rel": "references",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "works_at",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "works_at",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "located_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "located_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "located_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "located_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_harborlight_transit",
+            "rel": "operates_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_emberline_security",
+            "rel": "operates_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "connected_to",
+            "dst": "user_soren",
+            "confidence": 0.86
+          },
+          {
+            "src": "user_soren",
+            "rel": "connected_to",
+            "dst": "user_tara",
+            "confidence": 0.86
+          },
+          {
+            "src": "user_nora",
+            "rel": "connected_to",
+            "dst": "user_rhea",
+            "confidence": 0.87
+          },
+          {
+            "src": "user_rhea",
+            "rel": "collaborates_on",
+            "dst": "event_ember_tide",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_soren",
+            "rel": "collaborates_on",
+            "dst": "event_ghost_signal",
+            "confidence": 0.9
+          },
+          {
+            "src": "user_tara",
+            "rel": "reports_on",
+            "dst": "event_ghost_signal",
+            "confidence": 0.9
+          },
+          {
+            "src": "event_ember_tide",
+            "rel": "connected_to",
+            "dst": "event_ghost_signal",
+            "confidence": 0.77
+          },
+          {
+            "src": "org_harborlight_transit",
+            "rel": "connected_to",
+            "dst": "org_tidewatch_ops",
+            "confidence": 0.77
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "alias_of",
+            "dst": "user_rhea",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_steelquill",
+            "rel": "alias_of",
+            "dst": "user_bharat",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "alias_of",
+            "dst": "user_diya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_nightrelay",
+            "rel": "alias_of",
+            "dst": "user_faris",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_mapleghost",
+            "rel": "alias_of",
+            "dst": "user_elin",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "alias_of",
+            "dst": "user_hiro",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_quartzlotus",
+            "rel": "alias_of",
+            "dst": "user_cyrus",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_hollowsignal",
+            "rel": "alias_of",
+            "dst": "user_priya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_ironwhisper",
+            "rel": "alias_of",
+            "dst": "user_omar",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "alias_of",
+            "dst": "user_leena",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "works_at",
+            "dst": "org_helios_labs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "works_at",
+            "dst": "org_apex_dynamics",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "high",
+          "difficulty_level": 3,
+          "question_id": "high_09",
+          "support_nodes": 50
+        }
+      },
+      {
+        "task_type": "fixed_trace",
+        "question": "End-to-end benchmark sweep: across Lantern, Black Kite, Glass Harbor, Iron Wharf, Ember Tide, and Ghost Signal, which user behind alias_hollowsignal anchors the Sunmesh monitoring side?",
+        "answer": "user_priya",
+        "supporting_edges": [
+          {
+            "src": "alias_orchidfox",
+            "rel": "alias_of",
+            "dst": "user_ivy",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_steelquill",
+            "rel": "alias_of",
+            "dst": "user_bharat",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_monsoonbyte",
+            "rel": "alias_of",
+            "dst": "user_diya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_nightrelay",
+            "rel": "alias_of",
+            "dst": "user_faris",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_mapleghost",
+            "rel": "alias_of",
+            "dst": "user_elin",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_docksparrow",
+            "rel": "alias_of",
+            "dst": "user_hiro",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_quartzlotus",
+            "rel": "alias_of",
+            "dst": "user_cyrus",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_emberglass",
+            "rel": "alias_of",
+            "dst": "user_nora",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_basinraven",
+            "rel": "alias_of",
+            "dst": "user_mika",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_tideshard",
+            "rel": "alias_of",
+            "dst": "user_soren",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_hollowsignal",
+            "rel": "alias_of",
+            "dst": "user_priya",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_ironwhisper",
+            "rel": "alias_of",
+            "dst": "user_omar",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_cinderveil",
+            "rel": "alias_of",
+            "dst": "user_rhea",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_sablekeel",
+            "rel": "alias_of",
+            "dst": "user_tara",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_lanternmoth",
+            "rel": "alias_of",
+            "dst": "user_kian",
+            "confidence": 1.0
+          },
+          {
+            "src": "alias_frostledger",
+            "rel": "alias_of",
+            "dst": "user_leena",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "works_at",
+            "dst": "org_helios_labs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_aria",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_bharat",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "works_at",
+            "dst": "org_apex_dynamics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_cyrus",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "works_at",
+            "dst": "org_blueharbor_media",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_diya",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_elin",
+            "rel": "works_at",
+            "dst": "org_helios_labs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_elin",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_faris",
+            "rel": "works_at",
+            "dst": "org_tidewatch_ops",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_faris",
+            "rel": "located_in",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_gita",
+            "rel": "works_at",
+            "dst": "org_apex_dynamics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_gita",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "works_at",
+            "dst": "org_northbridge_logistics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_hiro",
+            "rel": "located_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "works_at",
+            "dst": "org_kestrel_works",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_ivy",
+            "rel": "located_in",
+            "dst": "loc_rivergate",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_jules",
+            "rel": "works_at",
+            "dst": "org_blueharbor_media",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_jules",
+            "rel": "located_in",
+            "dst": "loc_old_town",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "works_at",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_kian",
+            "rel": "located_in",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_leena",
+            "rel": "works_at",
+            "dst": "org_sunmesh_analytics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_leena",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "works_at",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_mika",
+            "rel": "located_in",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_nora",
+            "rel": "located_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_omar",
+            "rel": "works_at",
+            "dst": "org_atlas_freight",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_omar",
+            "rel": "located_in",
+            "dst": "loc_east_quay",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_priya",
+            "rel": "works_at",
+            "dst": "org_sunmesh_analytics",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_priya",
+            "rel": "located_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_quinn",
+            "rel": "works_at",
+            "dst": "org_orion_customs",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_quinn",
+            "rel": "located_in",
+            "dst": "loc_north_basin",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "works_at",
+            "dst": "org_emberline_security",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_rhea",
+            "rel": "located_in",
+            "dst": "loc_foundry_row",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "works_at",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_soren",
+            "rel": "located_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "works_at",
+            "dst": "org_harborlight_transit",
+            "confidence": 1.0
+          },
+          {
+            "src": "user_tara",
+            "rel": "located_in",
+            "dst": "loc_uplink_yard",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_helios_labs",
+            "rel": "operates_in",
+            "dst": "loc_sector9",
+            "confidence": 1.0
+          },
+          {
+            "src": "org_northbridge_logistics",
+            "rel": "operates_in",
+            "dst": "loc_dockyard17",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "difficulty": "high",
+          "difficulty_level": 3,
+          "question_id": "high_10",
+          "support_nodes": 55
         }
       }
     ],
     "llm_generate_remaining_graph": true,
     "llm_generate_remaining_tasks": false,
-    "llm_generated_edge_budget": 28,
+    "llm_generated_edge_budget": 48,
     "llm_generated_task_budget": 0,
     "llm_generation_parallel": true,
     "llm_generation_workers": 4,
