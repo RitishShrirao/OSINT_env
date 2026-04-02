@@ -1,4 +1,5 @@
 import json
+import os
 
 from fastapi.testclient import TestClient
 
@@ -84,6 +85,7 @@ def test_space_snapshot_prefers_newer_evaluation_payload(tmp_path, monkeypatch):
         encoding="utf-8",
     )
     space_dashboard.write_text("<html>space</html>", encoding="utf-8")
+    os.utime(evaluation_path, (baseline_path.stat().st_atime + 5, baseline_path.stat().st_mtime + 5))
 
     monkeypatch.setattr(server, "LATEST_BASELINE_OUTPUT", baseline_path)
     monkeypatch.setattr(server, "LATEST_EVALUATION_OUTPUT", evaluation_path)

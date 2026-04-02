@@ -135,6 +135,25 @@ def _decode_action(tool_name: str, args: dict[str, Any]) -> dict[str, Any]:
     return {"action_type": "CALL_TOOL", "payload": {"tool_name": tool_name, "args": dict(args)}}
 
 
+def _assistant_tool_call_id(message: dict[str, Any]) -> str | None:
+    tool_calls = list(message.get("tool_calls", []))
+    if not tool_calls:
+        return None
+    tool_call_id = tool_calls[0].get("id")
+    return str(tool_call_id) if tool_call_id else None
+
+
+def _tool_result_message(assistant_message: dict[str, Any], result: dict[str, Any]) -> dict[str, Any] | None:
+    tool_call_id = _assistant_tool_call_id(assistant_message)
+    if not tool_call_id:
+        return None
+    return {
+        "role": "tool",
+        "tool_call_id": tool_call_id,
+        "content": json.dumps(result, sort_keys=True),
+    }
+
+
 def get_model_action(client: OpenAI, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:
     try:
         completion = client.chat.completions.create(**_request_kwargs(messages, tools))
@@ -233,13 +252,9 @@ def main() -> None:
             log_step(step=steps_taken, action=action, reward=reward, done=done, error=error)
             history.append(f"step={steps_taken} task_index={task_index} reward={reward:+.4f}")
             messages.append(assistant_message)
-            messages.append(
-                {
-                    "role": "tool",
-                    "tool_call_id": "remote_step",
-                    "content": json.dumps(result, sort_keys=True),
-                }
-            )
+            tool_message = _tool_result_message(assistant_message, result)
+            if tool_message is not None:
+                messages.append(tool_message)
             if done:
                 break
 
