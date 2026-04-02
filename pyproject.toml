@@ -5,9 +5,16 @@ description = "OSINT-style multi-platform information ecosystem environment for 
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-	"openenv",
+	"openenv>=0.1.13",
 	"openai>=1.40.0",
-	"requests>=2.31.0",
+	"fastapi>=0.115.0",
+	"requests>=2.32.3",
+	"uvicorn>=0.30.0",
+]
+
+[project.optional-dependencies]
+dev = [
+	"pytest>=8.0.0",
 ]
 
 [project.scripts]
@@ -22,3 +29,6 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

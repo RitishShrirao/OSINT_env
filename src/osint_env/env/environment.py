@@ -3,10 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from openenv.env import Env
-
 from osint_env.data.generator import DatasetGenerator
 from osint_env.domain.models import Action, ActionType, Edge, EnvironmentConfig, Observation, TaskInstance
+from osint_env.env.openenv_compat import Env
 from osint_env.env.reward import (
     build_reward_model,
     compute_answer_reward,

@@ -282,7 +282,7 @@ def main() -> None:
         if args.with_demo:
             _runner_for(env).run_episode()
             info = {
-                "agent_answer": env.state.agent_answer if env.state else "",
+                "agent_answer": env.state.answer if env.state else "",
                 "task_answer": env.state.task.answer if env.state else "",
                 "total_reward": env.state.total_reward if env.state else 0.0,
                 "step_count": env.state.step_count if env.state else 0,
