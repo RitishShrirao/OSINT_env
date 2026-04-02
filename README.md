@@ -1,8 +1,8 @@
 ---
 title: OSINT OpenEnv
 emoji: 🕵️
-colorFrom: teal
-colorTo: amber
+colorFrom: blue
+colorTo: yellow
 sdk: docker
 app_port: 7860
 pinned: false
@@ -13,7 +13,7 @@ tags:
   - benchmark
   - docker
   - fastapi
-short_description: Containerized OpenEnv-compatible OSINT benchmark with fixed-level tasks, dashboard export, and an OpenAI baseline runner.
+short_description: Docker OSINT benchmark with fixed OpenEnv tasks.
 ---
 
 # OSINT OpenEnv
