@@ -14,6 +14,7 @@ from osint_env.baselines.openai_runner import SYSTEM_PROMPT, build_action_tools
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-5.4-mini")
 HF_TOKEN = os.getenv("HF_TOKEN", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 SPACE_URL = os.getenv("SPACE_URL", "https://siddeshwar1625-osint.hf.space").rstrip("/")
 
 MAX_STEPS = int(os.getenv("MAX_STEPS", "8"))
@@ -153,8 +154,11 @@ def get_model_action(client: OpenAI, messages: list[dict[str, Any]], tools: list
 
 
 def main() -> None:
-    if not HF_TOKEN:
-        raise SystemExit("HF_TOKEN is required.")
+    api_key = OPENAI_API_KEY or HF_TOKEN
+    if not api_key:
+        raise SystemExit("Set OPENAI_API_KEY or HF_TOKEN before running inference.py.")
+    if api_key == "your_openai_api_key" or api_key.startswith("your_"):
+        raise SystemExit("Replace the placeholder with your real OpenAI API key.")
 
     try:
         ping = _space_get("/healthz")
@@ -163,7 +167,7 @@ def main() -> None:
     except RequestException as exc:
         raise SystemExit(f"Space ping failed: {exc}") from exc
 
-    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN, timeout=REQUEST_TIMEOUT)
+    client = OpenAI(base_url=API_BASE_URL, api_key=api_key, timeout=REQUEST_TIMEOUT)
     tools = build_action_tools()
 
     history: list[str] = []

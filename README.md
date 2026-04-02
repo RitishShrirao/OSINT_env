@@ -175,13 +175,13 @@ Optional environment variables:
 Example local test command against a running local server:
 
 ```bash
-API_BASE_URL=https://api.openai.com/v1 MODEL_NAME=gpt-5.4-mini HF_TOKEN=your_key SPACE_URL=http://127.0.0.1:7860 python inference.py
+API_BASE_URL=https://api.openai.com/v1 MODEL_NAME=gpt-5.4-mini OPENAI_API_KEY=your_key SPACE_URL=http://127.0.0.1:7860 python inference.py
 ```
 
 Example test command against the deployed Space:
 
 ```bash
-API_BASE_URL=https://api.openai.com/v1 MODEL_NAME=gpt-5.4-mini HF_TOKEN=your_key SPACE_URL=https://siddeshwar1625-osint.hf.space python inference.py
+API_BASE_URL=https://api.openai.com/v1 MODEL_NAME=gpt-5.4-mini OPENAI_API_KEY=your_key SPACE_URL=https://siddeshwar1625-osint.hf.space python inference.py
 ```
 
 ## Docker And Hugging Face Space
