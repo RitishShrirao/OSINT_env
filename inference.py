@@ -49,6 +49,26 @@ def log_end(success: bool, steps: int, score: float, rewards: list[float]) -> No
     )
 
 
+def _looks_like_placeholder_api_key(value: str) -> bool:
+    token = str(value or "").strip().lower()
+    if not token:
+        return True
+    placeholder_markers = [
+        "your_openai_api_key",
+        "your-key",
+        "your_key",
+        "your real",
+        "real-openai-key",
+        "replace-me",
+        "changeme",
+        "example",
+        "<api-key>",
+    ]
+    if token.startswith("your_") or token.startswith("sk-your-"):
+        return True
+    return any(marker in token for marker in placeholder_markers)
+
+
 def _supports_reasoning_effort_in_chat_completions(model: str) -> bool:
     model_name = str(model).strip().lower()
     if model_name.startswith("gpt-5.4-mini"):
@@ -157,7 +177,7 @@ def main() -> None:
     api_key = OPENAI_API_KEY or HF_TOKEN
     if not api_key:
         raise SystemExit("Set OPENAI_API_KEY or HF_TOKEN before running inference.py.")
-    if api_key == "your_openai_api_key" or api_key.startswith("your_"):
+    if _looks_like_placeholder_api_key(api_key):
         raise SystemExit("Replace the placeholder with your real OpenAI API key.")
 
     try:
