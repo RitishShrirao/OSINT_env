@@ -5,12 +5,22 @@ import os
 from collections import Counter
 from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 from typing import Any
+from uuid import uuid4
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
+from osint_env.api import (
+    OpenEnvActionRequest,
+    OpenEnvObservationModel,
+    OpenEnvResetRequest,
+    OpenEnvResponseEnvelope,
+    OpenEnvTaskSummary,
+)
 from osint_env.config import clone_environment_config, load_seeding_config, load_shared_config
+from osint_env.domain.models import Action, ActionType
 from osint_env.env.environment import OSINTEnvironment
 from osint_env.eval.runner import run_evaluation
 from osint_env.llm import build_llm_client
@@ -25,6 +35,10 @@ SPACE_PORT = int(os.getenv("PORT", "7860"))
 SPACE_DASHBOARD = Path("artifacts/space_dashboard.html")
 LATEST_BASELINE_OUTPUT = Path("artifacts/baselines/openai_fixed_levels_latest.json")
 LATEST_EVALUATION_OUTPUT = Path("artifacts/latest_evaluation.json")
+OPENENV_SPEC_PATH = Path("openenv.yaml")
+
+_SESSION_LOCK = Lock()
+_SESSIONS: dict[str, OSINTEnvironment] = {}
 
 
 def _load_json(path: Path) -> dict[str, Any] | None:
@@ -57,6 +71,67 @@ def _build_environment() -> OSINTEnvironment:
         env_cfg.llm.provider = "mock"
         llm = build_llm_client(env_cfg.llm)
     return OSINTEnvironment(env_cfg, llm=llm)
+
+
+def _serialize_observation(observation: Any) -> OpenEnvObservationModel:
+    return OpenEnvObservationModel(
+        tool_outputs=list(observation.tool_outputs),
+        graph_snapshot=dict(observation.graph_snapshot),
+        action_history=list(observation.action_history),
+        task=dict(observation.task),
+    )
+
+
+def _safe_session_info(info: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "step_count": int(info.get("step_count", 0)),
+        "total_reward": float(info.get("total_reward", 0.0)),
+        "tool_calls": int(info.get("tool_calls", 0)),
+        "redundant_tool_calls": int(info.get("redundant_tool_calls", 0)),
+        "task_answer": str(info.get("task_answer", "")),
+        "agent_answer": "" if info.get("agent_answer") is None else str(info.get("agent_answer", "")),
+        "graph_f1": float(info.get("graph_f1", 0.0)),
+        "reward_components": dict(info.get("reward_components", {})),
+    }
+
+
+def _task_summaries(env: OSINTEnvironment) -> list[OpenEnvTaskSummary]:
+    return [
+        OpenEnvTaskSummary(
+            task_id=task.task_id,
+            task_type=task.task_type,
+            question=task.question,
+            difficulty=str(task.metadata.get("difficulty", "unknown")),
+        )
+        for task in env.tasks
+    ]
+
+
+def _resolve_task_index(env: OSINTEnvironment, request: OpenEnvResetRequest) -> int:
+    if request.task_index is not None:
+        task_index = int(request.task_index)
+        if task_index < 0 or task_index >= len(env.tasks):
+            raise HTTPException(status_code=400, detail=f"Invalid task_index {task_index}")
+        return task_index
+    if request.task_id:
+        for idx, task in enumerate(env.tasks):
+            if task.task_id == request.task_id:
+                return idx
+        raise HTTPException(status_code=400, detail=f"Unknown task_id {request.task_id}")
+    return 0
+
+
+def _get_session_env(session_id: str) -> OSINTEnvironment:
+    with _SESSION_LOCK:
+        env = _SESSIONS.get(session_id)
+    if env is None:
+        raise HTTPException(status_code=404, detail=f"Unknown session_id {session_id}")
+    return env
+
+
+def _store_session(session_id: str, env: OSINTEnvironment) -> None:
+    with _SESSION_LOCK:
+        _SESSIONS[session_id] = env
 
 
 @lru_cache(maxsize=1)
@@ -271,9 +346,67 @@ def healthz() -> JSONResponse:
     return JSONResponse({"status": "ok"})
 
 
+@app.get("/openenv.yaml")
+def openenv_spec() -> FileResponse:
+    return FileResponse(OPENENV_SPEC_PATH, media_type="text/yaml")
+
+
 @app.get("/api/environment")
 def environment_metadata() -> JSONResponse:
     return JSONResponse(_space_snapshot())
+
+
+@app.get("/openenv/tasks", response_model=list[OpenEnvTaskSummary])
+def openenv_tasks() -> list[OpenEnvTaskSummary]:
+    env = _build_environment()
+    return _task_summaries(env)
+
+
+@app.post("/openenv/reset", response_model=OpenEnvResponseEnvelope)
+def openenv_reset(request: OpenEnvResetRequest) -> OpenEnvResponseEnvelope:
+    env = _build_environment()
+    env._task_idx = _resolve_task_index(env, request)
+    observation = env.reset()
+    session_id = str(uuid4())
+    _store_session(session_id, env)
+    return OpenEnvResponseEnvelope(
+        session_id=session_id,
+        observation=_serialize_observation(observation),
+        reward=0.0,
+        done=False,
+        info=_safe_session_info(env._info()),
+    )
+
+
+@app.post("/openenv/step", response_model=OpenEnvResponseEnvelope)
+def openenv_step(request: OpenEnvActionRequest) -> OpenEnvResponseEnvelope:
+    env = _get_session_env(request.session_id)
+    try:
+        action_type = ActionType(str(request.action_type))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Unsupported action_type {request.action_type}") from exc
+    observation, reward, done, info = env.step(Action(action_type, dict(request.payload)))
+    return OpenEnvResponseEnvelope(
+        session_id=request.session_id,
+        observation=_serialize_observation(observation),
+        reward=float(reward),
+        done=bool(done),
+        info=_safe_session_info(info),
+    )
+
+
+@app.get("/openenv/state/{session_id}", response_model=OpenEnvResponseEnvelope)
+def openenv_state(session_id: str) -> OpenEnvResponseEnvelope:
+    env = _get_session_env(session_id)
+    if env.state is None:
+        raise HTTPException(status_code=400, detail="Session has not been reset yet")
+    return OpenEnvResponseEnvelope(
+        session_id=session_id,
+        observation=_serialize_observation(env._observation()),
+        reward=0.0,
+        done=bool(env.state.done),
+        info=_safe_session_info(env._info()),
+    )
 
 
 @app.get("/dashboard")

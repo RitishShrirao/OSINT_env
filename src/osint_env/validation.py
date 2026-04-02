@@ -19,6 +19,7 @@ from osint_env.env.reward import compute_answer_reward
 
 README_PATH = Path("README.md")
 DOCKERFILE_PATH = Path("Dockerfile")
+OPENENV_SPEC_PATH = Path("openenv.yaml")
 SHARED_CONFIG_PATH = "datasets/fixed_levels/shared_config_fixed_levels.json"
 SEED_FILE_PATH = "datasets/fixed_levels/seed_fixed_levels.json"
 
@@ -46,15 +47,18 @@ def check_hf_space_readiness() -> ValidationResult:
     client = TestClient(app)
     health = client.get("/healthz")
     dashboard = client.get("/api/environment")
+    spec = client.get("/openenv.yaml")
     passed = all(
         [
             README_PATH.exists(),
             DOCKERFILE_PATH.exists(),
+            OPENENV_SPEC_PATH.exists(),
             has_sdk,
             has_port,
             has_openenv_tag,
             health.status_code == 200,
             dashboard.status_code == 200,
+            spec.status_code == 200,
         ]
     )
     return ValidationResult(
@@ -63,11 +67,13 @@ def check_hf_space_readiness() -> ValidationResult:
         details={
             "readme_exists": README_PATH.exists(),
             "dockerfile_exists": DOCKERFILE_PATH.exists(),
+            "openenv_spec_exists": OPENENV_SPEC_PATH.exists(),
             "has_sdk_docker": has_sdk,
             "has_app_port": has_port,
             "has_openenv_tag": has_openenv_tag,
             "healthz_status": health.status_code,
             "environment_status": dashboard.status_code,
+            "openenv_spec_status": spec.status_code,
         },
     )
 
@@ -75,6 +81,17 @@ def check_hf_space_readiness() -> ValidationResult:
 def check_openenv_spec_compliance() -> ValidationResult:
     env = _build_environment()
     obs = env.reset()
+    client = TestClient(app)
+    reset = client.post("/openenv/reset", json={"task_index": 0})
+    step = client.post(
+        "/openenv/step",
+        json={
+            "session_id": reset.json()["session_id"] if reset.status_code == 200 else "",
+            "action_type": "ANSWER",
+            "payload": {"answer": "unknown"},
+        },
+    )
+    state = client.get(f"/openenv/state/{reset.json()['session_id']}") if reset.status_code == 200 else None
     passed = all(
         [
             isinstance(env, Env),
@@ -86,6 +103,9 @@ def check_openenv_spec_compliance() -> ValidationResult:
             env.episode_max_length == env.config.max_steps,
             isinstance(obs.task, dict),
             "question" in obs.task,
+            reset.status_code == 200,
+            step.status_code == 200,
+            state is not None and state.status_code == 200,
         ]
     )
     return ValidationResult(
@@ -97,6 +117,9 @@ def check_openenv_spec_compliance() -> ValidationResult:
             "action_space": list(env.action_space),
             "episode_max_length": env.episode_max_length,
             "task_keys": sorted(obs.task.keys()),
+            "reset_status": reset.status_code,
+            "step_status": step.status_code,
+            "state_status": 0 if state is None else state.status_code,
         },
     )
 

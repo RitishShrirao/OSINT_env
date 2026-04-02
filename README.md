@@ -156,6 +156,34 @@ python scripts/run_openai_baseline.py --model gpt-5-nano
 
 The script is designed to stay bounded enough for a normal benchmark pass to finish comfortably under 20 minutes on a lightweight chat model, while still using the full fixed task set. For repeatability it fixes the benchmark graph/tasks and uses deterministic decoding settings. Because remote model backends can still change over time, the output artifact also records model metadata and system fingerprints when available.
 
+## Inference Script
+
+The submission-ready inference entrypoint is the root `inference.py` file. It talks to the deployed Hugging Face Space over HTTP, uses the OpenAI client for all model calls, and emits structured stdout logs in the `[START]`, `[STEP]`, and `[END]` format.
+
+Required environment variables:
+
+- `API_BASE_URL`
+- `MODEL_NAME`
+- `HF_TOKEN`
+
+Optional environment variables:
+
+- `SPACE_URL` default: `https://siddeshwar1625-osint.hf.space`
+- `TASK_INDICES` default: `0,10,20`
+- `MAX_STEPS` default: `8`
+
+Example local test command against a running local server:
+
+```bash
+API_BASE_URL=https://api.openai.com/v1 MODEL_NAME=gpt-5.4-mini HF_TOKEN=your_key SPACE_URL=http://127.0.0.1:7860 python inference.py
+```
+
+Example test command against the deployed Space:
+
+```bash
+API_BASE_URL=https://api.openai.com/v1 MODEL_NAME=gpt-5.4-mini HF_TOKEN=your_key SPACE_URL=https://siddeshwar1625-osint.hf.space python inference.py
+```
+
 ## Docker And Hugging Face Space
 
 The repository is ready for a Docker-based Hugging Face Space:
@@ -179,6 +207,11 @@ The FastAPI app serves:
 - `/dashboard`: generated benchmark dashboard
 - `/api/environment`: environment metadata
 - `/healthz`: health check
+- `/openenv.yaml`: OpenEnv HTTP spec stub
+- `/openenv/tasks`: task enumeration
+- `/openenv/reset`: episode reset endpoint
+- `/openenv/step`: episode step endpoint
+- `/openenv/state/{session_id}`: current session state endpoint
 
 ## Automated Validation
 

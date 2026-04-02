@@ -24,6 +24,45 @@ def test_server_environment_metadata():
     assert "summary" in body
 
 
+def test_openenv_spec_and_tasks_endpoints():
+    spec = client.get("/openenv.yaml")
+    assert spec.status_code == 200
+    assert "reset" in spec.text
+
+    tasks = client.get("/openenv/tasks")
+    assert tasks.status_code == 200
+    body = tasks.json()
+    assert len(body) >= 3
+    assert {"task_id", "task_type", "question", "difficulty"} <= set(body[0].keys())
+
+
+def test_openenv_reset_step_and_state_cycle():
+    reset = client.post("/openenv/reset", json={"task_index": 0})
+    assert reset.status_code == 200
+    body = reset.json()
+    session_id = body["session_id"]
+    assert body["done"] is False
+    assert "question" in body["observation"]["task"]
+
+    state = client.get(f"/openenv/state/{session_id}")
+    assert state.status_code == 200
+    assert state.json()["session_id"] == session_id
+
+    step = client.post(
+        "/openenv/step",
+        json={
+            "session_id": session_id,
+            "action_type": "ANSWER",
+            "payload": {"answer": "unknown"},
+        },
+    )
+    assert step.status_code == 200
+    step_body = step.json()
+    assert step_body["session_id"] == session_id
+    assert step_body["done"] is True
+    assert "task_answer" in step_body["info"]
+
+
 def test_space_snapshot_prefers_newer_evaluation_payload(tmp_path, monkeypatch):
     baseline_path = tmp_path / "baseline.json"
     evaluation_path = tmp_path / "evaluation.json"

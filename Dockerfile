@@ -11,7 +11,7 @@ ENV HOME=/home/user \
 
 WORKDIR $HOME/app
 
-COPY --chown=user pyproject.toml README.md $HOME/app/
+COPY --chown=user pyproject.toml README.md openenv.yaml inference.py $HOME/app/
 COPY --chown=user src $HOME/app/src
 COPY --chown=user config $HOME/app/config
 COPY --chown=user datasets $HOME/app/datasets
@@ -25,4 +25,3 @@ RUN pip install --no-cache-dir --upgrade pip && \
 EXPOSE 7860
 
 CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT:-7860}"]
-

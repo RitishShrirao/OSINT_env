@@ -1,0 +1,35 @@
+name: osint-openenv
+version: 0.1.0
+description: Synthetic OSINT benchmark environment exposed over HTTP.
+transport:
+  type: http
+  base_path: /
+endpoints:
+  health:
+    method: GET
+    path: /healthz
+  metadata:
+    method: GET
+    path: /api/environment
+  tasks:
+    method: GET
+    path: /openenv/tasks
+  reset:
+    method: POST
+    path: /openenv/reset
+  step:
+    method: POST
+    path: /openenv/step
+  state:
+    method: GET
+    path: /openenv/state/{session_id}
+models:
+  action_space:
+    - CALL_TOOL
+    - ADD_EDGE
+    - ANSWER
+  observation_fields:
+    - tool_outputs
+    - graph_snapshot
+    - action_history
+    - task
