@@ -36,3 +36,15 @@ class OpenEnvResponseEnvelope(BaseModel):
     reward: float
     done: bool
     info: dict[str, Any]
+
+
+class OpenEnvInferenceReportRequest(BaseModel):
+    run: dict[str, Any] = Field(default_factory=dict)
+    summary: dict[str, Any]
+    episodes: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class OpenEnvInferenceReportResponse(BaseModel):
+    status: str
+    output_path: str
+    dashboard_path: str

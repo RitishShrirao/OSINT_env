@@ -1,5 +1,7 @@
 from osint_env.api.models import (
     OpenEnvActionRequest,
+    OpenEnvInferenceReportRequest,
+    OpenEnvInferenceReportResponse,
     OpenEnvObservationModel,
     OpenEnvResetRequest,
     OpenEnvResponseEnvelope,
@@ -8,6 +10,8 @@ from osint_env.api.models import (
 
 __all__ = [
     "OpenEnvActionRequest",
+    "OpenEnvInferenceReportRequest",
+    "OpenEnvInferenceReportResponse",
     "OpenEnvObservationModel",
     "OpenEnvResetRequest",
     "OpenEnvResponseEnvelope",

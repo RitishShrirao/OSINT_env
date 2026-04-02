@@ -9,11 +9,13 @@ from openai import OpenAI
 from requests import RequestException
 
 from osint_env.baselines.openai_runner import SYSTEM_PROMPT, build_action_tools
+from osint_env.eval.metrics import EvalMetrics
 
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-5.4-mini")
 HF_TOKEN = os.getenv("HF_TOKEN", "")
+API_KEY = os.getenv("API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 SPACE_URL = os.getenv("SPACE_URL", "https://siddeshwar1625-osint.hf.space").rstrip("/")
 
@@ -32,19 +34,18 @@ def log_start(task: str, env: str, model: str) -> None:
     print(f"[START] task={task} env={env} model={model}", flush=True)
 
 
-def log_step(step: int, action: dict[str, Any], reward: float, done: bool, error: str | None) -> None:
-    action_text = json.dumps(action, sort_keys=True, separators=(",", ":"))
-    error_text = "null" if error is None else json.dumps(error)
+def log_step(step: int, action: str, reward: float, done: bool, error: str | None) -> None:
+    error_text = "null" if error is None else str(error)
     print(
-        f"[STEP] step={step} action={action_text} reward={reward:.4f} done={str(bool(done)).lower()} error={error_text}",
+        f"[STEP] step={step} action={action} reward={reward:.2f} done={str(bool(done)).lower()} error={error_text}",
         flush=True,
     )
 
 
 def log_end(success: bool, steps: int, score: float, rewards: list[float]) -> None:
-    rewards_text = json.dumps([round(value, 4) for value in rewards], separators=(",", ":"))
+    rewards_text = ",".join(f"{value:.2f}" for value in rewards)
     print(
-        f"[END] success={str(bool(success)).lower()} steps={steps} score={score:.4f} rewards={rewards_text}",
+        f"[END] success={str(bool(success)).lower()} steps={steps} score={score:.3f} rewards={rewards_text}",
         flush=True,
     )
 
@@ -135,6 +136,28 @@ def _decode_action(tool_name: str, args: dict[str, Any]) -> dict[str, Any]:
     return {"action_type": "CALL_TOOL", "payload": {"tool_name": tool_name, "args": dict(args)}}
 
 
+def _format_action(action: dict[str, Any]) -> str:
+    action_type = str(action.get("action_type", ""))
+    payload = dict(action.get("payload", {}))
+    if action_type == "ANSWER":
+        return f"answer({payload.get('answer', 'unknown')})"
+    if action_type == "ADD_EDGE":
+        return (
+            "add_edge("
+            f"{payload.get('src', '')},"
+            f"{payload.get('rel', '')},"
+            f"{payload.get('dst', '')},"
+            f"{float(payload.get('confidence', 1.0)):.2f}"
+            ")"
+        )
+    tool_name = str(payload.get("tool_name", "tool"))
+    args = dict(payload.get("args", {}))
+    if not args:
+        return f"{tool_name}()"
+    arg_str = ",".join(f"{key}={value}" for key, value in sorted(args.items()))
+    return f"{tool_name}({arg_str})"
+
+
 def _assistant_tool_call_id(message: dict[str, Any]) -> str | None:
     tool_calls = list(message.get("tool_calls", []))
     if not tool_calls:
@@ -192,10 +215,54 @@ def get_model_action(client: OpenAI, messages: list[dict[str, Any]], tools: list
         return {"action_type": "ANSWER", "payload": {"answer": "unknown"}}, {"role": "assistant", "content": ""}
 
 
+def _episode_row(result: dict[str, Any], task_meta: dict[str, Any]) -> dict[str, Any]:
+    info = dict(result.get("info", {}))
+    graph_snapshot = dict((result.get("observation") or {}).get("graph_snapshot", {}))
+    task_type = str(task_meta.get("task_type", "unknown"))
+    task_id = str(task_meta.get("task_id", "unknown"))
+    question = str(task_meta.get("question", ""))
+    task_answer = str(info.get("task_answer", ""))
+    agent_answer = str(info.get("agent_answer", ""))
+    graph_f1 = float(info.get("graph_f1", 0.0) or 0.0)
+    return {
+        "task_id": task_id,
+        "task_type": task_type,
+        "question": question,
+        "task_answer": task_answer,
+        "agent_answer": agent_answer,
+        "graph_f1": graph_f1,
+        "reward": float(info.get("total_reward", 0.0) or 0.0),
+        "steps": int(info.get("step_count", 0) or 0),
+        "tool_calls": int(info.get("tool_calls", 0) or 0),
+        "success": int(bool(agent_answer) and agent_answer == task_answer),
+        "reward_components": dict(info.get("reward_components", {})),
+        "pred_edges": list(graph_snapshot.get("edges", [])),
+        "truth_edges": [],
+    }
+
+
+def _publish_inference_report(summary: dict[str, Any], episodes: list[dict[str, Any]]) -> None:
+    payload = {
+        "run": {
+            "name": "inference_py_run",
+            "model": MODEL_NAME,
+            "space_url": SPACE_URL,
+            "task_indices": TASK_INDICES,
+            "max_steps": MAX_STEPS,
+        },
+        "summary": summary,
+        "episodes": episodes,
+    }
+    try:
+        _space_post("/openenv/report_inference", payload)
+    except RequestException as exc:
+        print(f"[DEBUG] Failed to publish inference report: {exc}", flush=True)
+
+
 def main() -> None:
-    api_key = OPENAI_API_KEY or HF_TOKEN
+    api_key = OPENAI_API_KEY or HF_TOKEN or API_KEY
     if not api_key:
-        raise SystemExit("Set OPENAI_API_KEY or HF_TOKEN before running inference.py.")
+        raise SystemExit("Set HF_TOKEN, OPENAI_API_KEY, or API_KEY before running inference.py.")
     if _looks_like_placeholder_api_key(api_key):
         raise SystemExit("Replace the placeholder with your real OpenAI API key.")
 
@@ -212,6 +279,8 @@ def main() -> None:
     history: list[str] = []
     rewards: list[float] = []
     task_scores: list[float] = []
+    episode_rows: list[dict[str, Any]] = []
+    metrics = EvalMetrics()
     steps_taken = 0
 
     log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
@@ -220,6 +289,7 @@ def main() -> None:
         result = _space_post("/openenv/reset", {"task_index": task_index})
         session_id = str(result["session_id"])
         done = bool(result.get("done", False))
+        task_meta = dict((result.get("observation") or {}).get("task", {}))
         messages: list[dict[str, Any]] = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {
@@ -249,7 +319,7 @@ def main() -> None:
             done = bool(result.get("done", False))
             rewards.append(reward)
             steps_taken += 1
-            log_step(step=steps_taken, action=action, reward=reward, done=done, error=error)
+            log_step(step=steps_taken, action=_format_action(action), reward=reward, done=done, error=error)
             history.append(f"step={steps_taken} task_index={task_index} reward={reward:+.4f}")
             messages.append(assistant_message)
             tool_message = _tool_result_message(assistant_message, result)
@@ -262,10 +332,14 @@ def main() -> None:
         task_answer = str(info.get("task_answer", ""))
         agent_answer = str(info.get("agent_answer", ""))
         task_scores.append(1.0 if agent_answer and agent_answer == task_answer else 0.0)
+        episode_row = _episode_row(result, task_meta)
+        episode_rows.append(episode_row)
+        metrics.add(info, task_type=episode_row["task_type"], graph_f1=float(episode_row["graph_f1"]))
 
     score = sum(task_scores) / max(1, len(task_scores))
     success = score >= SUCCESS_SCORE_THRESHOLD
     log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
+    _publish_inference_report(metrics.summary(), episode_rows)
 
 
 if __name__ == "__main__":

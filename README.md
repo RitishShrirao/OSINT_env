@@ -160,6 +160,9 @@ The script is designed to stay bounded enough for a normal benchmark pass to fin
 
 The submission-ready inference entrypoint is the root `inference.py` file. It talks to the deployed Hugging Face Space over HTTP, uses the OpenAI client for all model calls, and emits structured stdout logs in the `[START]`, `[STEP]`, and `[END]` format.
 
+The script accepts `HF_TOKEN` as the primary auth variable and also supports `OPENAI_API_KEY` or `API_KEY` as local fallbacks.
+After a successful run, `inference.py` also posts the evaluation summary back to the Space so the latest `/dashboard` view reflects that run.
+
 Required environment variables:
 
 - `API_BASE_URL`

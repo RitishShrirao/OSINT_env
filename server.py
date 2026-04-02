@@ -14,6 +14,8 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from osint_env.api import (
     OpenEnvActionRequest,
+    OpenEnvInferenceReportRequest,
+    OpenEnvInferenceReportResponse,
     OpenEnvObservationModel,
     OpenEnvResetRequest,
     OpenEnvResponseEnvelope,
@@ -22,6 +24,7 @@ from osint_env.api import (
 from osint_env.config import clone_environment_config, load_seeding_config, load_shared_config
 from osint_env.domain.models import Action, ActionType
 from osint_env.env.environment import OSINTEnvironment
+from osint_env.eval.leaderboard import load_leaderboard
 from osint_env.eval.runner import run_evaluation
 from osint_env.llm import build_llm_client
 from osint_env.viz import export_dashboard
@@ -132,6 +135,43 @@ def _get_session_env(session_id: str) -> OSINTEnvironment:
 def _store_session(session_id: str, env: OSINTEnvironment) -> None:
     with _SESSION_LOCK:
         _SESSIONS[session_id] = env
+
+
+def _task_lookup(env: OSINTEnvironment) -> dict[str, Any]:
+    return {task.task_id: task for task in env.tasks}
+
+
+def _normalize_episode_rows(env: OSINTEnvironment, episodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    tasks_by_id = _task_lookup(env)
+    normalized: list[dict[str, Any]] = []
+    for episode in episodes:
+        row = dict(episode)
+        task = tasks_by_id.get(str(row.get("task_id", "")))
+        if task is not None:
+            row.setdefault("task_type", task.task_type)
+            row.setdefault("question", task.question)
+            row.setdefault("task_answer", task.answer)
+            row.setdefault(
+                "truth_edges",
+                [
+                    {
+                        "src": edge.src,
+                        "rel": edge.rel,
+                        "dst": edge.dst,
+                        "confidence": float(edge.confidence),
+                    }
+                    for edge in task.supporting_edges
+                ],
+            )
+        row.setdefault("pred_edges", [])
+        row.setdefault("reward_components", {})
+        row.setdefault("graph_f1", 0.0)
+        row.setdefault("reward", 0.0)
+        row.setdefault("steps", 0)
+        row.setdefault("tool_calls", 0)
+        row.setdefault("success", 0)
+        normalized.append(row)
+    return normalized
 
 
 @lru_cache(maxsize=1)
@@ -406,6 +446,30 @@ def openenv_state(session_id: str) -> OpenEnvResponseEnvelope:
         reward=0.0,
         done=bool(env.state.done),
         info=_safe_session_info(env._info()),
+    )
+
+
+@app.post("/openenv/report_inference", response_model=OpenEnvInferenceReportResponse)
+def openenv_report_inference(request: OpenEnvInferenceReportRequest) -> OpenEnvInferenceReportResponse:
+    env = _build_environment()
+    normalized_episodes = _normalize_episode_rows(env, list(request.episodes))
+    payload = {
+        "run": dict(request.run),
+        "summary": dict(request.summary),
+        "episodes": normalized_episodes,
+    }
+    LATEST_EVALUATION_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    LATEST_EVALUATION_OUTPUT.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    dashboard_path = export_dashboard(
+        env=env,
+        evaluation=payload,
+        leaderboard_records=load_leaderboard("artifacts/baselines/openai_fixed_levels_leaderboard.json"),
+        output_path=str(SPACE_DASHBOARD),
+    )
+    return OpenEnvInferenceReportResponse(
+        status="ok",
+        output_path=str(LATEST_EVALUATION_OUTPUT),
+        dashboard_path=str(dashboard_path),
     )
 
 

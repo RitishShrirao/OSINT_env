@@ -64,6 +64,43 @@ def test_openenv_reset_step_and_state_cycle():
     assert "task_answer" in step_body["info"]
 
 
+def test_report_inference_updates_latest_evaluation_and_dashboard(tmp_path, monkeypatch):
+    latest_evaluation = tmp_path / "latest_evaluation.json"
+    space_dashboard = tmp_path / "space_dashboard.html"
+
+    monkeypatch.setattr(server, "LATEST_EVALUATION_OUTPUT", latest_evaluation)
+    monkeypatch.setattr(server, "SPACE_DASHBOARD", space_dashboard)
+    monkeypatch.setattr(server, "load_leaderboard", lambda path: [])
+    monkeypatch.setattr(server, "export_dashboard", lambda env, evaluation, leaderboard_records, output_path: str(space_dashboard))
+
+    response = client.post(
+        "/openenv/report_inference",
+        json={
+            "run": {"name": "inference_py_run"},
+            "summary": {"leaderboard_score": 0.75, "task_success_rate": 1.0},
+            "episodes": [
+                {
+                    "task_id": "seed_task_0",
+                    "agent_answer": "user_bharat",
+                    "graph_f1": 0.5,
+                    "reward": 1.2,
+                    "steps": 5,
+                    "tool_calls": 4,
+                    "success": 1,
+                }
+            ],
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "ok"
+    assert latest_evaluation.exists()
+    stored = json.loads(latest_evaluation.read_text(encoding="utf-8"))
+    assert stored["summary"]["leaderboard_score"] == 0.75
+    assert stored["episodes"][0]["task_id"] == "seed_task_0"
+    assert stored["episodes"][0]["truth_edges"]
+
+
 def test_space_snapshot_prefers_newer_evaluation_payload(tmp_path, monkeypatch):
     baseline_path = tmp_path / "baseline.json"
     evaluation_path = tmp_path / "evaluation.json"
