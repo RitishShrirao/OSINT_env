@@ -9,7 +9,7 @@ from threading import Lock
 from typing import Any
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from osint_env.api import (
@@ -403,9 +403,28 @@ def openenv_tasks() -> list[OpenEnvTaskSummary]:
 
 
 @app.post("/openenv/reset", response_model=OpenEnvResponseEnvelope)
-def openenv_reset(request: OpenEnvResetRequest | None = None) -> OpenEnvResponseEnvelope:
+async def openenv_reset(request: Request) -> OpenEnvResponseEnvelope:
     env = _build_environment()
-    reset_request = request or OpenEnvResetRequest()
+    raw_body = await request.body()
+    if not raw_body.strip():
+        payload: dict[str, Any] = {}
+    else:
+        try:
+            parsed_payload = json.loads(raw_body)
+        except json.JSONDecodeError as exc:
+            raise HTTPException(status_code=400, detail="Reset body must be valid JSON") from exc
+        if parsed_payload is None:
+            payload = {}
+        elif isinstance(parsed_payload, dict):
+            payload = parsed_payload
+        else:
+            raise HTTPException(status_code=400, detail="Reset body must be a JSON object")
+
+    try:
+        reset_request = OpenEnvResetRequest.model_validate(payload)
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail="Invalid reset request payload") from exc
+
     env._task_idx = _resolve_task_index(env, reset_request)
     observation = env.reset()
     session_id = str(uuid4())

@@ -72,6 +72,18 @@ def test_openenv_reset_accepts_empty_body():
     assert "session_id" in body
 
 
+def test_openenv_reset_accepts_empty_json_body():
+    reset = client.post(
+        "/openenv/reset",
+        data="",
+        headers={"Content-Type": "application/json"},
+    )
+    assert reset.status_code == 200
+    body = reset.json()
+    assert body["done"] is False
+    assert "session_id" in body
+
+
 def test_openenv_step_accepts_nested_action_payload():
     reset = client.post("/openenv/reset", json={"task_index": 0})
     assert reset.status_code == 200
