@@ -26,8 +26,27 @@ class OpenEnvResetRequest(BaseModel):
 
 class OpenEnvActionRequest(BaseModel):
     session_id: str
-    action_type: str = Field(description="One of CALL_TOOL, ADD_EDGE, ANSWER.")
+    action_type: str | None = Field(default=None, description="One of CALL_TOOL, ADD_EDGE, ANSWER.")
     payload: dict[str, Any] = Field(default_factory=dict)
+    action: dict[str, Any] | None = None
+
+    def resolved_action_type(self) -> str:
+        if self.action_type:
+            return str(self.action_type)
+        if isinstance(self.action, dict):
+            nested = self.action.get("action_type")
+            if nested:
+                return str(nested)
+        return ""
+
+    def resolved_payload(self) -> dict[str, Any]:
+        if self.payload:
+            return dict(self.payload)
+        if isinstance(self.action, dict):
+            nested = self.action.get("payload")
+            if isinstance(nested, dict):
+                return dict(nested)
+        return {}
 
 
 class OpenEnvResponseEnvelope(BaseModel):

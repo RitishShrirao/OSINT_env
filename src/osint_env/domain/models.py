@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class NodeType(str, Enum):
     USER = "user"
@@ -48,18 +50,44 @@ class ToolCall:
     args: dict[str, Any]
 
 
-@dataclass(slots=True)
-class Action:
+class Action(BaseModel):
+    """Structured action payload used by OpenEnv step()."""
+
+    model_config = ConfigDict(extra="forbid")
+
     action_type: ActionType
-    payload: dict[str, Any]
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        # Backward-compatible positional form: Action(action_type, payload)
+        if args:
+            if len(args) != 2:
+                raise TypeError("Action() accepts either keyword fields or 2 positional args")
+            if "action_type" in kwargs or "payload" in kwargs:
+                raise TypeError("Action() cannot mix positional and keyword fields")
+            kwargs["action_type"] = args[0]
+            kwargs["payload"] = args[1]
+        super().__init__(**kwargs)
 
 
-@dataclass(slots=True)
-class Observation:
-    tool_outputs: list[dict[str, Any]]
-    graph_snapshot: dict[str, Any]
-    action_history: list[dict[str, Any]]
-    task: dict[str, Any]
+class Observation(BaseModel):
+    """Typed observation payload returned by reset()/step()/state()."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    tool_outputs: list[dict[str, Any]] = Field(default_factory=list)
+    graph_snapshot: dict[str, Any] = Field(default_factory=dict)
+    action_history: list[dict[str, Any]] = Field(default_factory=list)
+    task: dict[str, Any] = Field(default_factory=dict)
+
+
+class Reward(BaseModel):
+    """Typed reward payload for structured reward accounting."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    value: float = 0.0
+    components: dict[str, float] = Field(default_factory=dict)
 
 
 @dataclass(slots=True)

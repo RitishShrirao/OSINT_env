@@ -19,6 +19,7 @@ dev = [
 
 [project.scripts]
 osint-env = "osint_env.cli:main"
+server = "osint_env.server_entry:main"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

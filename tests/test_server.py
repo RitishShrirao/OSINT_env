@@ -64,6 +64,33 @@ def test_openenv_reset_step_and_state_cycle():
     assert "task_answer" in step_body["info"]
 
 
+def test_openenv_reset_accepts_empty_body():
+    reset = client.post("/openenv/reset")
+    assert reset.status_code == 200
+    body = reset.json()
+    assert body["done"] is False
+    assert "session_id" in body
+
+
+def test_openenv_step_accepts_nested_action_payload():
+    reset = client.post("/openenv/reset", json={"task_index": 0})
+    assert reset.status_code == 200
+    session_id = reset.json()["session_id"]
+
+    step = client.post(
+        "/openenv/step",
+        json={
+            "session_id": session_id,
+            "action": {
+                "action_type": "ANSWER",
+                "payload": {"answer": "unknown"},
+            },
+        },
+    )
+    assert step.status_code == 200
+    assert step.json()["done"] is True
+
+
 def test_report_inference_updates_latest_evaluation_and_dashboard(tmp_path, monkeypatch):
     latest_evaluation = tmp_path / "latest_evaluation.json"
     space_dashboard = tmp_path / "space_dashboard.html"

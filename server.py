@@ -403,9 +403,10 @@ def openenv_tasks() -> list[OpenEnvTaskSummary]:
 
 
 @app.post("/openenv/reset", response_model=OpenEnvResponseEnvelope)
-def openenv_reset(request: OpenEnvResetRequest) -> OpenEnvResponseEnvelope:
+def openenv_reset(request: OpenEnvResetRequest | None = None) -> OpenEnvResponseEnvelope:
     env = _build_environment()
-    env._task_idx = _resolve_task_index(env, request)
+    reset_request = request or OpenEnvResetRequest()
+    env._task_idx = _resolve_task_index(env, reset_request)
     observation = env.reset()
     session_id = str(uuid4())
     _store_session(session_id, env)
@@ -421,11 +422,14 @@ def openenv_reset(request: OpenEnvResetRequest) -> OpenEnvResponseEnvelope:
 @app.post("/openenv/step", response_model=OpenEnvResponseEnvelope)
 def openenv_step(request: OpenEnvActionRequest) -> OpenEnvResponseEnvelope:
     env = _get_session_env(request.session_id)
+    action_type_raw = request.resolved_action_type().strip()
+    if not action_type_raw:
+        raise HTTPException(status_code=400, detail="Missing action_type")
     try:
-        action_type = ActionType(str(request.action_type))
+        action_type = ActionType(action_type_raw)
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=f"Unsupported action_type {request.action_type}") from exc
-    observation, reward, done, info = env.step(Action(action_type, dict(request.payload)))
+        raise HTTPException(status_code=400, detail=f"Unsupported action_type {action_type_raw}") from exc
+    observation, reward, done, info = env.step(Action(action_type=action_type, payload=request.resolved_payload()))
     return OpenEnvResponseEnvelope(
         session_id=request.session_id,
         observation=_serialize_observation(observation),

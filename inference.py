@@ -260,9 +260,14 @@ def _publish_inference_report(summary: dict[str, Any], episodes: list[dict[str, 
 
 
 def main() -> None:
-    api_key = OPENAI_API_KEY or HF_TOKEN or API_KEY
+    if not str(API_BASE_URL).strip():
+        raise SystemExit("Set API_BASE_URL before running inference.py.")
+    if not str(MODEL_NAME).strip():
+        raise SystemExit("Set MODEL_NAME before running inference.py.")
+
+    api_key = HF_TOKEN or OPENAI_API_KEY or API_KEY
     if not api_key:
-        raise SystemExit("Set HF_TOKEN, OPENAI_API_KEY, or API_KEY before running inference.py.")
+        raise SystemExit("Set HF_TOKEN (or OPENAI_API_KEY/API_KEY) before running inference.py.")
     if _looks_like_placeholder_api_key(api_key):
         raise SystemExit("Replace the placeholder with your real OpenAI API key.")
 
