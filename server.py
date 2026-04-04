@@ -404,6 +404,8 @@ def openenv_tasks() -> list[OpenEnvTaskSummary]:
 
 @app.post("/openenv/reset", response_model=OpenEnvResponseEnvelope)
 @app.post("/openenv/reset/", response_model=OpenEnvResponseEnvelope, include_in_schema=False)
+@app.post("/reset", response_model=OpenEnvResponseEnvelope, include_in_schema=False)
+@app.post("/reset/", response_model=OpenEnvResponseEnvelope, include_in_schema=False)
 async def openenv_reset(request: Request) -> OpenEnvResponseEnvelope:
     env = _build_environment()
     raw_body = await request.body()
