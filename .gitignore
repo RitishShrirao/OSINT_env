@@ -3,3 +3,4 @@ blueprint.txt
 *.egg-info
 artifacts/*
 *.html
+.venv/
