@@ -2,32 +2,71 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from typing import Any
 
-import requests
-from openai import OpenAI
-from requests import RequestException
-
-from osint_env.baselines.openai_runner import SYSTEM_PROMPT, build_action_tools
+from osint_env.agents.single_agent import SingleAgentRunner
+from osint_env.agents.swarm_agent import SwarmAgentRunner
+from osint_env.config import clone_environment_config, load_seeding_config, load_shared_config
+from osint_env.domain.models import EnvironmentConfig
+from osint_env.env.environment import OSINTEnvironment
+from osint_env.env.reward import compute_graph_f1
+from osint_env.eval.leaderboard import append_leaderboard_record, load_leaderboard
 from osint_env.eval.metrics import EvalMetrics
+from osint_env.llm import build_llm_client
+from osint_env.viz import export_dashboard
 
 
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
-MODEL_NAME = os.getenv("MODEL_NAME", "gpt-5.4-mini")
-HF_TOKEN = os.getenv("HF_TOKEN", "")
-API_KEY = os.getenv("API_KEY", "")
+CONFIG_PATH = os.getenv("CONFIG_PATH", "datasets/fixed_levels/shared_config_fixed_levels.json")
+SEED_FILE = os.getenv("SEED_FILE", "datasets/fixed_levels/seed_fixed_levels.json")
+AGENT_MODE = os.getenv("AGENT_MODE", "swarm")
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
+MODEL_NAME = os.getenv("MODEL_NAME", "qwen3:1.7b")
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-SPACE_URL = os.getenv("SPACE_URL", "https://siddeshwar1625-osint.hf.space").rstrip("/")
-
-MAX_STEPS = int(os.getenv("MAX_STEPS", "8"))
-TEMPERATURE = float(os.getenv("TEMPERATURE", "0.0"))
-MAX_TOKENS = int(os.getenv("MAX_TOKENS", "256"))
-REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "90"))
-TASK_INDICES = [int(part.strip()) for part in os.getenv("TASK_INDICES", "0,10,20").split(",") if part.strip()]
+OPENAI_API_KEY_ENV = os.getenv("OPENAI_API_KEY_ENV", "OPENAI_API_KEY")
+LLM_TIMEOUT_SECONDS = int(os.getenv("LLM_TIMEOUT_SECONDS", "0"))
+EPISODES = int(os.getenv("EPISODES", "1"))
 SUCCESS_SCORE_THRESHOLD = float(os.getenv("SUCCESS_SCORE_THRESHOLD", "0.67"))
+TASK_INDICES_RAW = os.getenv("TASK_INDICES", "")
+
+WRITE_BENCHMARK_ARTIFACTS = os.getenv("WRITE_BENCHMARK_ARTIFACTS", "1").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "y",
+    "on",
+}
+LEADERBOARD_PATH = os.getenv("LEADERBOARD_PATH", "datasets/fixed_levels/leaderboard_fixed_levels.json")
+DASHBOARD_PATH = os.getenv("DASHBOARD_PATH", "datasets/fixed_levels/dashboard_fixed_levels.html")
+RUN_NAME = os.getenv("RUN_NAME", "fixed_levels_qwen_swarm")
 
 BENCHMARK = "osint-openenv"
 TASK_NAME = "fixed_levels_easy_mid_hard"
+
+
+def _parse_task_indices(raw: str) -> list[int]:
+    out: list[int] = []
+    for token in str(raw or "").split(","):
+        stripped = token.strip()
+        if not stripped:
+            continue
+        try:
+            out.append(int(stripped))
+        except ValueError:
+            continue
+    return out
+
+
+def _normalize_ollama_base_url(url: str) -> str:
+    normalized = str(url or "").strip().rstrip("/")
+    if normalized.endswith("/v1"):
+        normalized = normalized[:-3].rstrip("/")
+    return normalized or "http://127.0.0.1:11434"
+
+
+TASK_INDICES = _parse_task_indices(TASK_INDICES_RAW)
 
 
 def log_start(task: str, env: str, model: str) -> None:
@@ -70,92 +109,33 @@ def _looks_like_placeholder_api_key(value: str) -> bool:
     return any(marker in token for marker in placeholder_markers)
 
 
-def _supports_reasoning_effort_in_chat_completions(model: str) -> bool:
-    model_name = str(model).strip().lower()
-    if model_name.startswith("gpt-5.4-mini"):
-        return False
-    return model_name.startswith("gpt-5")
-
-
-def _request_kwargs(messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> dict[str, Any]:
-    kwargs: dict[str, Any] = {
-        "model": MODEL_NAME,
-        "messages": messages,
-        "tools": tools,
-        "tool_choice": "required",
-        "parallel_tool_calls": False,
-    }
-    if MODEL_NAME.strip().lower().startswith("gpt-5"):
-        kwargs["max_completion_tokens"] = MAX_TOKENS
-        if _supports_reasoning_effort_in_chat_completions(MODEL_NAME):
-            kwargs["reasoning_effort"] = "none"
-    else:
-        kwargs["temperature"] = TEMPERATURE
-        kwargs["max_tokens"] = MAX_TOKENS
-    return kwargs
-
-
-def _message_text(message: Any) -> str:
-    content = getattr(message, "content", "")
-    if isinstance(content, str):
-        return content
-    if isinstance(content, list):
-        parts: list[str] = []
-        for item in content:
-            if isinstance(item, dict) and item.get("type") == "text":
-                parts.append(str(item.get("text", "")))
-        return "\n".join(part for part in parts if part)
-    return str(content or "")
-
-
-def _space_get(path: str) -> dict[str, Any]:
-    response = requests.get(f"{SPACE_URL}{path}", timeout=REQUEST_TIMEOUT)
-    response.raise_for_status()
-    return response.json()
-
-
-def _space_post(path: str, payload: dict[str, Any]) -> dict[str, Any]:
-    response = requests.post(f"{SPACE_URL}{path}", json=payload, timeout=REQUEST_TIMEOUT)
-    response.raise_for_status()
-    return response.json()
-
-
-def _decode_action(tool_name: str, args: dict[str, Any]) -> dict[str, Any]:
-    if tool_name == "submit_answer":
-        return {"action_type": "ANSWER", "payload": {"answer": str(args.get("answer", "")).strip()}}
-    if tool_name == "add_edge":
-        return {
-            "action_type": "ADD_EDGE",
-            "payload": {
-                "src": str(args.get("src", "")).strip(),
-                "rel": str(args.get("rel", "")).strip(),
-                "dst": str(args.get("dst", "")).strip(),
-                "confidence": float(args.get("confidence", 1.0)),
-            },
-        }
-    return {"action_type": "CALL_TOOL", "payload": {"tool_name": tool_name, "args": dict(args)}}
-
-
 def _format_action(action: dict[str, Any]) -> str:
-    action_type = str(action.get("action_type", ""))
+    action_type = str(action.get("action_type", "")).upper()
     payload = dict(action.get("payload", {}))
+
     if action_type == "ANSWER":
-        return f"answer({payload.get('answer', 'unknown')})"
+        return f"answer({str(payload.get('answer', 'unknown')).strip()})"
+
     if action_type == "ADD_EDGE":
+        try:
+            conf = float(payload.get("confidence", 1.0))
+        except (TypeError, ValueError):
+            conf = 1.0
         return (
             "add_edge("
             f"{payload.get('src', '')},"
             f"{payload.get('rel', '')},"
             f"{payload.get('dst', '')},"
-            f"{float(payload.get('confidence', 1.0)):.2f}"
+            f"{conf:.2f}"
             ")"
         )
-    tool_name = str(payload.get("tool_name", "tool"))
-    args = dict(payload.get("args", {}))
-    if not args:
+
+    tool_name = str(payload.get("tool_name", "tool")).strip() or "tool"
+    args = payload.get("args", {})
+    if not isinstance(args, dict) or not args:
         return f"{tool_name}()"
-    arg_str = ",".join(f"{key}={value}" for key, value in sorted(args.items()))
-    return f"{tool_name}({arg_str})"
+    args_text = ",".join(f"{key}={value}" for key, value in sorted(args.items()))
+    return f"{tool_name}({args_text})"
 
 
 def _assistant_tool_call_id(message: dict[str, Any]) -> str | None:
@@ -177,174 +157,257 @@ def _tool_result_message(assistant_message: dict[str, Any], result: dict[str, An
     }
 
 
-def get_model_action(client: OpenAI, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:
-    try:
-        completion = client.chat.completions.create(**_request_kwargs(messages, tools))
-        message = completion.choices[0].message
-        tool_calls = list(message.tool_calls or [])
-        if not tool_calls:
-            fallback_answer = _message_text(message).strip() or "unknown"
-            return {"action_type": "ANSWER", "payload": {"answer": fallback_answer}}, {
-                "role": "assistant",
-                "content": _message_text(message),
-            }
-        tool_call = tool_calls[0]
-        try:
-            args = json.loads(tool_call.function.arguments or "{}")
-        except json.JSONDecodeError:
-            args = {}
-        if not isinstance(args, dict):
-            args = {}
-        assistant_message = {
-            "role": "assistant",
-            "content": _message_text(message),
-            "tool_calls": [
-                {
-                    "id": tool_call.id,
-                    "type": "function",
-                    "function": {
-                        "name": str(tool_call.function.name),
-                        "arguments": json.dumps(args, sort_keys=True),
-                    },
-                }
-            ],
+def _resolve_environment_config() -> EnvironmentConfig:
+    shared = load_shared_config(CONFIG_PATH)
+    env_cfg = clone_environment_config(shared.environment)
+
+    if SEED_FILE and Path(SEED_FILE).exists():
+        env_cfg.seeding = load_seeding_config(SEED_FILE)
+
+    mode = AGENT_MODE.strip().lower()
+    if mode == "single":
+        env_cfg.swarm.enabled = False
+    elif mode == "swarm":
+        env_cfg.swarm.enabled = True
+
+    provider = LLM_PROVIDER.strip().lower()
+    if provider and provider != "config":
+        env_cfg.llm.provider = provider
+
+    if MODEL_NAME.strip():
+        env_cfg.llm.model = MODEL_NAME.strip()
+
+    if LLM_TIMEOUT_SECONDS > 0:
+        env_cfg.llm.timeout_seconds = int(LLM_TIMEOUT_SECONDS)
+
+    api_base_override = os.getenv("API_BASE_URL", "")
+    if api_base_override.strip() or OLLAMA_BASE_URL.strip():
+        env_cfg.llm.ollama_base_url = _normalize_ollama_base_url(api_base_override or OLLAMA_BASE_URL)
+
+    if OPENAI_BASE_URL.strip():
+        env_cfg.llm.openai_base_url = OPENAI_BASE_URL.strip()
+
+    if OPENAI_API_KEY.strip():
+        env_cfg.llm.openai_api_key = OPENAI_API_KEY.strip()
+
+    if OPENAI_API_KEY_ENV.strip():
+        env_cfg.llm.openai_api_key_env = OPENAI_API_KEY_ENV.strip()
+
+    return env_cfg
+
+
+def _runner_for(env: OSINTEnvironment, llm: Any) -> SingleAgentRunner | SwarmAgentRunner:
+    if env.config.swarm.enabled:
+        return SwarmAgentRunner(env=env, llm=llm)
+    return SingleAgentRunner(env=env, llm=llm)
+
+
+def _episode_row(env: OSINTEnvironment, info: dict[str, Any]) -> dict[str, Any]:
+    if env.state is None:
+        return {
+            "task_id": "unknown",
+            "task_type": "unknown",
+            "question": "",
+            "task_answer": str(info.get("task_answer", "")),
+            "agent_answer": str(info.get("agent_answer", "")),
+            "graph_f1": 0.0,
+            "reward": float(info.get("total_reward", 0.0) or 0.0),
+            "steps": int(info.get("step_count", 0) or 0),
+            "tool_calls": int(info.get("tool_calls", 0) or 0),
+            "success": int(info.get("agent_answer") == info.get("task_answer")),
+            "reward_components": dict(info.get("reward_components", {})),
+            "pred_edges": [],
+            "truth_edges": [],
         }
-        return _decode_action(str(tool_call.function.name), args), assistant_message
-    except Exception as exc:
-        print(f"[DEBUG] Model request failed: {exc}", flush=True)
-        return {"action_type": "ANSWER", "payload": {"answer": "unknown"}}, {"role": "assistant", "content": ""}
 
-
-def _episode_row(result: dict[str, Any], task_meta: dict[str, Any]) -> dict[str, Any]:
-    info = dict(result.get("info", {}))
-    graph_snapshot = dict((result.get("observation") or {}).get("graph_snapshot", {}))
-    task_type = str(task_meta.get("task_type", "unknown"))
-    task_id = str(task_meta.get("task_id", "unknown"))
-    question = str(task_meta.get("question", ""))
-    task_answer = str(info.get("task_answer", ""))
-    agent_answer = str(info.get("agent_answer", ""))
-    graph_f1 = float(info.get("graph_f1", 0.0) or 0.0)
+    graph_f1 = compute_graph_f1(env.memory_graph.edges, env.state.task.supporting_edges)
     return {
-        "task_id": task_id,
-        "task_type": task_type,
-        "question": question,
-        "task_answer": task_answer,
-        "agent_answer": agent_answer,
+        "task_id": env.state.task.task_id,
+        "task_type": env.state.task.task_type,
+        "question": env.state.task.question,
+        "task_answer": str(info.get("task_answer", "")),
+        "agent_answer": str(info.get("agent_answer", "")) if info.get("agent_answer") is not None else "",
         "graph_f1": graph_f1,
         "reward": float(info.get("total_reward", 0.0) or 0.0),
         "steps": int(info.get("step_count", 0) or 0),
         "tool_calls": int(info.get("tool_calls", 0) or 0),
-        "success": int(bool(agent_answer) and agent_answer == task_answer),
+        "success": int(info.get("agent_answer") == info.get("task_answer")),
         "reward_components": dict(info.get("reward_components", {})),
-        "pred_edges": list(graph_snapshot.get("edges", [])),
-        "truth_edges": [],
+        "spawn_count": int(info.get("spawn_count", 0) or 0),
+        "spawn_critical_steps": int(info.get("spawn_critical_steps", 0) or 0),
+        "pred_edges": [
+            {
+                "src": edge.src,
+                "rel": edge.rel,
+                "dst": edge.dst,
+                "confidence": float(edge.confidence),
+            }
+            for edge in env.memory_graph.edges
+        ],
+        "truth_edges": [
+            {
+                "src": edge.src,
+                "rel": edge.rel,
+                "dst": edge.dst,
+                "confidence": float(edge.confidence),
+            }
+            for edge in env.state.task.supporting_edges
+        ],
     }
 
 
-def _publish_inference_report(summary: dict[str, Any], episodes: list[dict[str, Any]]) -> None:
-    payload = {
-        "run": {
-            "name": "inference_py_run",
-            "model": MODEL_NAME,
-            "space_url": SPACE_URL,
-            "task_indices": TASK_INDICES,
-            "max_steps": MAX_STEPS,
+def _format_action_from_history(item: dict[str, Any]) -> str:
+    action_type = str(item.get("type", "")).upper()
+    payload = dict(item.get("payload", {}))
+
+    if action_type == "ANSWER":
+        return f"answer({str(payload.get('answer', 'unknown')).strip()})"
+
+    if action_type == "ADD_EDGE":
+        try:
+            conf = float(payload.get("confidence", 1.0))
+        except (TypeError, ValueError):
+            conf = 1.0
+        return (
+            "add_edge("
+            f"{payload.get('src', '')},"
+            f"{payload.get('rel', '')},"
+            f"{payload.get('dst', '')},"
+            f"{conf:.2f}"
+            ")"
+        )
+
+    tool_name = str(payload.get("tool_name", "tool")).strip() or "tool"
+    args = payload.get("args", {})
+    if not isinstance(args, dict) or not args:
+        return f"{tool_name}()"
+    args_text = ",".join(f"{key}={value}" for key, value in sorted(args.items()))
+    return f"{tool_name}({args_text})"
+
+
+def _task_targets(env: OSINTEnvironment, episodes: int, task_indices: list[int]) -> list[int | None]:
+    if task_indices:
+        task_count = max(1, len(env.tasks))
+        return [index % task_count for index in task_indices]
+    return [None] * max(1, episodes)
+
+
+def _run_with_runner(
+    env: OSINTEnvironment,
+    runner: SingleAgentRunner | SwarmAgentRunner,
+    episodes: int,
+    task_indices: list[int],
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[float], int]:
+    metrics = EvalMetrics()
+    episode_rows: list[dict[str, Any]] = []
+    rewards: list[float] = []
+    steps_taken = 0
+
+    for task_index in _task_targets(env, episodes, task_indices):
+        if task_index is not None:
+            # Keep compatibility with explicit task selection from the previous inference script.
+            env._task_idx = task_index
+
+        info = runner.run_episode()
+        if env.state is None:
+            continue
+
+        history = list(env.state.action_history)
+        for idx, action_item in enumerate(history, start=1):
+            reward = float(action_item.get("reward", 0.0) or 0.0)
+            rewards.append(reward)
+            steps_taken += 1
+            done = idx == len(history)
+            log_step(
+                step=steps_taken,
+                action=_format_action_from_history(action_item),
+                reward=reward,
+                done=done,
+                error=None,
+            )
+
+        graph_f1 = compute_graph_f1(env.memory_graph.edges, env.state.task.supporting_edges)
+        metrics.add(info, task_type=env.state.task.task_type, graph_f1=graph_f1)
+        episode_rows.append(_episode_row(env, info))
+
+    return metrics.summary(), episode_rows, rewards, steps_taken
+
+
+def _maybe_write_artifacts(
+    env: OSINTEnvironment,
+    summary: dict[str, Any],
+    episodes: int,
+    episode_rows: list[dict[str, Any]],
+) -> tuple[dict[str, Any] | None, str | None]:
+    if not WRITE_BENCHMARK_ARTIFACTS:
+        return None, None
+
+    record = append_leaderboard_record(
+        path=LEADERBOARD_PATH,
+        summary=summary,
+        episodes=episodes,
+        run_name=RUN_NAME or None,
+        config={
+            "seed": env.config.seed,
+            "max_steps": env.config.max_steps,
+            "swarm_enabled": env.config.swarm.enabled,
+            "max_agents": env.config.swarm.max_agents,
+            "max_breadth": env.config.swarm.max_breadth,
+            "max_width": env.config.swarm.max_width,
+            "max_depth": env.config.swarm.max_depth,
+            "seeded_questions": len(env.config.seeding.seeded_questions),
+            "llm_provider": env.config.llm.provider,
+            "llm_model": env.config.llm.model,
         },
-        "summary": summary,
-        "episodes": episodes,
-    }
-    try:
-        _space_post("/openenv/report_inference", payload)
-    except RequestException as exc:
-        print(f"[DEBUG] Failed to publish inference report: {exc}", flush=True)
+    )
+
+    leaderboard = load_leaderboard(LEADERBOARD_PATH)
+    dashboard = export_dashboard(
+        env=env,
+        evaluation={"summary": summary, "episodes": episode_rows},
+        leaderboard_records=leaderboard,
+        output_path=DASHBOARD_PATH,
+    )
+    return record, dashboard
 
 
 def main() -> None:
-    if not str(API_BASE_URL).strip():
-        raise SystemExit("Set API_BASE_URL before running inference.py.")
-    if not str(MODEL_NAME).strip():
-        raise SystemExit("Set MODEL_NAME before running inference.py.")
+    env_cfg = _resolve_environment_config()
+    llm_client = build_llm_client(env_cfg.llm)
+    env = OSINTEnvironment(env_cfg, llm=llm_client)
+    runner = _runner_for(env, llm_client)
 
-    api_key = HF_TOKEN or OPENAI_API_KEY or API_KEY
-    if not api_key:
-        raise SystemExit("Set HF_TOKEN (or OPENAI_API_KEY/API_KEY) before running inference.py.")
-    if _looks_like_placeholder_api_key(api_key):
-        raise SystemExit("Replace the placeholder with your real OpenAI API key.")
+    log_start(task=TASK_NAME, env=BENCHMARK, model=env_cfg.llm.model)
 
-    try:
-        ping = _space_get("/healthz")
-        if ping.get("status") != "ok":
-            raise SystemExit(f"Unexpected healthz payload: {ping}")
-    except RequestException as exc:
-        raise SystemExit(f"Space ping failed: {exc}") from exc
+    episodes = len(TASK_INDICES) if TASK_INDICES else max(1, EPISODES)
+    summary, episode_rows, rewards, steps_taken = _run_with_runner(
+        env=env,
+        runner=runner,
+        episodes=episodes,
+        task_indices=TASK_INDICES,
+    )
 
-    client = OpenAI(base_url=API_BASE_URL, api_key=api_key, timeout=REQUEST_TIMEOUT)
-    tools = build_action_tools()
-
-    history: list[str] = []
-    rewards: list[float] = []
-    task_scores: list[float] = []
-    episode_rows: list[dict[str, Any]] = []
-    metrics = EvalMetrics()
-    steps_taken = 0
-
-    log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
-
-    for task_index in TASK_INDICES:
-        result = _space_post("/openenv/reset", {"task_index": task_index})
-        session_id = str(result["session_id"])
-        done = bool(result.get("done", False))
-        task_meta = dict((result.get("observation") or {}).get("task", {}))
-        messages: list[dict[str, Any]] = [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": json.dumps(result["observation"], indent=2, sort_keys=True),
-            },
-        ]
-
-        for local_step in range(1, MAX_STEPS + 1):
-            if done:
-                break
-            action, assistant_message = get_model_action(client, messages, tools)
-            error = None
-            try:
-                result = _space_post(
-                    "/openenv/step",
-                    {
-                        "session_id": session_id,
-                        "action_type": action["action_type"],
-                        "payload": action["payload"],
-                    },
-                )
-            except RequestException as exc:
-                error = str(exc)
-                result = _space_get(f"/openenv/state/{session_id}")
-            reward = float(result.get("reward", 0.0) or 0.0)
-            done = bool(result.get("done", False))
-            rewards.append(reward)
-            steps_taken += 1
-            log_step(step=steps_taken, action=_format_action(action), reward=reward, done=done, error=error)
-            history.append(f"step={steps_taken} task_index={task_index} reward={reward:+.4f}")
-            messages.append(assistant_message)
-            tool_message = _tool_result_message(assistant_message, result)
-            if tool_message is not None:
-                messages.append(tool_message)
-            if done:
-                break
-
-        info = dict(result.get("info", {}))
-        task_answer = str(info.get("task_answer", ""))
-        agent_answer = str(info.get("agent_answer", ""))
-        task_scores.append(1.0 if agent_answer and agent_answer == task_answer else 0.0)
-        episode_row = _episode_row(result, task_meta)
-        episode_rows.append(episode_row)
-        metrics.add(info, task_type=episode_row["task_type"], graph_f1=float(episode_row["graph_f1"]))
-
-    score = sum(task_scores) / max(1, len(task_scores))
+    score = float(summary.get("task_success_rate", 0.0) or 0.0)
     success = score >= SUCCESS_SCORE_THRESHOLD
     log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
-    _publish_inference_report(metrics.summary(), episode_rows)
+
+    record, dashboard = _maybe_write_artifacts(
+        env=env,
+        summary=summary,
+        episodes=episodes,
+        episode_rows=episode_rows,
+    )
+
+    payload: dict[str, Any] = {
+        "summary": summary,
+        "episodes": episode_rows,
+    }
+    if record is not None:
+        payload["record"] = record
+    if dashboard is not None:
+        payload["dashboard"] = dashboard
+
+    print(json.dumps(payload, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":
