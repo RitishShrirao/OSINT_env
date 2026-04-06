@@ -89,6 +89,74 @@ def log_end(success: bool, steps: int, score: float, rewards: list[float]) -> No
     )
 
 
+def _looks_like_placeholder_api_key(value: str) -> bool:
+    token = str(value or "").strip().lower()
+    if not token:
+        return True
+    placeholder_markers = [
+        "your_openai_api_key",
+        "your-key",
+        "your_key",
+        "your real",
+        "real-openai-key",
+        "replace-me",
+        "changeme",
+        "example",
+        "<api-key>",
+    ]
+    if token.startswith("your_") or token.startswith("sk-your-"):
+        return True
+    return any(marker in token for marker in placeholder_markers)
+
+
+def _format_action(action: dict[str, Any]) -> str:
+    action_type = str(action.get("action_type", "")).upper()
+    payload = dict(action.get("payload", {}))
+
+    if action_type == "ANSWER":
+        return f"answer({str(payload.get('answer', 'unknown')).strip()})"
+
+    if action_type == "ADD_EDGE":
+        try:
+            conf = float(payload.get("confidence", 1.0))
+        except (TypeError, ValueError):
+            conf = 1.0
+        return (
+            "add_edge("
+            f"{payload.get('src', '')},"
+            f"{payload.get('rel', '')},"
+            f"{payload.get('dst', '')},"
+            f"{conf:.2f}"
+            ")"
+        )
+
+    tool_name = str(payload.get("tool_name", "tool")).strip() or "tool"
+    args = payload.get("args", {})
+    if not isinstance(args, dict) or not args:
+        return f"{tool_name}()"
+    args_text = ",".join(f"{key}={value}" for key, value in sorted(args.items()))
+    return f"{tool_name}({args_text})"
+
+
+def _assistant_tool_call_id(message: dict[str, Any]) -> str | None:
+    tool_calls = list(message.get("tool_calls", []))
+    if not tool_calls:
+        return None
+    tool_call_id = tool_calls[0].get("id")
+    return str(tool_call_id) if tool_call_id else None
+
+
+def _tool_result_message(assistant_message: dict[str, Any], result: dict[str, Any]) -> dict[str, Any] | None:
+    tool_call_id = _assistant_tool_call_id(assistant_message)
+    if not tool_call_id:
+        return None
+    return {
+        "role": "tool",
+        "tool_call_id": tool_call_id,
+        "content": json.dumps(result, sort_keys=True),
+    }
+
+
 def _resolve_environment_config() -> EnvironmentConfig:
     shared = load_shared_config(CONFIG_PATH)
     env_cfg = clone_environment_config(shared.environment)
