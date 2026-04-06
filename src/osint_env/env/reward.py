@@ -170,6 +170,15 @@ def _connectivity_gain(edge: Edge, existing_edges: list[Edge]) -> float:
     return 0.10
 
 
+def _sigmoid_temperature(value: float, temperature: float = 2.0) -> float:
+    scaled = float(value) / max(1e-6, float(temperature))
+    if scaled >= 0:
+        z = math.exp(-scaled)
+        return 1.0 / (1.0 + z)
+    z = math.exp(scaled)
+    return z / (1.0 + z)
+
+
 def compute_edge_reward(
     edge: Edge,
     task: TaskInstance,
@@ -207,7 +216,7 @@ def compute_edge_reward(
     # Additional structural utility shaping for KG construction.
     connectivity_gain = _connectivity_gain(edge, existing_edges)
 
-    total = (
+    raw_total = (
         global_accuracy
         + soft_shaping
         + efficiency
@@ -216,6 +225,7 @@ def compute_edge_reward(
         + entity_informativeness
         + connectivity_gain
     )
+    total = _sigmoid_temperature(raw_total, temperature=2.0)
     return EdgeRewardBreakdown(
         total=total,
         global_accuracy=global_accuracy,
@@ -383,7 +393,7 @@ def compute_answer_reward(
     # AutoGraph-R1 repetition control variant used in larger models.
     repetition_penalty = -0.10 * _relation_repetition_ratio(pred_edges)
 
-    total = (
+    raw_total = (
         format_reward
         + correctness
         + knowledge_carrier
@@ -396,6 +406,7 @@ def compute_answer_reward(
         + entity_informativeness
         + repetition_penalty
     )
+    total = _sigmoid_temperature(raw_total, temperature=2.0)
     return AnswerRewardBreakdown(
         total=total,
         format_reward=format_reward,

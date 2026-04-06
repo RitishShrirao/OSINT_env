@@ -29,6 +29,15 @@ class EvalMetrics:
     total_spawn_finished_subtasks: int = 0
     total_spawn_critical_steps: int = 0
 
+    @staticmethod
+    def _sigmoid_temperature(value: float, temperature: float = 2.0) -> float:
+        scaled = float(value) / max(1e-6, float(temperature))
+        if scaled >= 0:
+            z = math.exp(-scaled)
+            return 1.0 / (1.0 + z)
+        z = math.exp(scaled)
+        return z / (1.0 + z)
+
     def add(self, info: dict, task_type: str, graph_f1: float) -> None:
         self.episodes += 1
         ok = info.get("agent_answer") == info.get("task_answer")
@@ -62,7 +71,8 @@ class EvalMetrics:
         tool_efficiency = 1.0 - (self.total_redundant_tool_calls / max(1, self.total_tool_calls))
         avg_graph_f1 = sum(self.graph_f1_scores) / max(1, len(self.graph_f1_scores))
         deanonymization_accuracy = self.deanonymization_success / max(1, self.deanonymization_total)
-        avg_reward = self.total_reward / episodes
+        avg_reward_raw = self.total_reward / episodes
+        avg_reward = self._sigmoid_temperature(avg_reward_raw, temperature=2.0)
         avg_knowledge_carrier = self.total_knowledge_carrier / episodes
         avg_knowledge_indexing = self.total_knowledge_indexing / episodes
         avg_connectivity = self.total_connectivity / episodes
@@ -78,7 +88,7 @@ class EvalMetrics:
         spawn_latency_signal = 1.0 / max(1.0, avg_spawn_critical_steps)
         spawn_signal = max(0.0, min(1.0, 0.6 * spawn_completion + 0.4 * spawn_latency_signal))
 
-        reward_norm = 1.0 / (1.0 + math.exp(-avg_reward))
+        reward_norm = avg_reward
         retrieval_signal = max(0.0, min(1.0, 0.5 + 0.35 * avg_knowledge_carrier + 0.35 * avg_knowledge_indexing))
         structural_signal = max(
             0.0,
