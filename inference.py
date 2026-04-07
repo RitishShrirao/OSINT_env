@@ -298,7 +298,7 @@ def _episode_row(env: OSINTEnvironment, info: dict[str, Any]) -> dict[str, Any]:
 
 
 def _format_action_from_history(item: dict[str, Any]) -> str:
-    action_type = str(item.get("type", "")).upper()
+    action_type = str(item.get("type", "")).upper() 
     payload = dict(item.get("payload", {}))
 
     if action_type == "ANSWER":
