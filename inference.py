@@ -94,10 +94,10 @@ def log_step(step: int, action: str, reward: float, done: bool, error: str | Non
     )
 
 
-def log_end(success: bool, steps: int, score: float, rewards: list[float]) -> None:
+def log_end(task: str, success: bool, steps: int, score: float, rewards: list[float]) -> None:
     rewards_text = ",".join(f"{value:.2f}" for value in rewards)
     print(
-        f"[END] success={str(bool(success)).lower()} steps={steps} score={score:.2f} rewards={rewards_text}",
+        f"[END] task={task} success={str(bool(success)).lower()} steps={steps} score={score:.2f} rewards={rewards_text}",
         flush=True,
     )
 
@@ -441,8 +441,9 @@ def main() -> None:
     )
 
     score = float(summary.get("avg_reward", 0.0) or 0.0)
+    score = max(0.01, min(0.99, score))
     success = score >= SUCCESS_SCORE_THRESHOLD
-    log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
+    log_end(task=TASK_NAME, success=success, steps=steps_taken, score=score, rewards=rewards)
 
     record, dashboard = _maybe_write_artifacts(
         env=env,
