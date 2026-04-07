@@ -20,12 +20,16 @@ from osint_env.viz import export_dashboard
 CONFIG_PATH = os.getenv("CONFIG_PATH", "datasets/fixed_levels/shared_config_fixed_levels.json")
 SEED_FILE = os.getenv("SEED_FILE", "datasets/fixed_levels/seed_fixed_levels.json")
 AGENT_MODE = os.getenv("AGENT_MODE", "swarm")
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
-MODEL_NAME = os.getenv("MODEL_NAME", "qwen3:1.7b")
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai")
+MODEL_NAME = os.getenv("MODEL_NAME", "gpt-5.4-mini")
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_API_KEY_ENV = os.getenv("OPENAI_API_KEY_ENV", "OPENAI_API_KEY")
+API_BASE_URL = os.getenv("API_BASE_URL", "")
+API_KEY = os.getenv("API_KEY", "")
+HF_SPACE_URL = os.getenv("HF_SPACE_URL", "")
+HF_TOKEN = os.getenv("HF_TOKEN", "")
 LLM_TIMEOUT_SECONDS = int(os.getenv("LLM_TIMEOUT_SECONDS", "0"))
 EPISODES = int(os.getenv("EPISODES", "1"))
 SUCCESS_SCORE_THRESHOLD = float(os.getenv("SUCCESS_SCORE_THRESHOLD", "0.67"))
@@ -64,6 +68,15 @@ def _normalize_ollama_base_url(url: str) -> str:
     if normalized.endswith("/v1"):
         normalized = normalized[:-3].rstrip("/")
     return normalized or "http://127.0.0.1:11434"
+
+
+def _normalize_openai_base_url(url: str) -> str:
+    normalized = str(url or "").strip().rstrip("/")
+    if not normalized:
+        return ""
+    if normalized.endswith("/v1"):
+        return normalized
+    return f"{normalized}/v1"
 
 
 TASK_INDICES = _parse_task_indices(TASK_INDICES_RAW)
@@ -180,15 +193,20 @@ def _resolve_environment_config() -> EnvironmentConfig:
     if LLM_TIMEOUT_SECONDS > 0:
         env_cfg.llm.timeout_seconds = int(LLM_TIMEOUT_SECONDS)
 
-    api_base_override = os.getenv("API_BASE_URL", "")
-    if api_base_override.strip() or OLLAMA_BASE_URL.strip():
-        env_cfg.llm.ollama_base_url = _normalize_ollama_base_url(api_base_override or OLLAMA_BASE_URL)
+    if provider == "openai":
+        # Evaluation harnesses often inject API_BASE_URL/API_KEY for proxy enforcement.
+        resolved_openai_base = API_BASE_URL.strip() or OPENAI_BASE_URL.strip() or HF_SPACE_URL.strip()
+        if resolved_openai_base:
+            env_cfg.llm.openai_base_url = _normalize_openai_base_url(resolved_openai_base)
 
-    if OPENAI_BASE_URL.strip():
-        env_cfg.llm.openai_base_url = OPENAI_BASE_URL.strip()
-
-    if OPENAI_API_KEY.strip():
-        env_cfg.llm.openai_api_key = OPENAI_API_KEY.strip()
+        if API_KEY.strip():
+            env_cfg.llm.openai_api_key = API_KEY.strip()
+        elif OPENAI_API_KEY.strip():
+            env_cfg.llm.openai_api_key = OPENAI_API_KEY.strip()
+        elif HF_TOKEN.strip():
+            env_cfg.llm.openai_api_key = HF_TOKEN.strip()
+    elif API_BASE_URL.strip() or OLLAMA_BASE_URL.strip():
+        env_cfg.llm.ollama_base_url = _normalize_ollama_base_url(API_BASE_URL or OLLAMA_BASE_URL)
 
     if OPENAI_API_KEY_ENV.strip():
         env_cfg.llm.openai_api_key_env = OPENAI_API_KEY_ENV.strip()
@@ -387,7 +405,7 @@ def main() -> None:
         task_indices=TASK_INDICES,
     )
 
-    score = float(summary.get("task_success_rate", 0.0) or 0.0)
+    score = float(summary.get("avg_reward", 0.0) or 0.0)
     success = score >= SUCCESS_SCORE_THRESHOLD
     log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
 
