@@ -6,6 +6,8 @@ def test_episode_flow():
     env = OSINTEnvironment(EnvironmentConfig(max_steps=5, seed=5))
     obs = env.reset()
     assert "question" in obs.task
+    assert isinstance(obs.task.get("grader"), dict)
+    assert "type" in obs.task["grader"]
     obs, r1, done, _ = env.step(Action(ActionType.CALL_TOOL, {"tool_name": "search_posts", "args": {"query": "Update"}}))
     assert done is False
     assert isinstance(r1, float)

@@ -354,6 +354,14 @@ class DatasetGenerator:
             }.get(difficulty, "full_reward"),
         }
 
+    def _task_metadata(self, index: int, base_task_type: str, metadata: dict[str, Any] | None = None) -> dict[str, Any]:
+        out = dict(metadata or {})
+        difficulty = self._normalize_difficulty(out.get("difficulty", ""), index)
+        out["difficulty"] = difficulty
+        out.setdefault("grader", self._grader_for_difficulty(difficulty))
+        out.setdefault("scenario", self._task_type_for_difficulty(base_task_type, difficulty))
+        return out
+
     def _infer_answer_from_question(self, question: str, graph: CanonicalGraph) -> str:
         entities = self._extract_entity_tokens(question)
         question_l = question.lower()
@@ -401,11 +409,8 @@ class DatasetGenerator:
         tasks: list[TaskInstance] = []
         for idx, question_spec in enumerate(self.config.seeding.seeded_questions):
             answer = question_spec.answer or self._infer_answer_from_question(question_spec.question, graph)
-            metadata = dict(question_spec.metadata)
-            difficulty = self._normalize_difficulty(metadata.get("difficulty", ""), idx)
-            metadata["difficulty"] = difficulty
-            metadata.setdefault("grader", self._grader_for_difficulty(difficulty))
-            metadata.setdefault("scenario", self._task_type_for_difficulty(question_spec.task_type, difficulty))
+            metadata = self._task_metadata(idx, question_spec.task_type, dict(question_spec.metadata))
+            difficulty = str(metadata.get("difficulty", "hard"))
             if question_spec.supporting_edges:
                 support = [
                     Edge(src=e.src, rel=e.rel, dst=e.dst, confidence=float(e.confidence))
@@ -458,6 +463,7 @@ class DatasetGenerator:
                     question=q,
                     answer=a,
                     supporting_edges=support,
+                    metadata=self._task_metadata(start_idx + i, mode),
                 )
             )
         return tasks
@@ -534,7 +540,11 @@ class DatasetGenerator:
                         question=question,
                         answer=answer,
                         supporting_edges=support,
-                        metadata={"generated_by": "llm", "shared_context": True},
+                        metadata=self._task_metadata(
+                            start_idx + len(llm_tasks),
+                            task_type,
+                            {"generated_by": "llm", "shared_context": True},
+                        ),
                     )
                 )
                 if len(llm_tasks) >= count:
@@ -579,7 +589,11 @@ class DatasetGenerator:
                             question=question,
                             answer=answer,
                             supporting_edges=support,
-                            metadata={"generated_by": "llm", "shared_context": True},
+                            metadata=self._task_metadata(
+                                start_idx + len(llm_tasks),
+                                task_type,
+                                {"generated_by": "llm", "shared_context": True},
+                            ),
                         )
                     )
                     if len(llm_tasks) >= count:

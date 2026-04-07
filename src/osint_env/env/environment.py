@@ -216,11 +216,31 @@ class OSINTEnvironment(Env):
     def _observation(self) -> Observation:
         if self.state is None:
             raise RuntimeError("State is not initialized.")
+        metadata = dict(self.state.task.metadata or {})
+        grader = metadata.get("grader") if isinstance(metadata.get("grader"), dict) else None
+        task_payload = {
+            "task_id": self.state.task.task_id,
+            "task_type": self.state.task.task_type,
+            "question": self.state.task.question,
+            "difficulty": self.state.difficulty,
+            "grader": (
+                dict(grader)
+                if grader is not None
+                else {
+                    "type": "difficulty_exact_match",
+                    "answer_type": "node_id",
+                    "case_sensitive": True,
+                    "reward_profile": self.state.difficulty,
+                }
+            ),
+        }
+        if "scenario" in metadata:
+            task_payload["scenario"] = str(metadata.get("scenario", ""))
         return Observation(
             tool_outputs=self.state.tool_outputs[-5:],
             graph_snapshot=self.memory_graph.to_snapshot(),
             action_history=self.state.action_history[-10:],
-            task={"task_id": self.state.task.task_id, "task_type": self.state.task.task_type, "question": self.state.task.question},
+            task=task_payload,
         )
 
     def _info(self) -> dict[str, Any]:
