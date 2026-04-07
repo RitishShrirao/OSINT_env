@@ -42,6 +42,7 @@ OPENENV_SPEC_PATH = Path("openenv.yaml")
 
 _SESSION_LOCK = Lock()
 _SESSIONS: dict[str, OSINTEnvironment] = {}
+_RESET_COUNTER = 0
 
 
 def _load_json(path: Path) -> dict[str, Any] | None:
@@ -120,6 +121,7 @@ def _task_summaries(env: OSINTEnvironment) -> list[OpenEnvTaskSummary]:
 
 
 def _resolve_task_index(env: OSINTEnvironment, request: OpenEnvResetRequest) -> int:
+    global _RESET_COUNTER
     if request.task_index is not None:
         task_index = int(request.task_index)
         if task_index < 0 or task_index >= len(env.tasks):
@@ -130,7 +132,10 @@ def _resolve_task_index(env: OSINTEnvironment, request: OpenEnvResetRequest) -> 
             if task.task_id == request.task_id:
                 return idx
         raise HTTPException(status_code=400, detail=f"Unknown task_id {request.task_id}")
-    return 0
+    with _SESSION_LOCK:
+        task_index = _RESET_COUNTER % max(1, len(env.tasks))
+        _RESET_COUNTER += 1
+    return task_index
 
 
 def _get_session_env(session_id: str) -> OSINTEnvironment:

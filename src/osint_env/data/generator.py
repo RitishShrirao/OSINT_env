@@ -314,6 +314,46 @@ class DatasetGenerator:
     def _extract_entity_tokens(question: str) -> list[str]:
         return re.findall(r"\b(?:alias|user|org|loc|post|thr|thread|event)_[a-zA-Z0-9_]+\b", question)
 
+    @staticmethod
+    def _normalize_difficulty(value: str, index: int) -> str:
+        token = str(value or "").strip().lower()
+        if token in {"easy", "e"}:
+            return "easy"
+        if token in {"mid", "medium", "m"}:
+            return "medium"
+        if token in {"high", "hard", "h"}:
+            return "hard"
+        if index < 10:
+            return "easy"
+        if index < 20:
+            return "medium"
+        return "hard"
+
+    @staticmethod
+    def _task_type_for_difficulty(base_task_type: str, difficulty: str) -> str:
+        token = str(base_task_type or "").strip().lower()
+        if token and token != "fixed_trace":
+            return token
+        if difficulty == "easy":
+            return "easy_trace"
+        if difficulty == "medium":
+            return "medium_trace"
+        return "hard_trace"
+
+    @staticmethod
+    def _grader_for_difficulty(difficulty: str) -> dict[str, Any]:
+        return {
+            "type": "difficulty_exact_match",
+            "answer_type": "node_id",
+            "case_sensitive": True,
+            "reward_profile": difficulty,
+            "logic": {
+                "easy": "single_agent_simplified",
+                "medium": "reduced_components",
+                "hard": "full_reward",
+            }.get(difficulty, "full_reward"),
+        }
+
     def _infer_answer_from_question(self, question: str, graph: CanonicalGraph) -> str:
         entities = self._extract_entity_tokens(question)
         question_l = question.lower()
@@ -361,6 +401,11 @@ class DatasetGenerator:
         tasks: list[TaskInstance] = []
         for idx, question_spec in enumerate(self.config.seeding.seeded_questions):
             answer = question_spec.answer or self._infer_answer_from_question(question_spec.question, graph)
+            metadata = dict(question_spec.metadata)
+            difficulty = self._normalize_difficulty(metadata.get("difficulty", ""), idx)
+            metadata["difficulty"] = difficulty
+            metadata.setdefault("grader", self._grader_for_difficulty(difficulty))
+            metadata.setdefault("scenario", self._task_type_for_difficulty(question_spec.task_type, difficulty))
             if question_spec.supporting_edges:
                 support = [
                     Edge(src=e.src, rel=e.rel, dst=e.dst, confidence=float(e.confidence))
@@ -372,11 +417,11 @@ class DatasetGenerator:
             tasks.append(
                 TaskInstance(
                     task_id=f"seed_task_{idx}",
-                    task_type=question_spec.task_type,
+                    task_type=self._task_type_for_difficulty(question_spec.task_type, difficulty),
                     question=question_spec.question,
                     answer=answer,
                     supporting_edges=support,
-                    metadata=dict(question_spec.metadata),
+                    metadata=metadata,
                 )
             )
         return tasks

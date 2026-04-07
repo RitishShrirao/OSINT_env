@@ -230,7 +230,27 @@ def check_task_and_grader_coverage() -> ValidationResult:
     env = _build_environment()
     tasks = env.tasks
     grader_checks: list[dict[str, Any]] = []
-    for task in tasks[:3]:
+    distinct_types = sorted({str(task.task_type) for task in tasks})
+    difficulty_buckets: dict[str, Any] = {}
+    for idx, task in enumerate(tasks):
+        token = str((task.metadata or {}).get("difficulty", "")).strip().lower()
+        if token in {"mid", "m"}:
+            token = "medium"
+        if token in {"high", "h"}:
+            token = "hard"
+        if token not in {"easy", "medium", "hard"}:
+            if idx < 10:
+                token = "easy"
+            elif idx < 20:
+                token = "medium"
+            else:
+                token = "hard"
+        difficulty_buckets.setdefault(token, task)
+
+    for difficulty in ["easy", "medium", "hard"]:
+        task = difficulty_buckets.get(difficulty)
+        if task is None:
+            continue
         correct = compute_answer_reward(
             proposed_answer=task.answer,
             task=task,
@@ -238,6 +258,7 @@ def check_task_and_grader_coverage() -> ValidationResult:
             tool_outputs=[],
             step_count=1,
             model=env.reward_model,
+            difficulty=difficulty,
         )
         wrong = compute_answer_reward(
             proposed_answer="unknown",
@@ -246,22 +267,36 @@ def check_task_and_grader_coverage() -> ValidationResult:
             tool_outputs=[],
             step_count=1,
             model=env.reward_model,
+            difficulty=difficulty,
         )
+        grader = dict(task.metadata.get("grader", {})) if isinstance(task.metadata, dict) else {}
         grader_checks.append(
             {
+                "difficulty": difficulty,
                 "task_id": task.task_id,
+                "task_type": task.task_type,
                 "support_edges": len(task.supporting_edges),
+                "has_grader": bool(grader),
                 "correct_reward": correct.total,
                 "wrong_reward": wrong.total,
                 "grader_prefers_correct": correct.total > wrong.total,
             }
         )
-    passed = len(tasks) >= 3 and all(row["support_edges"] > 0 and row["grader_prefers_correct"] for row in grader_checks)
+    passed = (
+        len(tasks) >= 3
+        and len(distinct_types) >= 3
+        and len(grader_checks) >= 3
+        and all(
+            row["support_edges"] > 0 and row["grader_prefers_correct"] and row["has_grader"]
+            for row in grader_checks
+        )
+    )
     return ValidationResult(
         name="task_and_grader_coverage",
         passed=passed,
         details={
             "task_count": len(tasks),
+            "distinct_task_types": distinct_types,
             "grader_checks": grader_checks,
         },
     )
