@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 @dataclass(slots=True)
 class EpisodeState:
     task: TaskInstance
+    task_index: int = 0
+    difficulty: str = "hard"
     step_count: int = 0
     done: bool = False
     total_reward: float = 0.0
@@ -54,10 +56,36 @@ class OSINTEnvironment(Env):
         self._task_idx = 0
         self.state: EpisodeState | None = None
 
+    @staticmethod
+    def _normalize_difficulty(value: str) -> str:
+        token = str(value or "").strip().lower()
+        if token in {"easy", "e"}:
+            return "easy"
+        if token in {"mid", "medium", "m"}:
+            return "medium"
+        if token in {"high", "hard", "h"}:
+            return "hard"
+        return "hard"
+
+    def _resolve_task_difficulty(self, task: TaskInstance, task_index: int) -> str:
+        metadata = dict(task.metadata or {})
+        if "difficulty" in metadata:
+            return self._normalize_difficulty(str(metadata.get("difficulty", "")))
+        if task_index < 10:
+            return "easy"
+        if task_index < 20:
+            return "medium"
+        return "hard"
+
     def reset(self) -> Observation:
-        task = self.tasks[self._task_idx % len(self.tasks)]
+        task_index = self._task_idx % len(self.tasks)
+        task = self.tasks[task_index]
         self._task_idx += 1
-        self.state = EpisodeState(task=task)
+        self.state = EpisodeState(
+            task=task,
+            task_index=task_index,
+            difficulty=self._resolve_task_difficulty(task, task_index),
+        )
         self.memory_graph = MemoryGraph()
         self.semantic_memory = SemanticMemory()
         return self._observation()
@@ -144,6 +172,7 @@ class OSINTEnvironment(Env):
             step_count=self.state.step_count,
             model=self.reward_model,
             graph=self.graph,
+            difficulty=self.state.difficulty,
         )
         self._accumulate_reward_components(breakdown.to_dict())
         return breakdown.total
@@ -161,6 +190,7 @@ class OSINTEnvironment(Env):
             tool_outputs=self.state.tool_outputs,
             step_count=self.state.step_count,
             model=self.reward_model,
+            difficulty=self.state.difficulty,
         )
         self._accumulate_reward_components(breakdown.to_dict())
         return breakdown.total
@@ -198,6 +228,8 @@ class OSINTEnvironment(Env):
             return {}
         return {
             "step_count": self.state.step_count,
+            "difficulty": self.state.difficulty,
+            "task_index": self.state.task_index,
             "total_reward": self.state.total_reward,
             "tool_calls": self.state.tool_calls,
             "redundant_tool_calls": self.state.redundant_tool_calls,

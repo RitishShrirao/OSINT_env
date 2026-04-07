@@ -220,6 +220,29 @@ def _runner_for(env: OSINTEnvironment, llm: Any) -> SingleAgentRunner | SwarmAge
     return SingleAgentRunner(env=env, llm=llm)
 
 
+def _normalize_difficulty(value: str) -> str:
+    token = str(value or "").strip().lower()
+    if token in {"easy", "e"}:
+        return "easy"
+    if token in {"mid", "medium", "m"}:
+        return "medium"
+    if token in {"high", "hard", "h"}:
+        return "hard"
+    return "hard"
+
+
+def _task_difficulty(env: OSINTEnvironment, task_index: int) -> str:
+    idx = int(task_index) % max(1, len(env.tasks))
+    task = env.tasks[idx]
+    if isinstance(task.metadata, dict) and "difficulty" in task.metadata:
+        return _normalize_difficulty(str(task.metadata.get("difficulty", "")))
+    if idx < 10:
+        return "easy"
+    if idx < 20:
+        return "medium"
+    return "hard"
+
+
 def _episode_row(env: OSINTEnvironment, info: dict[str, Any]) -> dict[str, Any]:
     if env.state is None:
         return {
@@ -312,7 +335,7 @@ def _task_targets(env: OSINTEnvironment, episodes: int, task_indices: list[int])
 
 def _run_with_runner(
     env: OSINTEnvironment,
-    runner: SingleAgentRunner | SwarmAgentRunner,
+    llm: Any,
     episodes: int,
     task_indices: list[int],
 ) -> tuple[dict[str, Any], list[dict[str, Any]], list[float], int]:
@@ -321,10 +344,23 @@ def _run_with_runner(
     rewards: list[float] = []
     steps_taken = 0
 
+    single_runner = SingleAgentRunner(env=env, llm=llm)
+    swarm_runner = SwarmAgentRunner(env=env, llm=llm) if env.config.swarm.enabled else None
+
     for task_index in _task_targets(env, episodes, task_indices):
+        task_count = max(1, len(env.tasks))
+        selected_index = env._task_idx % task_count if task_index is None else int(task_index) % task_count
         if task_index is not None:
             # Keep compatibility with explicit task selection from the previous inference script.
-            env._task_idx = task_index
+            env._task_idx = selected_index
+
+        difficulty = _task_difficulty(env, selected_index)
+        if difficulty == "easy":
+            runner: SingleAgentRunner | SwarmAgentRunner = single_runner
+        elif swarm_runner is not None:
+            runner = swarm_runner
+        else:
+            runner = single_runner
 
         info = runner.run_episode()
         if env.state is None:
@@ -393,14 +429,13 @@ def main() -> None:
     env_cfg = _resolve_environment_config()
     llm_client = build_llm_client(env_cfg.llm)
     env = OSINTEnvironment(env_cfg, llm=llm_client)
-    runner = _runner_for(env, llm_client)
 
     log_start(task=TASK_NAME, env=BENCHMARK, model=env_cfg.llm.model)
 
     episodes = len(TASK_INDICES) if TASK_INDICES else max(1, EPISODES)
     summary, episode_rows, rewards, steps_taken = _run_with_runner(
         env=env,
-        runner=runner,
+        llm=llm_client,
         episodes=episodes,
         task_indices=TASK_INDICES,
     )

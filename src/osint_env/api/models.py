@@ -10,6 +10,7 @@ class OpenEnvTaskSummary(BaseModel):
     task_type: str
     question: str
     difficulty: str = "unknown"
+    grader: dict[str, Any] = Field(default_factory=dict)
 
 
 class OpenEnvObservationModel(BaseModel):

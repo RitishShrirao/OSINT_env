@@ -28,6 +28,12 @@ models:
     - CALL_TOOL
     - ADD_EDGE
     - ANSWER
+  task_fields:
+    - task_id
+    - task_type
+    - question
+    - difficulty
+    - grader
   observation_fields:
     - tool_outputs
     - graph_snapshot

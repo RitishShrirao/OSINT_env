@@ -52,6 +52,17 @@ class AnswerRewardBreakdown:
         return asdict(self)
 
 
+def _normalize_difficulty(value: str) -> str:
+    token = str(value or "").strip().lower()
+    if token in {"easy", "e"}:
+        return "easy"
+    if token in {"mid", "medium", "m"}:
+        return "medium"
+    if token in {"high", "hard", "h"}:
+        return "hard"
+    return "hard"
+
+
 def build_reward_model(graph: CanonicalGraph) -> RewardModel:
     relation_freq: Counter[str] = Counter(e.rel for e in graph.edges)
     total_edges = max(1, len(graph.edges))
@@ -186,8 +197,10 @@ def compute_edge_reward(
     step_count: int,
     model: RewardModel,
     graph: CanonicalGraph,
+    difficulty: str = "hard",
 ) -> EdgeRewardBreakdown:
     in_truth = edge_in_truth(edge, task)
+    difficulty_level = _normalize_difficulty(difficulty)
 
     # DeepPath-inspired global accuracy term.
     global_accuracy = 0.85 if in_truth else -0.55
@@ -215,6 +228,19 @@ def compute_edge_reward(
 
     # Additional structural utility shaping for KG construction.
     connectivity_gain = _connectivity_gain(edge, existing_edges)
+
+    if difficulty_level == "easy":
+        global_accuracy = 0.75 if in_truth else -0.45
+        soft_shaping = 0.0
+        diversity = 0.0
+        relation_informativeness = 0.0
+        entity_informativeness = 0.0
+        connectivity_gain = 0.0
+        efficiency = 0.15 * (1.0 / max(1, step_count))
+    elif difficulty_level == "medium":
+        diversity = 0.0
+        relation_informativeness = 0.0
+        entity_informativeness = 0.0
 
     raw_total = (
         global_accuracy
@@ -368,7 +394,10 @@ def compute_answer_reward(
     tool_outputs: list[dict[str, object]],
     step_count: int,
     model: RewardModel | None = None,
+    difficulty: str = "hard",
 ) -> AnswerRewardBreakdown:
+    difficulty_level = _normalize_difficulty(difficulty)
+
     format_reward = 0.15 if proposed_answer else -0.55
     correctness = 1.15 if proposed_answer == task.answer else -1.0
 
@@ -392,6 +421,24 @@ def compute_answer_reward(
 
     # AutoGraph-R1 repetition control variant used in larger models.
     repetition_penalty = -0.10 * _relation_repetition_ratio(pred_edges)
+
+    if difficulty_level == "easy":
+        knowledge_carrier = 0.0
+        knowledge_indexing = 0.25 * _knowledge_indexing_recall(task, tool_outputs)
+        connectivity = 0.0
+        graph_f1 = 0.0
+        efficiency = 0.18 * (1.0 / max(1, step_count))
+        compactness = 0.0
+        relation_informativeness = 0.0
+        entity_informativeness = 0.0
+        repetition_penalty = 0.0
+    elif difficulty_level == "medium":
+        connectivity = 0.18 * _unirel_connectivity_score(pred_edges, seed_entities)
+        graph_f1 = 0.35 * compute_graph_f1(pred_edges, task.supporting_edges)
+        compactness = -0.04 * extra_edges
+        relation_informativeness = 0.0
+        entity_informativeness = 0.0
+        repetition_penalty = 0.0
 
     raw_total = (
         format_reward

@@ -105,6 +105,15 @@ def _task_summaries(env: OSINTEnvironment) -> list[OpenEnvTaskSummary]:
             task_type=task.task_type,
             question=task.question,
             difficulty=str(task.metadata.get("difficulty", "unknown")),
+            grader=(
+                dict(task.metadata.get("grader", {}))
+                if isinstance(task.metadata.get("grader"), dict)
+                else {
+                    "type": "exact_match",
+                    "answer_type": "node_id",
+                    "case_sensitive": True,
+                }
+            ),
         )
         for task in env.tasks
     ]
