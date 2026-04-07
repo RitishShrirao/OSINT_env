@@ -16,6 +16,12 @@ def test_server_health():
     assert response.json()["status"] == "ok"
 
 
+def test_server_health_alias():
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+
+
 def test_server_environment_metadata():
     response = client.get("/api/environment")
     assert response.status_code == 200
@@ -113,6 +119,36 @@ def test_openenv_step_accepts_nested_action_payload():
     )
     assert step.status_code == 200
     assert step.json()["done"] is True
+
+
+def test_step_alias_uses_latest_session_when_session_id_missing():
+    reset = client.post("/reset", json={"task_index": 0})
+    assert reset.status_code == 200
+    session_id = reset.json()["session_id"]
+
+    step = client.post(
+        "/step",
+        json={
+            "action_type": "ANSWER",
+            "payload": {"answer": "unknown"},
+        },
+    )
+    assert step.status_code == 200
+    body = step.json()
+    assert body["session_id"] == session_id
+    assert body["done"] is True
+
+
+def test_state_alias_returns_latest_session():
+    reset = client.post("/reset", json={"task_index": 0})
+    assert reset.status_code == 200
+    session_id = reset.json()["session_id"]
+
+    state = client.get("/state")
+    assert state.status_code == 200
+    body = state.json()
+    assert body["session_id"] == session_id
+    assert "task" in body["observation"]
 
 
 def test_report_inference_updates_latest_evaluation_and_dashboard(tmp_path, monkeypatch):

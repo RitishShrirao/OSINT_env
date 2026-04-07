@@ -209,12 +209,13 @@ The FastAPI app serves:
 - `/`: overview page
 - `/dashboard`: generated benchmark dashboard
 - `/api/environment`: environment metadata
-- `/healthz`: health check
+- `/health`: health check (validator-friendly alias)
+- `/healthz`: health check (legacy alias)
 - `/openenv.yaml`: OpenEnv HTTP spec stub
 - `/openenv/tasks`: task enumeration
-- `/openenv/reset`: episode reset endpoint
-- `/openenv/step`: episode step endpoint
-- `/openenv/state/{session_id}`: current session state endpoint
+- `/reset` and `/openenv/reset`: episode reset endpoints
+- `/step` and `/openenv/step`: episode step endpoints
+- `/state` and `/openenv/state/{session_id}`: session state endpoints (`/state` returns the latest session)
 
 ## Automated Validation
 

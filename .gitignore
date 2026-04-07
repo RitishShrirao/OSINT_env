@@ -4,3 +4,4 @@ blueprint.txt
 artifacts/*
 *.html
 .venv/
+.tmp_compare/

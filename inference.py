@@ -97,7 +97,7 @@ def log_step(step: int, action: str, reward: float, done: bool, error: str | Non
 def log_end(success: bool, steps: int, score: float, rewards: list[float]) -> None:
     rewards_text = ",".join(f"{value:.2f}" for value in rewards)
     print(
-        f"[END] success={str(bool(success)).lower()} steps={steps} score={score:.3f} rewards={rewards_text}",
+        f"[END] success={str(bool(success)).lower()} steps={steps} score={score:.2f} rewards={rewards_text}",
         flush=True,
     )
 

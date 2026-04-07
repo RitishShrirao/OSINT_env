@@ -7,7 +7,7 @@ transport:
 endpoints:
   health:
     method: GET
-    path: /healthz
+    path: /health
   metadata:
     method: GET
     path: /api/environment
@@ -16,13 +16,13 @@ endpoints:
     path: /openenv/tasks
   reset:
     method: POST
-    path: /openenv/reset
+    path: /reset
   step:
     method: POST
-    path: /openenv/step
+    path: /step
   state:
     method: GET
-    path: /openenv/state/{session_id}
+    path: /state
 models:
   action_space:
     - CALL_TOOL

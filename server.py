@@ -43,6 +43,7 @@ OPENENV_SPEC_PATH = Path("openenv.yaml")
 _SESSION_LOCK = Lock()
 _SESSIONS: dict[str, OSINTEnvironment] = {}
 _RESET_COUNTER = 0
+_LATEST_SESSION_ID: str | None = None
 
 
 def _load_json(path: Path) -> dict[str, Any] | None:
@@ -147,8 +148,26 @@ def _get_session_env(session_id: str) -> OSINTEnvironment:
 
 
 def _store_session(session_id: str, env: OSINTEnvironment) -> None:
+    global _LATEST_SESSION_ID
     with _SESSION_LOCK:
         _SESSIONS[session_id] = env
+        _LATEST_SESSION_ID = session_id
+
+
+def _latest_session_id() -> str:
+    with _SESSION_LOCK:
+        if _LATEST_SESSION_ID and _LATEST_SESSION_ID in _SESSIONS:
+            return _LATEST_SESSION_ID
+        if _SESSIONS:
+            return next(reversed(_SESSIONS))
+    raise HTTPException(status_code=404, detail="No active session. Call /reset first.")
+
+
+def _resolve_session_id(session_id: str | None) -> str:
+    token = str(session_id or "").strip()
+    if token:
+        return token
+    return _latest_session_id()
 
 
 def _task_lookup(env: OSINTEnvironment) -> dict[str, Any]:
@@ -400,6 +419,11 @@ def healthz() -> JSONResponse:
     return JSONResponse({"status": "ok"})
 
 
+@app.get("/health")
+def health() -> JSONResponse:
+    return healthz()
+
+
 @app.get("/openenv.yaml")
 def openenv_spec() -> FileResponse:
     return FileResponse(OPENENV_SPEC_PATH, media_type="text/yaml")
@@ -456,8 +480,12 @@ async def openenv_reset(request: Request) -> OpenEnvResponseEnvelope:
 
 
 @app.post("/openenv/step", response_model=OpenEnvResponseEnvelope)
+@app.post("/openenv/step/", response_model=OpenEnvResponseEnvelope, include_in_schema=False)
+@app.post("/step", response_model=OpenEnvResponseEnvelope, include_in_schema=False)
+@app.post("/step/", response_model=OpenEnvResponseEnvelope, include_in_schema=False)
 def openenv_step(request: OpenEnvActionRequest) -> OpenEnvResponseEnvelope:
-    env = _get_session_env(request.session_id)
+    session_id = _resolve_session_id(request.session_id)
+    env = _get_session_env(session_id)
     action_type_raw = request.resolved_action_type().strip()
     if not action_type_raw:
         raise HTTPException(status_code=400, detail="Missing action_type")
@@ -467,7 +495,7 @@ def openenv_step(request: OpenEnvActionRequest) -> OpenEnvResponseEnvelope:
         raise HTTPException(status_code=400, detail=f"Unsupported action_type {action_type_raw}") from exc
     observation, reward, done, info = env.step(Action(action_type=action_type, payload=request.resolved_payload()))
     return OpenEnvResponseEnvelope(
-        session_id=request.session_id,
+        session_id=session_id,
         observation=_serialize_observation(observation),
         reward=float(reward),
         done=bool(done),
@@ -475,8 +503,7 @@ def openenv_step(request: OpenEnvActionRequest) -> OpenEnvResponseEnvelope:
     )
 
 
-@app.get("/openenv/state/{session_id}", response_model=OpenEnvResponseEnvelope)
-def openenv_state(session_id: str) -> OpenEnvResponseEnvelope:
+def _state_response(session_id: str) -> OpenEnvResponseEnvelope:
     env = _get_session_env(session_id)
     if env.state is None:
         raise HTTPException(status_code=400, detail="Session has not been reset yet")
@@ -487,6 +514,18 @@ def openenv_state(session_id: str) -> OpenEnvResponseEnvelope:
         done=bool(env.state.done),
         info=_safe_session_info(env._info()),
     )
+
+
+@app.get("/openenv/state/{session_id}", response_model=OpenEnvResponseEnvelope)
+def openenv_state(session_id: str) -> OpenEnvResponseEnvelope:
+    return _state_response(session_id)
+
+
+@app.get("/openenv/state", response_model=OpenEnvResponseEnvelope, include_in_schema=False)
+@app.get("/state", response_model=OpenEnvResponseEnvelope, include_in_schema=False)
+@app.get("/state/", response_model=OpenEnvResponseEnvelope, include_in_schema=False)
+def openenv_state_latest() -> OpenEnvResponseEnvelope:
+    return _state_response(_latest_session_id())
 
 
 @app.post("/openenv/report_inference", response_model=OpenEnvInferenceReportResponse)

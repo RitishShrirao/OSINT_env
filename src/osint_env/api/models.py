@@ -26,7 +26,10 @@ class OpenEnvResetRequest(BaseModel):
 
 
 class OpenEnvActionRequest(BaseModel):
-    session_id: str
+    session_id: str | None = Field(
+        default=None,
+        description="Session identifier. Optional for /step compatibility alias, which uses the latest session.",
+    )
     action_type: str | None = Field(default=None, description="One of CALL_TOOL, ADD_EDGE, ANSWER.")
     payload: dict[str, Any] = Field(default_factory=dict)
     action: dict[str, Any] | None = None
