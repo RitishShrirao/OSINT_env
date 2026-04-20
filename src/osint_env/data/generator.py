@@ -2,10 +2,13 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
+from pathlib import Path
 import random
 import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
+
+from osint_env.data.metaqa import MetaQATaskRecord, infer_metaqa_support_edges, load_metaqa_dataset
 
 from osint_env.domain.models import (
     CanonicalGraph,
@@ -35,10 +38,24 @@ class DatasetGenerator:
         self.config = config
         self.rng = random.Random(config.seed)
         self.llm = llm
+        self._metaqa_records: list[MetaQATaskRecord] = []
 
     @staticmethod
     def _edge_key(edge: Edge) -> tuple[str, str, str]:
         return (edge.src, edge.rel, edge.dst)
+
+    def _dataset_mode(self) -> str:
+        token = str(getattr(self.config, "dataset_mode", "canonical") or "canonical").strip().lower()
+        return "metaqa" if token == "metaqa" else "canonical"
+
+    @staticmethod
+    def _metaqa_difficulty(hop_label: str) -> str:
+        hop = str(hop_label).strip().lower()
+        if hop == "1-hop":
+            return "easy"
+        if hop == "2-hop":
+            return "medium"
+        return "hard"
 
     @staticmethod
     def _infer_node_type(node_id: str) -> NodeType:
@@ -609,7 +626,172 @@ class DatasetGenerator:
             )
         return llm_tasks[:count]
 
+    def _metaqa_selected_records(self, count: int) -> list[MetaQATaskRecord]:
+        records = list(self._metaqa_records)
+        if not records:
+            return []
+        if count <= 0 or len(records) <= count:
+            return records
+
+        grouped: dict[str, list[MetaQATaskRecord]] = {}
+        for record in records:
+            grouped.setdefault(record.hop_label, []).append(record)
+
+        hop_keys = sorted(grouped.keys())
+        if not hop_keys:
+            return records[:count]
+
+        selected: list[MetaQATaskRecord] = []
+        leftovers: list[MetaQATaskRecord] = []
+        per_hop = max(1, count // len(hop_keys))
+
+        for hop in hop_keys:
+            bucket = list(grouped[hop])
+            self.rng.shuffle(bucket)
+            take = min(len(bucket), per_hop)
+            selected.extend(bucket[:take])
+            leftovers.extend(bucket[take:])
+
+        if len(selected) < count:
+            self.rng.shuffle(leftovers)
+            selected.extend(leftovers[: count - len(selected)])
+
+        return selected[:count]
+
+    def _metaqa_tasks(self, graph: CanonicalGraph, count: int) -> list[TaskInstance]:
+        records = self._metaqa_selected_records(count)
+        tasks: list[TaskInstance] = []
+        for idx, record in enumerate(records):
+            difficulty = self._metaqa_difficulty(record.hop_label)
+            support_edges = list(record.supporting_edges)
+            if not support_edges:
+                support_edges = infer_metaqa_support_edges(
+                    graph=graph,
+                    topic_entity=record.topic_entity,
+                    answer_candidates=record.answers,
+                    hop_count=record.hop_count,
+                )
+            metadata = {
+                "difficulty": difficulty,
+                "hop": record.hop_label,
+                "split": record.split,
+                "source": "metaqa",
+                "dataset_mode": "metaqa",
+                "qtype": record.qtype,
+                "topic_entity": record.topic_entity,
+                "all_answers": list(record.answers),
+                "grader": {
+                    "type": "metaqa_exact_match",
+                    "answer_type": "entity_name",
+                    "case_sensitive": True,
+                    "reward_profile": difficulty,
+                    "logic": "hop_trace",
+                },
+                "scenario": f"metaqa_{record.hop_label}",
+            }
+            task_type = f"metaqa_{record.hop_label}"
+            tasks.append(
+                TaskInstance(
+                    task_id=f"metaqa_{record.hop_label}_{record.split}_{idx}",
+                    task_type=task_type,
+                    question=record.question,
+                    answer=record.primary_answer,
+                    supporting_edges=support_edges,
+                    metadata=metadata,
+                )
+            )
+        return tasks
+
+    def _build_platform_views_metaqa(self, graph: CanonicalGraph) -> PlatformViews:
+        node_names = {
+            node_id: str((node.attrs or {}).get("name") or node_id)
+            for node_id, node in graph.nodes.items()
+        }
+
+        microblog_posts: list[dict] = []
+        for idx, edge in enumerate(graph.edges):
+            microblog_posts.append(
+                {
+                    "post_id": f"post_metaqa_{idx}",
+                    "user_id": edge.src,
+                    "canonical_user": edge.src,
+                    "text": f"{edge.src} {edge.rel} {edge.dst}",
+                    "references": [edge.src, edge.dst],
+                    "reference_names": [node_names.get(edge.src, edge.src), node_names.get(edge.dst, edge.dst)],
+                    "mentions": [edge.dst],
+                    "timestamp": 100000 + idx,
+                }
+            )
+
+        relation_groups: dict[str, list[Edge]] = {}
+        for edge in graph.edges:
+            relation_groups.setdefault(edge.rel, []).append(edge)
+
+        forum_threads: list[dict] = []
+        for idx, rel in enumerate(sorted(relation_groups.keys())[:200]):
+            group = relation_groups.get(rel, [])[:10]
+            forum_threads.append(
+                {
+                    "thread_id": f"thr_metaqa_{idx}",
+                    "topic": rel,
+                    "author_id": group[0].src if group else "metaqa",
+                    "comments": [
+                        {
+                            "user_id": edge.src,
+                            "text": f"{edge.src} {edge.rel} {edge.dst}",
+                        }
+                        for edge in group
+                    ],
+                    "references": [edge.dst for edge in group],
+                    "discusses": [edge.dst for edge in group],
+                }
+            )
+
+        neighbors: dict[str, set[str]] = {}
+        for edge in graph.edges:
+            neighbors.setdefault(edge.src, set()).add(edge.dst)
+            neighbors.setdefault(edge.dst, set()).add(edge.src)
+
+        profiles: list[dict] = []
+        for node_id in sorted(graph.nodes.keys()):
+            node = graph.nodes[node_id]
+            profiles.append(
+                {
+                    "user_id": node_id,
+                    "name": str((node.attrs or {}).get("name") or node_id),
+                    "org": str(node.node_type.value),
+                    "org_id": str(node.node_type.value),
+                    "location": "metaqa",
+                    "location_id": "metaqa",
+                    "alias_ids": [],
+                    "connections": sorted(neighbors.get(node_id, set()))[:8],
+                    "work_history": [str(node.node_type.value)],
+                }
+            )
+
+        return PlatformViews(
+            microblog_posts=microblog_posts,
+            forum_threads=forum_threads,
+            profiles=profiles,
+            alias_lookup={},
+        )
+
     def build_canonical_graph(self) -> CanonicalGraph:
+        if self._dataset_mode() == "metaqa":
+            root = Path(self.config.metaqa_root)
+            kb_path = Path(self.config.metaqa_kb_path) if str(self.config.metaqa_kb_path).strip() else None
+            graph, records = load_metaqa_dataset(
+                root=root,
+                kb_path=kb_path,
+                variant=self.config.metaqa_variant,
+                hops=list(self.config.metaqa_hops),
+                splits=list(self.config.metaqa_splits),
+            )
+            self._metaqa_records = records
+            self._apply_seed_nodes(graph)
+            self._apply_seed_edges(graph)
+            return graph
+
         graph = CanonicalGraph()
         orgs = ["Apex Dynamics", "Helios Labs", "Northbridge"]
         locations = ["Bengaluru", "Pune", "Hyderabad", "Delhi"]
@@ -646,6 +828,9 @@ class DatasetGenerator:
         return graph
 
     def build_platform_views(self, graph: CanonicalGraph) -> PlatformViews:
+        if self._dataset_mode() == "metaqa":
+            return self._build_platform_views_metaqa(graph)
+
         users = [n for n in graph.nodes.values() if n.node_type == NodeType.USER]
         aliases = [n for n in graph.nodes.values() if n.node_type == NodeType.ALIAS]
         alias_owner = {e.src: e.dst for e in graph.edges if e.rel == "alias_of"}
@@ -800,6 +985,11 @@ class DatasetGenerator:
         return PlatformViews(microblog_posts, forum_threads, profiles, alias_lookup=alias_owner)
 
     def generate_tasks(self, graph: CanonicalGraph, views: PlatformViews, count: int = 12) -> list[TaskInstance]:
+        if self._dataset_mode() == "metaqa":
+            metaqa_tasks = self._metaqa_tasks(graph=graph, count=max(1, count))
+            if metaqa_tasks:
+                return metaqa_tasks
+
         tasks = self._seeded_tasks(graph)
         target_count = max(1, count, len(tasks))
 

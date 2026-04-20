@@ -67,6 +67,16 @@ def _parse_bool(value: Any, default: bool) -> bool:
     return default
 
 
+def _parse_str_list(value: Any, default: list[str]) -> list[str]:
+    if isinstance(value, list):
+        items = [str(item).strip() for item in value if str(item).strip()]
+        return items or list(default)
+    if isinstance(value, str):
+        items = [part.strip() for part in value.split(",") if part.strip()]
+        return items or list(default)
+    return list(default)
+
+
 def _infer_node_type(node_id: str) -> NodeType:
     prefix = str(node_id).split("_", 1)[0].lower()
     mapping = {
@@ -175,10 +185,19 @@ def load_seeding_config(path: str | Path) -> SeedingConfig:
 
 def _parse_environment(payload: dict[str, Any]) -> EnvironmentConfig:
     env_data = _as_dict(payload.get("environment", payload))
+    dataset_data = _as_dict(payload.get("dataset", env_data.get("dataset", {})))
     swarm_data = _as_dict(payload.get("swarm", env_data.get("swarm", {})))
     spawn_data = _as_dict(payload.get("spawn_reward", env_data.get("spawn_reward", {})))
     seeding_data = _as_dict(payload.get("seeding", env_data.get("seeding", {})))
     llm_data = _as_dict(payload.get("llm", env_data.get("llm", {})))
+
+    dataset_mode = str(dataset_data.get("mode", env_data.get("dataset_mode", "canonical"))).strip().lower()
+    if dataset_mode not in {"canonical", "metaqa"}:
+        dataset_mode = "canonical"
+
+    metaqa_variant = str(dataset_data.get("metaqa_variant", env_data.get("metaqa_variant", "vanilla"))).strip().lower()
+    if metaqa_variant not in {"vanilla", "ntm"}:
+        metaqa_variant = "vanilla"
 
     env = EnvironmentConfig(
         n_users=max(4, _parse_int(env_data.get("n_users"), 40)),
@@ -187,6 +206,18 @@ def _parse_environment(payload: dict[str, Any]) -> EnvironmentConfig:
         red_herring_rate=max(0.0, min(1.0, _parse_float(env_data.get("red_herring_rate"), 0.1))),
         max_steps=max(2, _parse_int(env_data.get("max_steps"), 18)),
         seed=_parse_int(env_data.get("seed"), 7),
+        dataset_mode=dataset_mode,
+        metaqa_root=str(dataset_data.get("metaqa_root", env_data.get("metaqa_root", "metaQA"))).strip() or "metaQA",
+        metaqa_kb_path=str(dataset_data.get("metaqa_kb_path", env_data.get("metaqa_kb_path", ""))).strip(),
+        metaqa_variant=metaqa_variant,
+        metaqa_hops=_parse_str_list(
+            dataset_data.get("metaqa_hops", env_data.get("metaqa_hops", ["1-hop", "2-hop", "3-hop"])),
+            ["1-hop", "2-hop", "3-hop"],
+        ),
+        metaqa_splits=_parse_str_list(
+            dataset_data.get("metaqa_splits", env_data.get("metaqa_splits", ["train", "dev", "test"])),
+            ["train", "dev", "test"],
+        ),
     )
 
     env.swarm = SwarmConfig(

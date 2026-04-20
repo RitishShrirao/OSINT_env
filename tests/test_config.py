@@ -16,6 +16,14 @@ def test_shared_config_parses_swarm_and_seeding(tmp_path: Path):
         json.dumps(
             {
                 "environment": {"seed": 19, "max_steps": 9},
+                "dataset": {
+                    "mode": "metaqa",
+                    "metaqa_root": "metaQA",
+                    "metaqa_kb_path": "metaQA/kb.txt",
+                    "metaqa_variant": "vanilla",
+                    "metaqa_hops": ["1-hop", "2-hop", "3-hop"],
+                    "metaqa_splits": ["train", "dev", "test"],
+                },
                 "swarm": {"enabled": True, "max_agents": 3, "max_breadth": 2, "max_width": 2, "max_depth": 2},
                 "seeding": {
                     "seeded_questions": [
@@ -40,6 +48,12 @@ def test_shared_config_parses_swarm_and_seeding(tmp_path: Path):
     assert config.environment.seed == 19
     assert config.environment.swarm.enabled is True
     assert config.environment.swarm.max_width == 2
+    assert config.environment.dataset_mode == "metaqa"
+    assert config.environment.metaqa_root == "metaQA"
+    assert config.environment.metaqa_kb_path == "metaQA/kb.txt"
+    assert config.environment.metaqa_variant == "vanilla"
+    assert config.environment.metaqa_hops == ["1-hop", "2-hop", "3-hop"]
+    assert config.environment.metaqa_splits == ["train", "dev", "test"]
     assert len(config.environment.seeding.seeded_questions) == 1
     assert config.runtime.default_episodes == 5
     assert config.environment.llm.provider == "ollama"

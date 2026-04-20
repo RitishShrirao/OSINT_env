@@ -28,6 +28,13 @@ The environment generates or loads a hidden canonical graph of users, aliases, o
 
 The default hosted Space uses the fixed-level benchmark in `datasets/fixed_levels/seed_fixed_levels.json`, which now contains 30 stable tasks over a larger shared seeded graph.
 
+The repository now supports two dataset backends:
+
+- `canonical` (existing fixed-level synthetic graph pipeline)
+- `metaqa` (MetaQA KB + QA files for `1-hop`, `2-hop`, and `3-hop`)
+
+Use `config/shared_config.json` or CLI flags (`--dataset-mode`, `--metaqa-root`, `--metaqa-hops`, `--metaqa-splits`) to choose which backend to run.
+
 ## Action Space
 
 The environment exposes three actions:
@@ -52,6 +59,12 @@ The benchmark mixes direct lookups with multi-hop traces:
 - Easy: single-hop identity resolution, organization lookup, event lookup, or location lookup.
 - Mid: two-hop alias-to-user-to-organization or thread-to-event-to-user traces.
 - High: cross-platform multi-hop traces combining aliases, authored content, event references, organization links, and direct connections.
+
+In MetaQA mode, hop buckets are mapped into the same reward difficulty tiers:
+
+- `1-hop` -> `easy`
+- `2-hop` -> `medium`
+- `3-hop` -> `hard`
 
 Common task families include:
 
@@ -121,6 +134,18 @@ Run one demo episode:
 
 ```bash
 osint-env demo --agent-mode swarm --llm-provider mock
+```
+
+Run against MetaQA using the provided sample config:
+
+```bash
+osint-env demo --config config/shared_config_metaqa.json --dataset-mode metaqa --llm-provider mock
+```
+
+Run MetaQA with only selected hop buckets:
+
+```bash
+osint-env eval --config config/shared_config_metaqa.json --dataset-mode metaqa --metaqa-hops 1-hop,2-hop --episodes 5 --llm-provider mock
 ```
 
 Run a quick evaluation:

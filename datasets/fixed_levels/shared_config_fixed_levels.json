@@ -7,6 +7,14 @@
     "max_steps": 24,
     "seed": 2026
   },
+  "dataset": {
+    "mode": "canonical",
+    "metaqa_root": "metaQA",
+    "metaqa_kb_path": "",
+    "metaqa_variant": "vanilla",
+    "metaqa_hops": ["1-hop", "2-hop", "3-hop"],
+    "metaqa_splits": ["train", "dev", "test"]
+  },
   "swarm": {
     "enabled": true,
     "max_agents": 3,

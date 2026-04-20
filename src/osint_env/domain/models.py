@@ -179,6 +179,12 @@ class EnvironmentConfig:
     red_herring_rate: float = 0.1
     max_steps: int = 18
     seed: int = 7
+    dataset_mode: str = "canonical"
+    metaqa_root: str = "metaQA"
+    metaqa_kb_path: str = ""
+    metaqa_variant: str = "vanilla"
+    metaqa_hops: list[str] = field(default_factory=lambda: ["1-hop", "2-hop", "3-hop"])
+    metaqa_splits: list[str] = field(default_factory=lambda: ["train", "dev", "test"])
     seeding: SeedingConfig = field(default_factory=SeedingConfig)
     swarm: SwarmConfig = field(default_factory=SwarmConfig)
     spawn_reward: SpawnRewardConfig = field(default_factory=SpawnRewardConfig)

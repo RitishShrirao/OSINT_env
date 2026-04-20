@@ -5,3 +5,4 @@ artifacts/*
 *.html
 .venv/
 .tmp_compare/
+metaQA/

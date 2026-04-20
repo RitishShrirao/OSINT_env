@@ -66,6 +66,39 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
         default="",
         help="Environment variable name for OpenAI API key.",
     )
+    parser.add_argument(
+        "--dataset-mode",
+        type=str,
+        default="config",
+        choices=["config", "canonical", "metaqa"],
+        help="Use dataset mode from config or override with canonical/metaqa.",
+    )
+    parser.add_argument("--metaqa-root", type=str, default="", help="Override MetaQA dataset root directory.")
+    parser.add_argument(
+        "--metaqa-kb-path",
+        type=str,
+        default="",
+        help="Override MetaQA KB triples file path. Defaults to <metaqa-root>/kb.txt.",
+    )
+    parser.add_argument(
+        "--metaqa-variant",
+        type=str,
+        default="",
+        choices=["", "vanilla", "ntm"],
+        help="Override MetaQA QA variant.",
+    )
+    parser.add_argument(
+        "--metaqa-hops",
+        type=str,
+        default="",
+        help="Comma-separated hop buckets for MetaQA mode (example: 1-hop,2-hop,3-hop).",
+    )
+    parser.add_argument(
+        "--metaqa-splits",
+        type=str,
+        default="",
+        help="Comma-separated splits for MetaQA mode (example: train,dev,test).",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -150,6 +183,19 @@ def _resolve_environment_config(args: argparse.Namespace) -> tuple[EnvironmentCo
         env_cfg.llm.openai_api_key = args.openai_api_key
     if args.openai_api_key_env:
         env_cfg.llm.openai_api_key_env = args.openai_api_key_env
+
+    if args.dataset_mode != "config":
+        env_cfg.dataset_mode = args.dataset_mode
+    if args.metaqa_root:
+        env_cfg.metaqa_root = args.metaqa_root
+    if args.metaqa_kb_path:
+        env_cfg.metaqa_kb_path = args.metaqa_kb_path
+    if args.metaqa_variant:
+        env_cfg.metaqa_variant = args.metaqa_variant
+    if args.metaqa_hops:
+        env_cfg.metaqa_hops = [item.strip() for item in str(args.metaqa_hops).split(",") if item.strip()]
+    if args.metaqa_splits:
+        env_cfg.metaqa_splits = [item.strip() for item in str(args.metaqa_splits).split(",") if item.strip()]
 
     if args.agent_mode == "single":
         env_cfg.swarm.enabled = False
