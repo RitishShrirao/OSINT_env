@@ -111,6 +111,7 @@ def build_parser() -> argparse.ArgumentParser:
     e = sub.add_parser("eval", help="Run multiple episodes and show aggregate metrics.")
     _add_common_args(e)
     e.add_argument("--episodes", type=int, default=0)
+    e.add_argument("--dashboard", type=str, default="")
 
     b = sub.add_parser("benchmark", help="Run eval, update leaderboard, and export interactive dashboard.")
     _add_common_args(b)
@@ -288,8 +289,16 @@ def main() -> None:
         info = _runner_for(env).run_episode()
         print(json.dumps(info, indent=2, sort_keys=True))
     elif args.cmd == "eval":
-        metrics = run_evaluation(env, episodes=episodes, llm=llm_client)
-        print(json.dumps(metrics, indent=2, sort_keys=True))
+        evaluation = run_evaluation(env, episodes=episodes, return_details=True, llm=llm_client)
+        _save_evaluation(DEFAULT_EVALUATION_PATH, evaluation)
+        leaderboard = load_leaderboard(leaderboard_path)
+        export_dashboard(
+            env=env,
+            evaluation=evaluation,
+            leaderboard_records=leaderboard,
+            output_path=dashboard_path,
+        )
+        print(json.dumps(evaluation["summary"], indent=2, sort_keys=True))
     elif args.cmd == "benchmark":
         evaluation = run_evaluation(env, episodes=episodes, return_details=True, llm=llm_client)
         summary = evaluation["summary"]

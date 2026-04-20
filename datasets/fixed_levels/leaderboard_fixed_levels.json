@@ -1354,5 +1354,48 @@
     },
     "run_id": "run_0032",
     "run_name": "fixed_levels_qwen_swarm"
+  },
+  {
+    "config": {
+      "llm_model": "qwen3:8b",
+      "llm_provider": "openai",
+      "max_agents": 3,
+      "max_breadth": 2,
+      "max_depth": 2,
+      "max_steps": 18,
+      "max_width": 2,
+      "seed": 7,
+      "seeded_questions": 30,
+      "swarm_enabled": true
+    },
+    "created_at": "2026-04-20T19:46:04+00:00",
+    "episodes": 1,
+    "metrics": {
+      "avg_compactness_reward": 0.0,
+      "avg_connectivity_gain_reward": 0.0,
+      "avg_connectivity_reward": 0.0,
+      "avg_diversity_reward": 0.0,
+      "avg_entity_informativeness_reward": 0.0,
+      "avg_format_reward": 0.15,
+      "avg_graph_f1": 0.0,
+      "avg_knowledge_carrier_reward": 0.0,
+      "avg_knowledge_indexing_reward": 0.0,
+      "avg_relation_informativeness_reward": 0.0,
+      "avg_reward": 0.5519400198339021,
+      "avg_soft_shaping_reward": 0.0,
+      "avg_spawn_count": 0.0,
+      "avg_spawn_critical_steps": 0.0,
+      "avg_steps_to_solution": 1.0,
+      "deanonymization_accuracy": 0.0,
+      "leaderboard_score": 0.2785970009916951,
+      "retrieval_signal": 0.5,
+      "spawn_completion_rate": 0.0,
+      "spawn_signal": 0.4,
+      "structural_signal": 0.5,
+      "task_success_rate": 0.0,
+      "tool_efficiency": 1.0
+    },
+    "run_id": "run_0033",
+    "run_name": "fixed_levels_qwen_swarm"
   }
 ]

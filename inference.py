@@ -35,6 +35,12 @@ LLM_TIMEOUT_SECONDS = int(os.getenv("LLM_TIMEOUT_SECONDS", "0"))
 EPISODES = int(os.getenv("EPISODES", "1"))
 SUCCESS_SCORE_THRESHOLD = float(os.getenv("SUCCESS_SCORE_THRESHOLD", "0.67"))
 TASK_INDICES_RAW = os.getenv("TASK_INDICES", "")
+DATASET_MODE = os.getenv("DATASET_MODE", "")
+METAQA_ROOT = os.getenv("METAQA_ROOT", "")
+METAQA_KB_PATH = os.getenv("METAQA_KB_PATH", "")
+METAQA_VARIANT = os.getenv("METAQA_VARIANT", "")
+METAQA_HOPS_RAW = os.getenv("METAQA_HOPS", "")
+METAQA_SPLITS_RAW = os.getenv("METAQA_SPLITS", "")
 
 WRITE_BENCHMARK_ARTIFACTS = os.getenv("WRITE_BENCHMARK_ARTIFACTS", "1").strip().lower() in {
     "1",
@@ -62,6 +68,10 @@ def _parse_task_indices(raw: str) -> list[int]:
         except ValueError:
             continue
     return out
+
+
+def _parse_csv_tokens(raw: str) -> list[str]:
+    return [token.strip() for token in str(raw or "").split(",") if token.strip()]
 
 
 def _normalize_ollama_base_url(url: str) -> str:
@@ -205,6 +215,27 @@ def _resolve_environment_config() -> EnvironmentConfig:
 
     if OPENAI_API_KEY_ENV.strip():
         env_cfg.llm.openai_api_key_env = OPENAI_API_KEY_ENV.strip()
+
+    dataset_mode = DATASET_MODE.strip().lower()
+    if dataset_mode in {"canonical", "metaqa"}:
+        env_cfg.dataset_mode = dataset_mode
+
+    if METAQA_ROOT.strip():
+        env_cfg.metaqa_root = METAQA_ROOT.strip()
+    if METAQA_KB_PATH.strip():
+        env_cfg.metaqa_kb_path = METAQA_KB_PATH.strip()
+
+    metaqa_variant = METAQA_VARIANT.strip().lower()
+    if metaqa_variant in {"vanilla", "ntm"}:
+        env_cfg.metaqa_variant = metaqa_variant
+
+    metaqa_hops = _parse_csv_tokens(METAQA_HOPS_RAW)
+    if metaqa_hops:
+        env_cfg.metaqa_hops = metaqa_hops
+
+    metaqa_splits = _parse_csv_tokens(METAQA_SPLITS_RAW)
+    if metaqa_splits:
+        env_cfg.metaqa_splits = metaqa_splits
 
     return env_cfg
 
