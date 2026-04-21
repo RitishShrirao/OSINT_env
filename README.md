@@ -116,6 +116,12 @@ Local install:
 python -m pip install -e .
 ```
 
+Install optional adversarial self-play training stack (TRL + Transformers):
+
+```bash
+python -m pip install -e ".[train]"
+```
+
 Run tests:
 
 ```bash
@@ -159,6 +165,18 @@ Export a dashboard:
 ```bash
 osint-env benchmark --episodes 5 --agent-mode swarm --llm-provider mock --name quick_check
 ```
+
+Run Kimi-style adversarial self-play scaffold (dry-run by default in the example config):
+
+```bash
+osint-env train-self-play --config config/shared_config.json --train-config config/self_play_training_example.json --dry-run
+```
+
+When you have compute and the train dependencies installed, remove `--dry-run` (or set `"dry_run": false` in the training config) to execute TRL GRPO updates for alternating generator and answerer phases.
+
+The training config also supports `"model_topology": "dual"|"shared"`, `"phase_schedule": "generator_answerer"|"answerer_generator_answerer"`, and `"tuning_mode": "full"|"lora"` so you can switch between two-model vs single-model self-play and full fine-tuning vs LoRA adapters.
+
+Detailed design notes are in `docs/adversarial_self_play.md`.
 
 ## OpenAI Baseline
 

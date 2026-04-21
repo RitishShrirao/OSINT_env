@@ -160,6 +160,35 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_EVALUATION_PATH,
         help="Path to a saved evaluation payload with episode details.",
     )
+
+    t = sub.add_parser(
+        "train-self-play",
+        help="Run adversarial self-play fine-tuning scaffold with Hugging Face TRL (Kimi-style alternating phases).",
+    )
+    _add_common_args(t)
+    t.add_argument(
+        "--train-config",
+        type=str,
+        default="config/self_play_training_example.json",
+        help="Path to self-play training JSON config.",
+    )
+    t.add_argument(
+        "--train-output-dir",
+        type=str,
+        default="",
+        help="Optional output dir override for self-play artifacts and checkpoints.",
+    )
+    t.add_argument(
+        "--train-rounds",
+        type=int,
+        default=0,
+        help="Optional override for the number of self-play rounds.",
+    )
+    t.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Skip actual GRPO updates and only materialize datasets/round artifacts.",
+    )
     return parser
 
 
@@ -281,6 +310,23 @@ def main() -> None:
                 sort_keys=True,
             )
         )
+        return
+
+    if args.cmd == "train-self-play":
+        from osint_env.training import load_self_play_config, run_adversarial_self_play
+
+        train_cfg = load_self_play_config(args.train_config)
+        if str(args.train_output_dir).strip():
+            train_cfg.output_dir = str(args.train_output_dir).strip()
+        if int(args.train_rounds) > 0:
+            train_cfg.rounds = int(args.train_rounds)
+
+        payload = run_adversarial_self_play(
+            env_config=env_cfg,
+            training_config=train_cfg,
+            dry_run=bool(args.dry_run),
+        )
+        print(json.dumps(payload, indent=2, sort_keys=True))
         return
 
     llm_client = build_llm_client(env_cfg.llm)
