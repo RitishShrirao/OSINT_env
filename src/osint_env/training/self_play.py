@@ -114,13 +114,26 @@ def _maybe_upload_folder_to_hf(local_dir: Path, run_dir: Path, commit_message: s
     path_in_repo = _hf_relative_repo_path(local_dir, run_dir)
     api = HfApi(token=token)
     api.create_repo(repo_id=repo_id, repo_type=repo_type, private=private, exist_ok=True)
+    # Upload only inference-relevant artifacts. Resume-only state such as
+    # optimizer/scheduler RNG snapshots makes uploads much larger and is not
+    # needed for sharing or post-phase evaluation.
+    ignore_patterns = [
+        "*.pyc",
+        "__pycache__",
+        ".DS_Store",
+        "**/optimizer.pt",
+        "**/scheduler.pt",
+        "**/rng_state.pth",
+        "**/trainer_state.json",
+        "**/training_args.bin",
+    ]
     api.upload_folder(
         folder_path=str(local_dir),
         repo_id=repo_id,
         repo_type=repo_type,
         path_in_repo=path_in_repo,
         commit_message=commit_message,
-        ignore_patterns=["*.pyc", "__pycache__", ".DS_Store"],
+        ignore_patterns=ignore_patterns,
     )
     print(f"[self_play][hf_upload] uploaded {local_dir} -> {repo_type}:{repo_id}/{path_in_repo}")
 
