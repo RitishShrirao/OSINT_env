@@ -384,6 +384,26 @@ def _build_lora_config(lora: LoraTuningConfig) -> Any:
     )
 
 
+def _coerce_named_reward_func(reward_function: Any) -> Any:
+    """Return a callable with a stable __name__ for TRL compatibility."""
+    if hasattr(reward_function, "__name__") and str(getattr(reward_function, "__name__", "")).strip():
+        return reward_function
+
+    # TRL versions that introspect reward_funcs[i].__name__ require this attribute.
+    if callable(reward_function):
+        name = reward_function.__class__.__name__ or "reward_func"
+        try:
+            setattr(reward_function, "__name__", name)
+            return reward_function
+        except Exception:
+            def _wrapped_reward(*args: Any, **kwargs: Any) -> Any:
+                return reward_function(*args, **kwargs)
+
+            _wrapped_reward.__name__ = name
+            return _wrapped_reward
+    return reward_function
+
+
 
 def _train_grpo_phase(
     model_name_or_path: str,
@@ -411,7 +431,7 @@ def _train_grpo_phase(
     trainer_kwargs: dict[str, Any] = {
         "model": model_name_or_path,
         "args": args,
-        "reward_funcs": reward_function,
+        "reward_funcs": _coerce_named_reward_func(reward_function),
         "train_dataset": dataset,
     }
 
