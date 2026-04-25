@@ -2,6 +2,7 @@
   "rounds": 3,
   "output_dir": "artifacts/self_play",
   "dry_run": true,
+  "canonical_graph_mode": "generate",
   "pipeline_mode": "swarm_v2",
   "model_topology": "dual",
   "phase_schedule": "generator_answerer",

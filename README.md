@@ -174,7 +174,7 @@ osint-env train-self-play --config config/shared_config.json --train-config conf
 
 When you have compute and the train dependencies installed, remove `--dry-run` (or set `"dry_run": false` in the training config) to execute TRL GRPO updates for alternating generator and answerer phases.
 
-The training config also supports `"model_topology": "dual"|"shared"`, `"phase_schedule": "generator_answerer"|"answerer_generator_answerer"`, and `"tuning_mode": "full"|"lora"` so you can switch between two-model vs single-model self-play and full fine-tuning vs LoRA adapters.
+The training config also supports `"model_topology": "dual"|"shared"`, `"phase_schedule": "generator_answerer"|"answerer_generator_answerer"`, `"tuning_mode": "full"|"lora"`, and `"canonical_graph_mode": "generate"|"fixed"` so you can switch between two-model vs single-model self-play, full fine-tuning vs LoRA adapters, and whether canonical graph structure is generated each round or kept fixed while training question/answer behavior.
 
 ### Hugging Face Space Smoke Run (Qwen 3.5 0.8B + W&B)
 
@@ -188,8 +188,11 @@ This config:
 
 - uses `Qwen/Qwen3.5-0.8B`
 - enables W&B reporting (`wandb_enabled: true`)
+- uses `pipeline_mode: "swarm_v2"` with `canonical_graph_mode: "fixed"` to keep canonical graph candidates stable while training question/answer behavior
 - keeps training intentionally short (`rounds=1`, `max_steps=5` per phase)
 - uses LoRA with small batch settings so it can run as a smoke test on an A10G
+
+To enable canonical graph generation during swarm_v2 training, switch `"canonical_graph_mode"` to `"generate"` in the training config.
 
 Space setup checklist:
 

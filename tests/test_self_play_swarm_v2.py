@@ -240,3 +240,32 @@ def test_swarm_v2_dry_run_writes_new_artifacts_and_preserves_legacy_contract(tmp
         assert Path(artifacts[key]).exists()
         loaded = json.loads(Path(artifacts[key]).read_text(encoding="utf-8"))
         assert loaded is not None
+
+
+def test_swarm_v2_fixed_canonical_mode_reuses_prompt_candidates(tmp_path: Path):
+    env_cfg = EnvironmentConfig(seed=19, n_users=14, max_steps=6)
+    train_cfg = SelfPlayTrainingConfig(
+        rounds=1,
+        output_dir=str(tmp_path / "self_play_fixed_canonical"),
+        dry_run=True,
+        pipeline_mode="swarm_v2",
+        canonical_graph_mode="fixed",
+        generated_tasks_per_round=3,
+        generator_prompts_per_round=3,
+    )
+
+    payload = run_adversarial_self_play(env_config=env_cfg, training_config=train_cfg, dry_run=True)
+    artifacts = payload["rounds"][0]["artifacts"]
+    candidates_payload = json.loads(Path(artifacts["canonical_graph_candidates"]).read_text(encoding="utf-8"))
+    generated_payload = json.loads(Path(artifacts["generated_tasks"]).read_text(encoding="utf-8"))
+
+    expected_graphs = {
+        json.dumps((item.get("canonical_graph") if isinstance(item.get("canonical_graph"), dict) else item), sort_keys=True)
+        for item in candidates_payload
+        if isinstance(item, dict)
+    }
+    assert expected_graphs
+
+    for task in generated_payload:
+        canonical_graph = ((task.get("metadata") or {}).get("canonical_graph")) or {}
+        assert json.dumps(canonical_graph, sort_keys=True) in expected_graphs

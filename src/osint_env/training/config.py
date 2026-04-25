@@ -116,6 +116,7 @@ class SelfPlayTrainingConfig:
     wandb_project: str = "osint-self-play"
     wandb_entity: str = ""
     wandb_run_name_prefix: str = "self-play"
+    canonical_graph_mode: str = "generate"
     pipeline_mode: str = "legacy"
     model_topology: str = "dual"
     phase_schedule: str = "generator_answerer"
@@ -358,6 +359,11 @@ def load_self_play_config(path: str | Path | None) -> SelfPlayTrainingConfig:
         wandb_entity=str(payload.get("wandb_entity", defaults.wandb_entity)).strip(),
         wandb_run_name_prefix=str(payload.get("wandb_run_name_prefix", defaults.wandb_run_name_prefix)).strip()
         or defaults.wandb_run_name_prefix,
+        canonical_graph_mode=_parse_str_choice(
+            payload.get("canonical_graph_mode"),
+            defaults.canonical_graph_mode,
+            {"generate", "fixed"},
+        ),
         pipeline_mode=_parse_str_choice(
             payload.get("pipeline_mode"),
             defaults.pipeline_mode,

@@ -249,8 +249,15 @@ def _swarm_v2_generator_prompt(
     canonical_candidate: dict[str, Any],
     anchor_questions: list[str],
     swarm_cfg: SwarmV2SwarmConfig,
+    canonical_graph_mode: str,
 ) -> str:
     anchors = "\n".join(f"- {question}" for question in anchor_questions)
+    canonical_mode = str(canonical_graph_mode).strip().lower() or "generate"
+    canonical_instruction = (
+        "You may propose canonical_graph updates when they improve replayability and keep it graph-grounded."
+        if canonical_mode == "generate"
+        else "Reuse the provided canonical candidate as-is; do not add, remove, or modify canonical_graph nodes/edges."
+    )
     return (
         "You are the trainable orchestrator for the adversarial OSINT question-generation swarm.\n"
         "Coordinate frozen subagents over the shared context and return a replayable task.\n"
@@ -263,6 +270,7 @@ def _swarm_v2_generator_prompt(
         "tool_trace, subagent_outputs, orchestrator.\n"
         "tool_trace may only use enumerate_neighbors, trace_path, select_answer, emit_question.\n"
         "The question must exactly match the deterministic emit_question result derived from the replayed path.\n"
+        f"Canonical graph mode: {canonical_mode}. {canonical_instruction}\n"
         f"Shared context:\n{json.dumps(shared_context, sort_keys=True)}\n"
         f"Canonical candidate:\n{json.dumps(canonical_candidate, sort_keys=True)}\n"
         "Anchor questions to avoid:\n"
@@ -304,6 +312,7 @@ def _build_swarm_v2_generator_rows(
             canonical_candidate=canonical_candidate,
             anchor_questions=anchor_sample,
             swarm_cfg=cfg.swarm_v2.generator_swarm,
+            canonical_graph_mode=cfg.canonical_graph_mode,
         )
         rows.append(
             {
@@ -735,6 +744,7 @@ def _materialize_swarm_v2_completions(
     completion_texts: list[str],
     round_index: int,
     seen_questions: list[str],
+    prompt_canonical_candidates: list[dict[str, Any]] | None = None,
 ) -> tuple[list[TaskInstance], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     validator = SwarmV2ReplayValidator(
         graph=env.graph,
@@ -755,31 +765,35 @@ def _materialize_swarm_v2_completions(
         )
         validation = validator.validate(candidate)
 
-        if candidate.canonical_edges or candidate.canonical_nodes:
-            canonical_edges = list(candidate.canonical_edges or candidate.supporting_edges)
-            canonical_nodes = list(candidate.canonical_nodes)
-            if not canonical_nodes:
-                canonical_nodes = sorted(
-                    {edge.src for edge in canonical_edges} | {edge.dst for edge in canonical_edges}
-                )
-            canonical_graph = {
-                "nodes": canonical_nodes,
-                "edges": [
-                    {
-                        "src": edge.src,
-                        "rel": edge.rel,
-                        "dst": edge.dst,
-                        "confidence": float(edge.confidence),
-                    }
-                    for edge in canonical_edges
-                ],
-            }
+        use_fixed_canonical = str(cfg.canonical_graph_mode).strip().lower() == "fixed"
+        if use_fixed_canonical and prompt_canonical_candidates and completion_idx < len(prompt_canonical_candidates):
+            canonical_graph = dict(prompt_canonical_candidates[completion_idx])
         else:
-            canonical_graph = build_swarm_v2_canonical_subgraph(
-                env.graph,
-                candidate.supporting_edges,
-                max_extra_edges=max(0, cfg.swarm_v2.shared_context.max_edges - len(candidate.supporting_edges)),
-            )
+            if candidate.canonical_edges or candidate.canonical_nodes:
+                canonical_edges = list(candidate.canonical_edges or candidate.supporting_edges)
+                canonical_nodes = list(candidate.canonical_nodes)
+                if not canonical_nodes:
+                    canonical_nodes = sorted(
+                        {edge.src for edge in canonical_edges} | {edge.dst for edge in canonical_edges}
+                    )
+                canonical_graph = {
+                    "nodes": canonical_nodes,
+                    "edges": [
+                        {
+                            "src": edge.src,
+                            "rel": edge.rel,
+                            "dst": edge.dst,
+                            "confidence": float(edge.confidence),
+                        }
+                        for edge in canonical_edges
+                    ],
+                }
+            else:
+                canonical_graph = build_swarm_v2_canonical_subgraph(
+                    env.graph,
+                    candidate.supporting_edges,
+                    max_extra_edges=max(0, cfg.swarm_v2.shared_context.max_edges - len(candidate.supporting_edges)),
+                )
 
         canonical_graph_candidates.append(
             {
@@ -1029,6 +1043,7 @@ def _run_adversarial_self_play_swarm_v2(
             completion_texts=completion_texts,
             round_index=round_index,
             seen_questions=seed_questions + [task.question for task in rolling_generated_tasks],
+            prompt_canonical_candidates=prompt_canonical_candidates,
         )
         if not generated_tasks:
             fallback_completions = _fallback_swarm_v2_completion_texts(
@@ -1043,6 +1058,7 @@ def _run_adversarial_self_play_swarm_v2(
                 completion_texts=fallback_completions,
                 round_index=round_index,
                 seen_questions=seed_questions + [task.question for task in rolling_generated_tasks],
+                prompt_canonical_candidates=None,
             )
 
         if generated_tasks:
@@ -1133,6 +1149,7 @@ def _run_adversarial_self_play_swarm_v2(
         "model_topology": topology,
         "phase_schedule": phase_schedule,
         "tuning_mode": tuning_mode,
+        "canonical_graph_mode": str(training_config.canonical_graph_mode).strip().lower() or "generate",
         "rounds": rounds_payload,
         "final_models": {
             "generator": generator_model,
@@ -1390,6 +1407,7 @@ def run_adversarial_self_play(
         "model_topology": topology,
         "phase_schedule": phase_schedule,
         "tuning_mode": tuning_mode,
+        "canonical_graph_mode": str(training_config.canonical_graph_mode).strip().lower() or "generate",
         "rounds": rounds_payload,
         "final_models": {
             "generator": generator_model,

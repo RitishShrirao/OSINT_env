@@ -18,6 +18,7 @@ def test_self_play_config_defaults_when_missing():
     assert cfg.swarm_v2.validation.max_support_edges >= 1
     assert cfg.wandb_enabled is False
     assert cfg.wandb_project == "osint-self-play"
+    assert cfg.canonical_graph_mode == "generate"
 
 
 def test_self_play_config_parses_overrides(tmp_path: Path):
@@ -33,6 +34,7 @@ def test_self_play_config_parses_overrides(tmp_path: Path):
                 "wandb_project": "osint-train-tests",
                 "wandb_entity": "example-team",
                 "wandb_run_name_prefix": "ci-self-play",
+                "canonical_graph_mode": "fixed",
                 "model_topology": "shared",
                 "phase_schedule": "answerer_generator_answerer",
                 "tuning_mode": "lora",
@@ -112,6 +114,7 @@ def test_self_play_config_parses_overrides(tmp_path: Path):
     assert cfg.wandb_project == "osint-train-tests"
     assert cfg.wandb_entity == "example-team"
     assert cfg.wandb_run_name_prefix == "ci-self-play"
+    assert cfg.canonical_graph_mode == "fixed"
     assert cfg.model_topology == "shared"
     assert cfg.phase_schedule == "answerer_generator_answerer"
     assert cfg.tuning_mode == "lora"

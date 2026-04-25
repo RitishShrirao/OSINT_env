@@ -35,6 +35,11 @@ The implementation maps the requested Kimi-style ingredients onto TRL GRPO as fo
 
 This directly supports the "train solver, freeze, attack, retrain solver" sequence.
 
+## Canonical Graph Mode
+
+- `canonical_graph_mode: "generate"` (default): generator can propose canonical graph updates in `swarm_v2`.
+- `canonical_graph_mode: "fixed"`: canonical graph candidates are held fixed per prompt, so training focuses on question/answer behavior over stable graph structure.
+
 ## Tuning Modes
 
 - `tuning_mode: "full"`: full-model GRPO fine-tuning.
