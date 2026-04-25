@@ -599,37 +599,44 @@ class GeneratorRewardFunction:
         candidate: GeneratedTaskCandidate,
         validation_result: ReplayValidationResult,
     ) -> float:
-        # Avoid a constant hard penalty. Keep invalid samples negative but graded
-        # so GRPO still gets reward variance/advantages when quality differs.
+        # Avoid a constant hard penalty. Keep invalid samples negative but
+        # graded so GRPO still gets reward variance/advantages when quality
+        # differs. Scale is intentionally wider than the original [-1.35]
+        # constant path:
+        #   malformed/no JSON ~= -2.0
+        #   partial structured JSON ~= -1.2 .. -0.4
+        #   replayable but imperfect candidates are handled by valid path.
         reason_penalty = {
-            "missing_question_or_answer": 0.30,
-            "malformed_support_edges": 0.20,
-            "non_replayable_tool_calls": 0.35,
-            "non_unique_derivation_path": 0.20,
-            "unseen_nodes_or_edges": 0.20,
-            "answer_leakage": 0.20,
-            "duplicate_or_near_duplicate": 0.10,
-            "context_or_support_budget_overflow": 0.15,
+            "missing_question_or_answer": 0.55,
+            "malformed_support_edges": 0.40,
+            "non_replayable_tool_calls": 0.55,
+            "non_unique_derivation_path": 0.30,
+            "unseen_nodes_or_edges": 0.35,
+            "answer_leakage": 0.45,
+            "duplicate_or_near_duplicate": 0.20,
+            "context_or_support_budget_overflow": 0.25,
         }
-        penalty = 0.30
+        penalty = 0.35
         for reason in validation_result.reasons:
-            penalty += reason_penalty.get(reason, 0.05)
+            penalty += reason_penalty.get(reason, 0.10)
 
         # Partial credit for parseable structure to reduce flat rewards.
         partial_credit = 0.0
         if candidate.question:
-            partial_credit += 0.10
+            partial_credit += 0.25
         if candidate.answer:
-            partial_credit += 0.10
+            partial_credit += 0.25
         if candidate.supporting_edges:
-            partial_credit += 0.10
+            partial_credit += min(0.35, 0.08 * len(candidate.supporting_edges))
         if candidate.tool_trace:
-            partial_credit += 0.10
+            partial_credit += min(0.30, 0.06 * len(candidate.tool_trace))
         if candidate.subagent_outputs:
-            partial_credit += 0.05
+            partial_credit += 0.10
+        if candidate.canonical_edges or candidate.canonical_nodes:
+            partial_credit += 0.10
 
         reward = partial_credit - penalty
-        return float(max(-1.5, min(-0.05, reward)))
+        return float(max(-2.0, min(-0.05, reward)))
 
     def _validity_score(self, candidate: GeneratedTaskCandidate) -> float:
         score = 0.0
@@ -737,8 +744,8 @@ class GeneratorRewardFunction:
         parl_parallel, parl_finish = self._parl_scores(candidate)
 
         reward = (
-            0.20  # validity
-            + 0.20  # derivability
+            0.25  # valid JSON/schema
+            + 0.30  # replayable derivation
             + (0.30 * hardness)
             + (0.15 * swarm_diversity)
             + (0.10 * context_pressure)
@@ -765,7 +772,7 @@ class GeneratorRewardFunction:
 
             if self.pipeline_mode == "swarm_v2":
                 reward, validation_result = self._swarm_v2_reward(candidate)
-                rewards.append(float(max(-1.5, min(1.5, reward))))
+                rewards.append(float(max(-2.0, min(1.2, reward))))
                 if validation_result.is_valid and candidate.question:
                     valid_count += 1
                     self._seen_questions.append(candidate.question)
@@ -786,7 +793,7 @@ class GeneratorRewardFunction:
                     + self.weights.diversity * diversity
                     + self.weights.consistency * consistency
                 )
-                rewards.append(float(max(-1.5, min(1.5, reward))))
+                rewards.append(float(max(-2.0, min(1.2, reward))))
 
             if self.pipeline_mode != "swarm_v2" and candidate.question:
                 self._seen_questions.append(candidate.question)
@@ -797,12 +804,19 @@ class GeneratorRewardFunction:
         self._debug_reward_window.extend(rewards)
         self._debug_reward_window = self._debug_reward_window[-512:]
         self._debug_reason_counter.update(batch_reasons)
+        batch_mean = float(sum(rewards) / max(1, len(rewards)))
+        batch_std = float(self._std(rewards))
+        advantages = [float(value - batch_mean) for value in rewards]
         self._debug_last_batch = {
             "batch_rewards": list(rewards),
-            "batch_reward_mean": float(sum(rewards) / max(1, len(rewards))),
-            "batch_reward_std": float(self._std(rewards)),
+            "batch_reward_mean": batch_mean,
+            "batch_reward_std": batch_std,
+            "advantage_proxy_min": min(advantages) if advantages else 0.0,
+            "advantage_proxy_max": max(advantages) if advantages else 0.0,
+            "advantage_proxy_std": float(self._std(advantages)),
             "valid_count": int(valid_count),
             "invalid_count": int(max(0, len(rewards) - valid_count)),
+            "valid_output_ratio": float(valid_count / max(1, len(rewards))),
             "top_invalid_reasons": batch_reasons.most_common(5),
         }
         if self.pipeline_mode == "swarm_v2" and (self._debug_batches_seen % 10 == 0):

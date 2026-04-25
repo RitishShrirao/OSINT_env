@@ -70,6 +70,83 @@ def _task_to_edge_json(task: TaskInstance) -> str:
     return json.dumps(payload, sort_keys=True)
 
 
+def _edge_payload(edge: Edge) -> dict[str, Any]:
+    return {
+        "src": edge.src,
+        "rel": edge.rel,
+        "dst": edge.dst,
+        "confidence": float(edge.confidence),
+    }
+
+
+def _edges_from_payload(rows: Any, max_edges: int) -> list[Edge]:
+    if not isinstance(rows, list):
+        return []
+    edges: list[Edge] = []
+    for row in rows[:max_edges]:
+        if not isinstance(row, dict):
+            continue
+        src = str(row.get("src", "")).strip()
+        rel = str(row.get("rel", "")).strip()
+        dst = str(row.get("dst", "")).strip()
+        if not src or not rel or not dst:
+            continue
+        try:
+            confidence = float(row.get("confidence", 1.0))
+        except (TypeError, ValueError):
+            confidence = 1.0
+        edges.append(Edge(src=src, rel=rel, dst=dst, confidence=confidence))
+    return edges
+
+
+
+def _canonical_example_payload(
+    graph: Any,
+    canonical_candidate: dict[str, Any],
+    swarm_cfg: SwarmV2SwarmConfig,
+) -> dict[str, Any]:
+    candidate_edges = _edges_from_payload(canonical_candidate.get("edges", []), max_edges=4)
+    traced_edges = trace_swarm_v2_path(graph, candidate_edges) or candidate_edges
+    if not traced_edges:
+        return {
+            "canonical_graph": canonical_candidate,
+            "question": "Which entity is reached by following the provided replayable relation path?",
+            "answer": "",
+            "task_type": "swarm_v2_trace",
+            "supporting_edges": [],
+            "tool_trace": [],
+            "subagent_outputs": ["path_agent: no replayable edge available"],
+            "orchestrator": {
+                "spawn_count": 1,
+                "finished_subtasks": 1,
+                "critical_steps": 1,
+                "breadth": 1,
+                "depth": 1,
+            },
+        }
+
+    spawn_count = min(swarm_cfg.max_agents, max(1, len(traced_edges) + 1))
+    return {
+        "canonical_graph": canonical_candidate,
+        "question": emit_swarm_v2_question(traced_edges),
+        "answer": select_swarm_v2_answer(traced_edges),
+        "task_type": f"swarm_v2_{len(traced_edges)}hop_trace",
+        "supporting_edges": [_edge_payload(edge) for edge in traced_edges],
+        "tool_trace": build_swarm_v2_tool_trace(graph, traced_edges),
+        "subagent_outputs": [
+            f"path_agent_{idx}: {edge.src} --{edge.rel}--> {edge.dst}"
+            for idx, edge in enumerate(traced_edges)
+        ]
+        + ["question_agent: emitted deterministic relation-path question"],
+        "orchestrator": {
+            "spawn_count": spawn_count,
+            "finished_subtasks": spawn_count,
+            "critical_steps": max(1, len(traced_edges)),
+            "breadth": min(swarm_cfg.max_breadth, spawn_count),
+            "depth": min(swarm_cfg.max_depth, 1 if len(traced_edges) <= 2 else 2),
+        },
+    }
+
 
 def _difficulty_for_task(task: TaskInstance) -> str:
     metadata = dict(task.metadata or {})
@@ -87,8 +164,9 @@ def _difficulty_for_task(task: TaskInstance) -> str:
 def _answer_prompt(question: str) -> str:
     return (
         "You are the answer-generation swarm for an OSINT graph task.\n"
-        "Return only JSON in the form {\"answer\": \"<entity_or_value>\"}.\n"
-        "Do not add extra keys.\n"
+        "Return ONLY one compact JSON object. Do not use markdown. Do not add prose.\n"
+        "Required schema: {\"answer\": \"<entity_or_value>\"}\n"
+        "Valid example: {\"answer\": \"user_7\"}\n"
         f"Question: {question}"
     )
 
@@ -106,9 +184,11 @@ def _swarm_v2_answer_prompt(
         f"Max depth: {swarm_cfg.max_depth}. "
         f"Planner rounds: {swarm_cfg.planner_rounds}. "
         f"Tools per agent: {swarm_cfg.tools_per_agent}.\n"
-        "Return strict JSON with keys: answer, supporting_edges, orchestrator.\n"
-        "orchestrator must contain spawn_count, finished_subtasks, critical_steps, breadth, depth.\n"
-        "supporting_edges must be a list of replayable graph edges.\n"
+        "Return ONLY one compact JSON object. Do not use markdown. Do not add prose.\n"
+        "Required schema: {\"answer\": string, \"supporting_edges\": list, \"orchestrator\": object}.\n"
+        "orchestrator must contain integer keys: spawn_count, finished_subtasks, critical_steps, breadth, depth.\n"
+        "supporting_edges must use only edges from Shared context and each edge must contain src, rel, dst, confidence.\n"
+        "Valid example: {\"answer\":\"user_7\",\"supporting_edges\":[{\"src\":\"alias_7_123\",\"rel\":\"alias_of\",\"dst\":\"user_7\",\"confidence\":1.0}],\"orchestrator\":{\"spawn_count\":2,\"finished_subtasks\":2,\"critical_steps\":1,\"breadth\":2,\"depth\":1}}\n"
         f"Shared context:\n{json.dumps(shared_context, sort_keys=True)}\n"
         f"Question: {question}"
     )
@@ -245,6 +325,7 @@ def _build_generator_rows(
 
 
 def _swarm_v2_generator_prompt(
+    graph: Any,
     shared_context: dict[str, Any],
     canonical_candidate: dict[str, Any],
     anchor_questions: list[str],
@@ -253,6 +334,7 @@ def _swarm_v2_generator_prompt(
 ) -> str:
     anchors = "\n".join(f"- {question}" for question in anchor_questions)
     canonical_mode = str(canonical_graph_mode).strip().lower() or "generate"
+    example_payload = _canonical_example_payload(graph, canonical_candidate, swarm_cfg)
     canonical_instruction = (
         "You may propose canonical_graph updates when they improve replayability and keep it graph-grounded."
         if canonical_mode == "generate"
@@ -266,11 +348,18 @@ def _swarm_v2_generator_prompt(
         f"Max depth: {swarm_cfg.max_depth}. "
         f"Planner rounds: {swarm_cfg.planner_rounds}. "
         f"Tools per agent: {swarm_cfg.tools_per_agent}.\n"
-        "Return strict JSON with keys: canonical_graph, question, answer, task_type, supporting_edges, "
+        "Return ONLY one compact JSON object. Do not use markdown fences. Do not add commentary.\n"
+        "Required top-level keys: canonical_graph, question, answer, task_type, supporting_edges, "
         "tool_trace, subagent_outputs, orchestrator.\n"
-        "tool_trace may only use enumerate_neighbors, trace_path, select_answer, emit_question.\n"
+        "supporting_edges must be a non-empty list of objects with src, rel, dst, confidence.\n"
+        "tool_trace must be non-empty and may only use enumerate_neighbors, trace_path, select_answer, emit_question.\n"
+        "orchestrator must contain integer keys: spawn_count, finished_subtasks, critical_steps, breadth, depth.\n"
+        "The answer must be the final dst selected by the replayed relation path.\n"
         "The question must exactly match the deterministic emit_question result derived from the replayed path.\n"
         f"Canonical graph mode: {canonical_mode}. {canonical_instruction}\n"
+        "Valid output example using this canonical candidate:\n"
+        f"{json.dumps(example_payload, separators=(',', ':'), sort_keys=True)}\n"
+        "Now produce a different valid JSON object for the provided candidate.\n"
         f"Shared context:\n{json.dumps(shared_context, sort_keys=True)}\n"
         f"Canonical candidate:\n{json.dumps(canonical_candidate, sort_keys=True)}\n"
         "Anchor questions to avoid:\n"
@@ -308,6 +397,7 @@ def _build_swarm_v2_generator_rows(
         anchor_sample_size = min(5, len(existing_questions))
         anchor_sample = rng.sample(existing_questions, k=anchor_sample_size) if anchor_sample_size > 0 else []
         prompt = _swarm_v2_generator_prompt(
+            graph=env.graph,
             shared_context=shared_context,
             canonical_candidate=canonical_candidate,
             anchor_questions=anchor_sample,
@@ -814,9 +904,12 @@ def _fallback_swarm_v2_completion_texts(
 
 
 def _sample_swarm_v2_completion_texts_with_model(
+    env: OSINTEnvironment,
+    cfg: SelfPlayTrainingConfig,
     model_name_or_path: str,
     prompts: list[str],
     count: int,
+    seen_questions: list[str],
 ) -> list[str]:
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -833,25 +926,48 @@ def _sample_swarm_v2_completion_texts_with_model(
 
     device = next(model.parameters()).device
     completions: list[str] = []
+    validator = SwarmV2ReplayValidator(
+        graph=env.graph,
+        validation=cfg.swarm_v2.validation,
+        shared_context=cfg.swarm_v2.shared_context,
+        seen_questions=seen_questions,
+    )
     for prompt in prompts:
         if len(completions) >= count:
             break
         encoded = tokenizer(prompt, return_tensors="pt")
         encoded = {key: value.to(device) for key, value in encoded.items()}
 
-        with torch.no_grad():
-            output = model.generate(
-                **encoded,
-                max_new_tokens=512,
-                do_sample=True,
-                top_p=0.95,
-                temperature=1.0,
-                num_return_sequences=1,
-                pad_token_id=tokenizer.eos_token_id,
-            )
+        best_completion = ""
+        best_score = -999
+        for attempt_idx, (temperature, top_p) in enumerate([(0.7, 0.9), (0.5, 0.85), (0.3, 0.8)]):
+            with torch.no_grad():
+                output = model.generate(
+                    **encoded,
+                    max_new_tokens=max(256, int(cfg.generator_phase.max_completion_length)),
+                    do_sample=True,
+                    top_p=top_p,
+                    temperature=temperature,
+                    num_return_sequences=1,
+                    pad_token_id=tokenizer.eos_token_id,
+                )
 
-        completion_ids = output[0][encoded["input_ids"].shape[1] :]
-        completions.append(tokenizer.decode(completion_ids, skip_special_tokens=True))
+            completion_ids = output[0][encoded["input_ids"].shape[1] :]
+            completion = tokenizer.decode(completion_ids, skip_special_tokens=True)
+            candidate = parse_generated_task_completion(
+                completion,
+                max_support_edges=cfg.swarm_v2.validation.max_support_edges,
+            )
+            validation = validator.validate(candidate)
+            score = int(bool(candidate.question)) + int(bool(candidate.answer)) + len(candidate.supporting_edges)
+            if validation.is_valid:
+                print(f"[self_play][generation_retry] valid_completion attempt={attempt_idx + 1}")
+                best_completion = completion
+                break
+            if score > best_score:
+                best_score = score
+                best_completion = completion
+        completions.append(best_completion)
     return completions
 
 
@@ -1142,9 +1258,12 @@ def _run_adversarial_self_play_swarm_v2(
             )
         else:
             completion_texts = _sample_swarm_v2_completion_texts_with_model(
+                env=env,
+                cfg=training_config,
                 model_name_or_path=generator_model,
                 prompts=[row["prompt"] for row in generator_rows],
                 count=max(1, training_config.generated_tasks_per_round * 2),
+                seen_questions=seed_questions + [task.question for task in rolling_generated_tasks],
             )
             if not completion_texts:
                 completion_texts = _fallback_swarm_v2_completion_texts(

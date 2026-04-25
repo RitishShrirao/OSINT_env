@@ -213,6 +213,40 @@ def test_swarm_v2_generator_reward_prefers_valid_parallel_diverse_tasks():
     assert scores[5] < 0
 
 
+def test_swarm_v2_generator_reward_grades_invalid_outputs_instead_of_constant_penalty():
+    cfg = SelfPlayTrainingConfig(pipeline_mode="swarm_v2")
+    env = OSINTEnvironment(EnvironmentConfig(seed=31, n_users=18, max_steps=6))
+    valid_payload = _build_valid_candidate_payload(env, cfg)
+
+    reward_fn = GeneratorRewardFunction(
+        graph=env.graph,
+        answerer_judge=DummyJudge(answer="wrong_answer"),
+        weights=GeneratorRewardWeights(),
+        max_support_edges=cfg.swarm_v2.validation.max_support_edges,
+        pipeline_mode="swarm_v2",
+        swarm_v2_validation=cfg.swarm_v2.validation,
+        swarm_v2_shared_context=cfg.swarm_v2.shared_context,
+        parl_max_parallel_hint=cfg.swarm_v2.generator_swarm.max_agents,
+    )
+
+    missing_everything = "not json"
+    partial_json = json.dumps({"question": "Who is linked by this path?", "answer": valid_payload["answer"]})
+    partial_edges = json.dumps(
+        {
+            "question": valid_payload["question"],
+            "answer": valid_payload["answer"],
+            "supporting_edges": valid_payload["supporting_edges"],
+        }
+    )
+
+    scores = reward_fn(completions=[missing_everything, partial_json, partial_edges, json.dumps(valid_payload)])
+
+    assert len(set(scores)) > 2
+    assert scores[0] < scores[1] < scores[2] < scores[3]
+    assert reward_fn._debug_last_batch["batch_reward_std"] > 0.0
+    assert reward_fn._debug_last_batch["valid_output_ratio"] == 0.25
+
+
 def test_swarm_v2_dry_run_writes_new_artifacts_and_preserves_legacy_contract(tmp_path: Path):
     env_cfg = EnvironmentConfig(seed=11, n_users=14, max_steps=6)
     train_cfg = SelfPlayTrainingConfig(
