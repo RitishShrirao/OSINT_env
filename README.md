@@ -198,13 +198,14 @@ Space setup checklist:
 
 1. In Space **Settings -> Hardware**, select **NVIDIA A10G (large)**.
 2. In Space **Settings -> Variables and secrets**, set `WANDB_API_KEY`.
-3. Optionally set `WANDB_ENTITY` if your project belongs to a team.
-4. Set `RUN_SELF_PLAY_TRAINING=1` in Space variables to trigger training during container startup.
-5. Optional overrides:
+3. Set `HF_TOKEN` in Space secrets to avoid unauthenticated Hub downloads and stricter rate limits.
+4. Optionally set `WANDB_ENTITY` if your project belongs to a team.
+5. Set `RUN_SELF_PLAY_TRAINING=1` in Space variables to trigger training during container startup.
+6. Optional overrides:
    - `TRAIN_SELF_PLAY_CONFIG_PATH` (default: `config/self_play_training_hf_a10g_smoke.json`)
    - `TRAIN_ENV_CONFIG_PATH` (default: `config/shared_config.json`)
    - `RUN_SELF_PLAY_DRY_RUN=1` to test startup wiring without GRPO updates.
-6. Restart the Space and monitor build/runtime logs for the training run.
+7. Restart the Space and monitor build/runtime logs for the training run.
 
 W&B run naming is controlled by `wandb_run_name_prefix` and will emit phase-specific runs like `...-r001-generator` and `...-r001-answerer`.
 
