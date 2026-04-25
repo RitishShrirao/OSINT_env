@@ -14,6 +14,13 @@ def test_self_play_config_defaults_when_missing():
     assert cfg.generator_phase.max_steps >= 1
     assert cfg.answerer_phase.max_steps >= 1
     assert cfg.generator_reward_weights.hardness > 0.0
+    assert cfg.generated_task_max_new_tokens >= 32
+    assert cfg.post_training_eval_questions >= 1
+    assert cfg.generator_phase.optim == "adamw_torch_fused"
+    assert cfg.generator_phase.bf16 is True
+    assert cfg.generator_phase.tf32 is True
+    assert cfg.generator_phase.generation_batch_size >= 1
+    assert cfg.generator_phase.max_prompt_length >= 32
     assert cfg.swarm_v2.generator_swarm.shared_context is True
     assert cfg.swarm_v2.validation.max_support_edges >= 1
     assert cfg.wandb_enabled is False
@@ -41,6 +48,9 @@ def test_self_play_config_parses_overrides(tmp_path: Path):
                 "shared_model_name_or_path": "/models/local-base",
                 "seed_tasks_per_round": 12,
                 "generated_tasks_per_round": 18,
+                "generated_task_max_new_tokens": 640,
+                "post_training_eval_questions": 9,
+                "post_training_eval_answer_max_new_tokens": 96,
                 "swarm_v2": {
                     "generator_swarm": {
                         "shared_context": True,
@@ -90,6 +100,12 @@ def test_self_play_config_parses_overrides(tmp_path: Path):
                     "model_name_or_path": "Qwen/Qwen2.5-3B-Instruct",
                     "max_steps": 77,
                     "num_generations": 6,
+                    "optim": "adamw_torch",
+                    "bf16": False,
+                    "tf32": False,
+                    "generation_batch_size": 12,
+                    "max_prompt_length": 768,
+                    "save_total_limit": 3,
                     "loss_type": "grpo",
                     "scale_rewards": "group",
                     "output_subdir": "gen_phase",
@@ -98,6 +114,9 @@ def test_self_play_config_parses_overrides(tmp_path: Path):
                     "model_name_or_path": "Qwen/Qwen2.5-1.5B-Instruct",
                     "max_steps": 55,
                     "num_generations": 5,
+                    "dataloader_num_workers": 6,
+                    "dataloader_persistent_workers": False,
+                    "dataloader_prefetch_factor": 6,
                     "output_subdir": "ans_phase",
                 },
             }
@@ -121,6 +140,9 @@ def test_self_play_config_parses_overrides(tmp_path: Path):
     assert cfg.shared_model_name_or_path == "/models/local-base"
     assert cfg.seed_tasks_per_round == 12
     assert cfg.generated_tasks_per_round == 18
+    assert cfg.generated_task_max_new_tokens == 640
+    assert cfg.post_training_eval_questions == 9
+    assert cfg.post_training_eval_answer_max_new_tokens == 96
     assert cfg.swarm_v2.generator_swarm.max_agents == 5
     assert cfg.swarm_v2.answerer_swarm.max_agents == 4
     assert cfg.swarm_v2.validation.max_support_edges == 6
@@ -133,6 +155,12 @@ def test_self_play_config_parses_overrides(tmp_path: Path):
     assert cfg.generator_phase.model_name_or_path == "Qwen/Qwen2.5-3B-Instruct"
     assert cfg.generator_phase.max_steps == 77
     assert cfg.generator_phase.num_generations == 6
+    assert cfg.generator_phase.optim == "adamw_torch"
+    assert cfg.generator_phase.bf16 is False
+    assert cfg.generator_phase.tf32 is False
+    assert cfg.generator_phase.generation_batch_size == 12
+    assert cfg.generator_phase.max_prompt_length == 768
+    assert cfg.generator_phase.save_total_limit == 3
     assert cfg.generator_phase.loss_type == "grpo"
     assert cfg.generator_phase.scale_rewards == "group"
     assert cfg.generator_phase.output_subdir == "gen_phase"
@@ -140,6 +168,9 @@ def test_self_play_config_parses_overrides(tmp_path: Path):
     assert cfg.answerer_phase.model_name_or_path == "Qwen/Qwen2.5-1.5B-Instruct"
     assert cfg.answerer_phase.max_steps == 55
     assert cfg.answerer_phase.num_generations == 5
+    assert cfg.answerer_phase.dataloader_num_workers == 6
+    assert cfg.answerer_phase.dataloader_persistent_workers is False
+    assert cfg.answerer_phase.dataloader_prefetch_factor == 6
     assert cfg.answerer_phase.output_subdir == "ans_phase"
 
 

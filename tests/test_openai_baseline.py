@@ -7,6 +7,7 @@ def test_openai_baseline_toolset_contains_answer_and_graph_actions():
     assert "submit_answer" in names
     assert "add_edge" in names
     assert "search_memory" in names
+    assert "search_shared_context" in names
     assert "get_post" in names
 
 
