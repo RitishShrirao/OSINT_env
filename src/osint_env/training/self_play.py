@@ -105,17 +105,16 @@ def _canonical_example_payload(
     canonical_candidate: dict[str, Any],
     swarm_cfg: SwarmV2SwarmConfig,
 ) -> dict[str, Any]:
-    candidate_edges = _edges_from_payload(canonical_candidate.get("edges", []), max_edges=4)
+    candidate_edges = _edges_from_payload(canonical_candidate.get("edges", []), max_edges=2)
     traced_edges = trace_swarm_v2_path(graph, candidate_edges) or candidate_edges
     if not traced_edges:
         return {
-            "canonical_graph": canonical_candidate,
             "question": "Which entity is reached by following the provided replayable relation path?",
             "answer": "",
             "task_type": "swarm_v2_trace",
             "supporting_edges": [],
             "tool_trace": [],
-            "subagent_outputs": ["path_agent: no replayable edge available"],
+            "subagent_outputs": ["path_agent: no replayable edge"],
             "orchestrator": {
                 "spawn_count": 1,
                 "finished_subtasks": 1,
@@ -125,25 +124,25 @@ def _canonical_example_payload(
             },
         }
 
+    traced_edges = traced_edges[:2]
     spawn_count = min(swarm_cfg.max_agents, max(1, len(traced_edges) + 1))
+    full_tool_trace = build_swarm_v2_tool_trace(graph, traced_edges)
     return {
-        "canonical_graph": canonical_candidate,
         "question": emit_swarm_v2_question(traced_edges),
         "answer": select_swarm_v2_answer(traced_edges),
         "task_type": f"swarm_v2_{len(traced_edges)}hop_trace",
         "supporting_edges": [_edge_payload(edge) for edge in traced_edges],
-        "tool_trace": build_swarm_v2_tool_trace(graph, traced_edges),
+        "tool_trace": full_tool_trace[:4],
         "subagent_outputs": [
-            f"path_agent_{idx}: {edge.src} --{edge.rel}--> {edge.dst}"
+            f"path_agent_{idx}: {edge.src}->{edge.dst}"
             for idx, edge in enumerate(traced_edges)
-        ]
-        + ["question_agent: emitted deterministic relation-path question"],
+        ],
         "orchestrator": {
             "spawn_count": spawn_count,
             "finished_subtasks": spawn_count,
             "critical_steps": max(1, len(traced_edges)),
             "breadth": min(swarm_cfg.max_breadth, spawn_count),
-            "depth": min(swarm_cfg.max_depth, 1 if len(traced_edges) <= 2 else 2),
+            "depth": min(swarm_cfg.max_depth, 1),
         },
     }
 
@@ -176,21 +175,25 @@ def _swarm_v2_answer_prompt(
     shared_context: dict[str, Any],
     swarm_cfg: SwarmV2SwarmConfig,
 ) -> str:
+    del swarm_cfg  # kept for signature compatibility
+    compact_context = {
+        "nodes": list(shared_context.get("nodes", []))[:8],
+        "edges": list(shared_context.get("edges", []))[:6],
+    }
     return (
-        "You are the trainable orchestrator for the OSINT answer-generation swarm.\n"
-        "Assume frozen subagents share the same context window by default.\n"
-        f"Max agents: {swarm_cfg.max_agents}. "
-        f"Max breadth: {swarm_cfg.max_breadth}. "
-        f"Max depth: {swarm_cfg.max_depth}. "
-        f"Planner rounds: {swarm_cfg.planner_rounds}. "
-        f"Tools per agent: {swarm_cfg.tools_per_agent}.\n"
-        "Return ONLY one compact JSON object. Do not use markdown. Do not add prose.\n"
-        "Required schema: {\"answer\": string, \"supporting_edges\": list, \"orchestrator\": object}.\n"
-        "orchestrator must contain integer keys: spawn_count, finished_subtasks, critical_steps, breadth, depth.\n"
-        "supporting_edges must use only edges from Shared context and each edge must contain src, rel, dst, confidence.\n"
-        "Valid example: {\"answer\":\"user_7\",\"supporting_edges\":[{\"src\":\"alias_7_123\",\"rel\":\"alias_of\",\"dst\":\"user_7\",\"confidence\":1.0}],\"orchestrator\":{\"spawn_count\":2,\"finished_subtasks\":2,\"critical_steps\":1,\"breadth\":2,\"depth\":1}}\n"
-        f"Shared context:\n{json.dumps(shared_context, sort_keys=True)}\n"
-        f"Question: {question}"
+        "You answer one OSINT graph question using ONLY the shared context.\n"
+        "Output rules:\n"
+        "- Return ONLY one compact JSON object. No markdown. No prose. End with }.\n"
+        "- Required keys: answer, supporting_edges, orchestrator.\n"
+        "- supporting_edges: list of {src, rel, dst, confidence} taken from shared edges.\n"
+        "- orchestrator integer keys: spawn_count, finished_subtasks, critical_steps, breadth, depth.\n"
+        "Example schema:\n"
+        "{\"answer\":\"user_7\",\"supporting_edges\":[{\"src\":\"alias_7_123\",\"rel\":\"alias_of\","
+        "\"dst\":\"user_7\",\"confidence\":1.0}],\"orchestrator\":{\"spawn_count\":2,"
+        "\"finished_subtasks\":2,\"critical_steps\":1,\"breadth\":2,\"depth\":1}}\n"
+        f"Shared context: {json.dumps(compact_context, separators=(',', ':'), sort_keys=True)}\n"
+        f"Question: {question}\n"
+        "JSON:"
     )
 
 
@@ -340,30 +343,28 @@ def _swarm_v2_generator_prompt(
         if canonical_mode == "generate"
         else "Reuse the provided canonical candidate as-is; do not add, remove, or modify canonical_graph nodes/edges."
     )
+    canonical_compact = {
+        "nodes": list(canonical_candidate.get("nodes", []))[:8],
+        "edges": list(canonical_candidate.get("edges", []))[:6],
+    }
     return (
-        "You are the trainable orchestrator for the adversarial OSINT question-generation swarm.\n"
-        "Coordinate frozen subagents over the shared context and return a replayable task.\n"
-        f"Max agents: {swarm_cfg.max_agents}. "
-        f"Max breadth: {swarm_cfg.max_breadth}. "
-        f"Max depth: {swarm_cfg.max_depth}. "
-        f"Planner rounds: {swarm_cfg.planner_rounds}. "
-        f"Tools per agent: {swarm_cfg.tools_per_agent}.\n"
-        "Return ONLY one compact JSON object. Do not use markdown fences. Do not add commentary.\n"
-        "Required top-level keys: canonical_graph, question, answer, task_type, supporting_edges, "
-        "tool_trace, subagent_outputs, orchestrator.\n"
-        "supporting_edges must be a non-empty list of objects with src, rel, dst, confidence.\n"
-        "tool_trace must be non-empty and may only use enumerate_neighbors, trace_path, select_answer, emit_question.\n"
-        "orchestrator must contain integer keys: spawn_count, finished_subtasks, critical_steps, breadth, depth.\n"
-        "The answer must be the final dst selected by the replayed relation path.\n"
-        "The question must exactly match the deterministic emit_question result derived from the replayed path.\n"
-        f"Canonical graph mode: {canonical_mode}. {canonical_instruction}\n"
-        "Valid output example using this canonical candidate:\n"
+        "You generate ONE OSINT question/answer task as compact JSON.\n"
+        "Output rules:\n"
+        "- Return ONLY one JSON object. No markdown. No prose. End with }.\n"
+        "- Required keys: question, answer, task_type, supporting_edges, tool_trace, "
+        "subagent_outputs, orchestrator.\n"
+        "- supporting_edges: non-empty list of {src, rel, dst, confidence}, taken from canonical edges.\n"
+        "- tool_trace: non-empty list of {tool, args, result} using only "
+        "enumerate_neighbors|trace_path|select_answer|emit_question.\n"
+        "- answer = final dst of the trace. question describes the path.\n"
+        "- orchestrator: integer keys spawn_count, finished_subtasks, critical_steps, breadth, depth.\n"
+        f"- canonical_graph_mode={canonical_mode}: {canonical_instruction}\n"
+        "Example (copy schema, not values):\n"
         f"{json.dumps(example_payload, separators=(',', ':'), sort_keys=True)}\n"
-        "Now produce a different valid JSON object for the provided candidate.\n"
-        f"Shared context:\n{json.dumps(shared_context, sort_keys=True)}\n"
-        f"Canonical candidate:\n{json.dumps(canonical_candidate, sort_keys=True)}\n"
-        "Anchor questions to avoid:\n"
-        f"{anchors}\n"
+        "Canonical candidate (use these edges):\n"
+        f"{json.dumps(canonical_compact, separators=(',', ':'), sort_keys=True)}\n"
+        f"Avoid these prior questions: {anchors}\n"
+        "JSON:"
     )
 
 
@@ -433,6 +434,7 @@ def _safe_build_grpo_config(
         "max_completion_length": int(phase.max_completion_length),
         "temperature": float(phase.temperature),
         "top_p": float(phase.top_p),
+        "repetition_penalty": float(phase.repetition_penalty),
         "beta": float(phase.beta),
         "epsilon": float(phase.epsilon),
         "num_iterations": int(phase.num_iterations),

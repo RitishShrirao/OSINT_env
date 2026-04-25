@@ -705,45 +705,87 @@ class GeneratorRewardFunction:
         self,
         candidate: GeneratedTaskCandidate,
         validation_result: ReplayValidationResult,
+        completion_text: str = "",
     ) -> float:
         # Avoid a constant hard penalty. Keep invalid samples negative but
         # graded so GRPO still gets reward variance/advantages when quality
-        # differs. Scale is intentionally wider than the original [-1.35]
-        # constant path:
-        #   malformed/no JSON ~= -2.0
-        #   partial structured JSON ~= -1.2 .. -0.4
-        #   replayable but imperfect candidates are handled by valid path.
+        # differs. Three layers of signal:
+        #   (1) per-reason penalty (caps how bad it can get)
+        #   (2) partial credit for any parseable structural element
+        #   (3) tiny text-level signal so completely-collapsed completions
+        #       differ from completions that at least *attempt* JSON.
         reason_penalty = {
-            "missing_question_or_answer": 0.55,
-            "malformed_support_edges": 0.40,
-            "non_replayable_tool_calls": 0.55,
-            "non_unique_derivation_path": 0.30,
-            "unseen_nodes_or_edges": 0.35,
-            "answer_leakage": 0.45,
+            "missing_question_or_answer": 0.45,
+            "malformed_support_edges": 0.30,
+            "non_replayable_tool_calls": 0.40,
+            "non_unique_derivation_path": 0.25,
+            "unseen_nodes_or_edges": 0.30,
+            "answer_leakage": 0.40,
             "duplicate_or_near_duplicate": 0.20,
-            "context_or_support_budget_overflow": 0.25,
+            "context_or_support_budget_overflow": 0.20,
         }
-        penalty = 0.35
+        penalty = 0.20
         for reason in validation_result.reasons:
             penalty += reason_penalty.get(reason, 0.10)
 
-        # Partial credit for parseable structure to reduce flat rewards.
         partial_credit = 0.0
         if candidate.question:
-            partial_credit += 0.25
+            partial_credit += 0.30
         if candidate.answer:
-            partial_credit += 0.25
+            partial_credit += 0.30
         if candidate.supporting_edges:
-            partial_credit += min(0.35, 0.08 * len(candidate.supporting_edges))
+            partial_credit += min(0.40, 0.10 * len(candidate.supporting_edges))
         if candidate.tool_trace:
-            partial_credit += min(0.30, 0.06 * len(candidate.tool_trace))
+            partial_credit += min(0.35, 0.08 * len(candidate.tool_trace))
         if candidate.subagent_outputs:
             partial_credit += 0.10
         if candidate.canonical_edges or candidate.canonical_nodes:
             partial_credit += 0.10
 
-        reward = partial_credit - penalty
-        return float(max(-2.0, min(-0.05, reward)))
+        text_signal = self._completion_text_signal(completion_text)
+
+        reward = partial_credit - penalty + text_signal
+        return float(max(-1.8, min(-0.05, reward)))
+
+    @staticmethod
+    def _completion_text_signal(completion_text: str) -> float:
+        """Small [0, 0.25] bonus that grades how 'JSON-like' a raw completion is.
+
+        Important for GRPO: if every sample in a group is unparseable garbage
+        but the *raw text* differs in JSON-likeness, we still produce non-zero
+        advantages. Without this the reward collapses to a flat floor and
+        ``frac_reward_zero_std`` stays at 1.0 forever.
+        """
+        if not completion_text:
+            return 0.0
+        text = completion_text.strip()
+        if not text:
+            return 0.0
+        signal = 0.0
+        # Brace cues (model is trying to emit JSON).
+        signal += 0.03 * min(2, text.count("{"))
+        signal += 0.03 * min(2, text.count("}"))
+        signal += 0.01 * min(4, text.count("["))
+        signal += 0.01 * min(4, text.count("]"))
+        # Schema-keyword cues. Each keyword bumps the signal a tiny amount.
+        cues = (
+            "\"question\"",
+            "\"answer\"",
+            "\"supporting_edges\"",
+            "\"tool_trace\"",
+            "\"task_type\"",
+            "\"orchestrator\"",
+        )
+        signal += 0.015 * sum(1 for cue in cues if cue in text)
+        # Diversity proxy: number of unique short tokens. Pure repetition
+        # collapses this; varied output keeps it nonzero. Caps very fast.
+        sample = text[:512]
+        unique_words = len(set(sample.split())) if sample else 0
+        signal += min(0.04, unique_words / 800.0)
+        # Length proxy capped — purely-empty vs anything-emitted differs.
+        length_bump = min(0.03, len(text) / 8000.0)
+        signal += length_bump
+        return min(0.25, signal)
 
     def _validity_score(self, candidate: GeneratedTaskCandidate) -> float:
         score = 0.0
@@ -838,12 +880,19 @@ class GeneratorRewardFunction:
         )
         return breakdown.parallel, breakdown.finish
 
-    def _swarm_v2_reward(self, candidate: GeneratedTaskCandidate) -> tuple[float, ReplayValidationResult]:
+    def _swarm_v2_reward(
+        self,
+        candidate: GeneratedTaskCandidate,
+        completion_text: str = "",
+    ) -> tuple[float, ReplayValidationResult]:
         validator = self._swarm_v2_validator
         validator.seen_questions = list(self._seen_questions)
         validation_result = validator.validate(candidate)
         if not validation_result.is_valid:
-            return self._invalid_swarm_v2_reward(candidate, validation_result), validation_result
+            return (
+                self._invalid_swarm_v2_reward(candidate, validation_result, completion_text),
+                validation_result,
+            )
 
         hardness = self._hardness_score(candidate)
         swarm_diversity = self._swarm_diversity_score(candidate)
@@ -878,8 +927,8 @@ class GeneratorRewardFunction:
             candidate = parse_generated_task_completion(text, max_support_edges=self.max_support_edges)
 
             if self.pipeline_mode == "swarm_v2":
-                reward, validation_result = self._swarm_v2_reward(candidate)
-                rewards.append(float(max(-2.0, min(1.2, reward))))
+                reward, validation_result = self._swarm_v2_reward(candidate, completion_text=text)
+                rewards.append(float(max(-1.8, min(1.2, reward))))
                 if validation_result.is_valid and candidate.question:
                     valid_count += 1
                     self._seen_questions.append(candidate.question)

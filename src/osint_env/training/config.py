@@ -19,6 +19,7 @@ class KimiGRPOPhaseConfig:
     max_completion_length: int = 256
     temperature: float = 1.0
     top_p: float = 1.0
+    repetition_penalty: float = 1.0
     beta: float = 0.01
     epsilon: float = 0.2
     num_iterations: int = 1
@@ -214,6 +215,7 @@ def _parse_phase(data: dict[str, Any], fallback: KimiGRPOPhaseConfig) -> KimiGRP
         ),
         temperature=_parse_float(data.get("temperature"), fallback.temperature),
         top_p=_parse_float(data.get("top_p"), fallback.top_p),
+        repetition_penalty=_parse_float(data.get("repetition_penalty"), fallback.repetition_penalty),
         beta=_parse_float(data.get("beta"), fallback.beta),
         epsilon=_parse_float(data.get("epsilon"), fallback.epsilon),
         num_iterations=_parse_int(data.get("num_iterations"), fallback.num_iterations, floor=1),
