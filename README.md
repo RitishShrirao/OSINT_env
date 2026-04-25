@@ -205,6 +205,7 @@ Space setup checklist:
    - `TRAIN_SELF_PLAY_CONFIG_PATH` (default: `config/self_play_training_hf_a10g_smoke.json`)
    - `TRAIN_ENV_CONFIG_PATH` (default: `config/shared_config.json`)
    - `RUN_SELF_PLAY_DRY_RUN=1` to test startup wiring without GRPO updates.
+   - `OSINT_TRAIN_STRICT_ASSERTS=1` to fail fast when reward variance, KL, loss, grad norms, or parameter updates stay zero.
 7. Restart the Space and monitor build/runtime logs for the training run.
 
 W&B run naming is controlled by `wandb_run_name_prefix` and will emit phase-specific runs like `...-r001-generator` and `...-r001-answerer`.

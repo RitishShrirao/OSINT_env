@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import Any
@@ -580,6 +581,55 @@ class GeneratorRewardFunction:
             shared_context=self.swarm_v2_shared_context,
             seen_questions=self._seen_questions,
         )
+        self._debug_batches_seen = 0
+        self._debug_reason_counter: Counter[str] = Counter()
+        self._debug_reward_window: list[float] = []
+        self._debug_last_batch: dict[str, Any] = {}
+
+    @staticmethod
+    def _std(values: list[float]) -> float:
+        if len(values) <= 1:
+            return 0.0
+        mean = sum(values) / len(values)
+        variance = sum((value - mean) ** 2 for value in values) / len(values)
+        return variance ** 0.5
+
+    def _invalid_swarm_v2_reward(
+        self,
+        candidate: GeneratedTaskCandidate,
+        validation_result: ReplayValidationResult,
+    ) -> float:
+        # Avoid a constant hard penalty. Keep invalid samples negative but graded
+        # so GRPO still gets reward variance/advantages when quality differs.
+        reason_penalty = {
+            "missing_question_or_answer": 0.30,
+            "malformed_support_edges": 0.20,
+            "non_replayable_tool_calls": 0.35,
+            "non_unique_derivation_path": 0.20,
+            "unseen_nodes_or_edges": 0.20,
+            "answer_leakage": 0.20,
+            "duplicate_or_near_duplicate": 0.10,
+            "context_or_support_budget_overflow": 0.15,
+        }
+        penalty = 0.30
+        for reason in validation_result.reasons:
+            penalty += reason_penalty.get(reason, 0.05)
+
+        # Partial credit for parseable structure to reduce flat rewards.
+        partial_credit = 0.0
+        if candidate.question:
+            partial_credit += 0.10
+        if candidate.answer:
+            partial_credit += 0.10
+        if candidate.supporting_edges:
+            partial_credit += 0.10
+        if candidate.tool_trace:
+            partial_credit += 0.10
+        if candidate.subagent_outputs:
+            partial_credit += 0.05
+
+        reward = partial_credit - penalty
+        return float(max(-1.5, min(-0.05, reward)))
 
     def _validity_score(self, candidate: GeneratedTaskCandidate) -> float:
         score = 0.0
@@ -679,7 +729,7 @@ class GeneratorRewardFunction:
         validator.seen_questions = list(self._seen_questions)
         validation_result = validator.validate(candidate)
         if not validation_result.is_valid:
-            return -1.35, validation_result
+            return self._invalid_swarm_v2_reward(candidate, validation_result), validation_result
 
         hardness = self._hardness_score(candidate)
         swarm_diversity = self._swarm_diversity_score(candidate)
@@ -707,6 +757,8 @@ class GeneratorRewardFunction:
         if completions is None:
             completions = list(kwargs.get("completions", []))
         rewards: list[float] = []
+        batch_reasons: Counter[str] = Counter()
+        valid_count = 0
         for completion in completions:
             text = decode_completion_text(completion)
             candidate = parse_generated_task_completion(text, max_support_edges=self.max_support_edges)
@@ -715,9 +767,13 @@ class GeneratorRewardFunction:
                 reward, validation_result = self._swarm_v2_reward(candidate)
                 rewards.append(float(max(-1.5, min(1.5, reward))))
                 if validation_result.is_valid and candidate.question:
+                    valid_count += 1
                     self._seen_questions.append(candidate.question)
                     if len(self._seen_questions) > 4096:
                         self._seen_questions = self._seen_questions[-2048:]
+                else:
+                    for reason in validation_result.reasons:
+                        batch_reasons[reason] += 1
             else:
                 validity = self._validity_score(candidate)
                 consistency = self._consistency_score(candidate)
@@ -736,6 +792,28 @@ class GeneratorRewardFunction:
                 self._seen_questions.append(candidate.question)
                 if len(self._seen_questions) > 4096:
                     self._seen_questions = self._seen_questions[-2048:]
+
+        self._debug_batches_seen += 1
+        self._debug_reward_window.extend(rewards)
+        self._debug_reward_window = self._debug_reward_window[-512:]
+        self._debug_reason_counter.update(batch_reasons)
+        self._debug_last_batch = {
+            "batch_rewards": list(rewards),
+            "batch_reward_mean": float(sum(rewards) / max(1, len(rewards))),
+            "batch_reward_std": float(self._std(rewards)),
+            "valid_count": int(valid_count),
+            "invalid_count": int(max(0, len(rewards) - valid_count)),
+            "top_invalid_reasons": batch_reasons.most_common(5),
+        }
+        if self.pipeline_mode == "swarm_v2" and (self._debug_batches_seen % 10 == 0):
+            window_std = self._std(self._debug_reward_window)
+            print(
+                "[reward_debug][generator] "
+                f"batches={self._debug_batches_seen} "
+                f"window_reward_std={window_std:.6f} "
+                f"last_batch_valid={valid_count}/{len(rewards)} "
+                f"top_invalid_reasons={batch_reasons.most_common(3)}"
+            )
 
         return rewards
 

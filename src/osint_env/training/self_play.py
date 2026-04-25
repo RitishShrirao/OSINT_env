@@ -443,7 +443,17 @@ def _train_grpo_phase(
 
     phase_label = str(run_name).strip() or str(output_dir.name)
     print(f"[self_play] Starting phase: {phase_label} rows={len(rows)} max_steps={phase.max_steps}")
+    strict_asserts = str(os.getenv("OSINT_TRAIN_STRICT_ASSERTS", "")).strip().lower() in {"1", "true", "yes", "on"}
     trainer = GRPOTrainer(**trainer_kwargs)
+    tracked_params = [
+        (name, param)
+        for name, param in trainer.model.named_parameters()
+        if getattr(param, "requires_grad", False)
+    ][:32]
+    pre_update_fingerprint = {
+        name: float(param.detach().float().abs().mean().item())
+        for name, param in tracked_params
+    }
     train_output = trainer.train()
 
     final_dir = output_dir / "final_model"
@@ -459,6 +469,86 @@ def _train_grpo_phase(
         "train_rows": len(rows),
         "tuning_mode": str(tuning_mode).strip().lower() or "full",
     }
+
+    log_history = list(getattr(getattr(trainer, "state", None), "log_history", []) or [])
+    reward_values = [float(row.get("reward")) for row in log_history if isinstance(row, dict) and "reward" in row]
+    reward_std_values = [
+        float(row.get("reward_std"))
+        for row in log_history
+        if isinstance(row, dict) and "reward_std" in row
+    ]
+    kl_values = [float(row.get("kl")) for row in log_history if isinstance(row, dict) and "kl" in row]
+    grad_norm_values = [
+        float(row.get("grad_norm"))
+        for row in log_history
+        if isinstance(row, dict) and "grad_norm" in row
+    ]
+    loss_values = [float(row.get("loss")) for row in log_history if isinstance(row, dict) and "loss" in row]
+    entropy_values = [float(row.get("entropy")) for row in log_history if isinstance(row, dict) and "entropy" in row]
+
+    trainable_params = [param for param in trainer.model.parameters() if getattr(param, "requires_grad", False)]
+    grad_tensors = [param.grad for param in trainable_params if getattr(param, "grad", None) is not None]
+    trainable_param_count = int(sum(param.numel() for param in trainable_params))
+    params_with_grad = int(len(grad_tensors))
+    nonzero_grad_tensors = int(
+        sum(
+            1
+            for grad in grad_tensors
+            if float(grad.detach().abs().sum().item()) > 0.0
+        )
+    )
+
+    diagnostics = {
+        "reward_min": min(reward_values) if reward_values else 0.0,
+        "reward_max": max(reward_values) if reward_values else 0.0,
+        "reward_std_max": max(reward_std_values) if reward_std_values else 0.0,
+        "kl_max": max(kl_values) if kl_values else 0.0,
+        "loss_abs_max": max((abs(value) for value in loss_values), default=0.0),
+        "grad_norm_max": max(grad_norm_values) if grad_norm_values else 0.0,
+        "entropy_min": min(entropy_values) if entropy_values else 0.0,
+        "entropy_max": max(entropy_values) if entropy_values else 0.0,
+        "trainable_param_count": trainable_param_count,
+        "params_with_grad": params_with_grad,
+        "nonzero_grad_tensors": nonzero_grad_tensors,
+        "fingerprint_param_count": len(pre_update_fingerprint),
+        "fingerprint_changed_count": 0,
+    }
+    if pre_update_fingerprint:
+        changed_count = 0
+        for name, param in tracked_params:
+            after_value = float(param.detach().float().abs().mean().item())
+            before_value = pre_update_fingerprint.get(name, after_value)
+            if abs(after_value - before_value) > 1e-9:
+                changed_count += 1
+        diagnostics["fingerprint_changed_count"] = changed_count
+    result["diagnostics"] = diagnostics
+
+    print(
+        "[self_play][diagnostics] "
+        f"{phase_label} reward_range=({diagnostics['reward_min']:.4f},{diagnostics['reward_max']:.4f}) "
+        f"reward_std_max={diagnostics['reward_std_max']:.6f} "
+        f"kl_max={diagnostics['kl_max']:.6f} "
+        f"loss_abs_max={diagnostics['loss_abs_max']:.6f} "
+        f"grad_norm_max={diagnostics['grad_norm_max']:.6f} "
+        f"nonzero_grad_tensors={diagnostics['nonzero_grad_tensors']}/{max(1, diagnostics['params_with_grad'])} "
+        f"fingerprint_changed={diagnostics['fingerprint_changed_count']}/{max(1, diagnostics['fingerprint_param_count'])}"
+    )
+
+    if strict_asserts:
+        assert diagnostics["reward_max"] != diagnostics["reward_min"], (
+            f"Constant reward detected in {phase_label}: {diagnostics['reward_min']}"
+        )
+        assert diagnostics["reward_std_max"] > 0.0, f"reward_std stayed zero in {phase_label}"
+        assert diagnostics["kl_max"] > 0.0, f"KL stayed zero in {phase_label}"
+        assert diagnostics["loss_abs_max"] > 0.0, f"Loss stayed zero in {phase_label}"
+        assert diagnostics["grad_norm_max"] > 0.0, f"Grad norm stayed zero in {phase_label}"
+        assert diagnostics["nonzero_grad_tensors"] > 0, f"No non-zero grads in {phase_label}"
+        assert diagnostics["fingerprint_changed_count"] > 0, f"No parameter fingerprint change in {phase_label}"
+
+    reward_debug = getattr(reward_function, "_debug_last_batch", None)
+    if isinstance(reward_debug, dict):
+        print(f"[reward_debug][last_batch] {phase_label} {json.dumps(reward_debug, sort_keys=True)}")
+
     print(
         "[self_play] Finished phase: "
         f"{phase_label} global_step={global_step} training_loss={training_loss} output={final_dir}"
