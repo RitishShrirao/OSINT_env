@@ -342,6 +342,68 @@ def test_swarm_v2_generator_reward_grades_invalid_outputs_instead_of_constant_pe
     assert reward_fn._debug_last_batch["valid_output_ratio"] == 0.25
 
 
+def test_parse_generated_task_completion_handles_garbage_orchestrator_values():
+    """Regression: model emits e.g. ``"none"`` for an orchestrator integer.
+
+    Previously this crashed the GRPO trainer with
+    ``ValueError: invalid literal for int() with base 10: 'none'``.
+    """
+    completion = json.dumps(
+        {
+            "question": "Q?",
+            "answer": "user_7",
+            "supporting_edges": [
+                {"src": "a", "rel": "knows", "dst": "user_7", "confidence": 1.0}
+            ],
+            "tool_trace": [],
+            "orchestrator": {
+                "spawn_count": "none",
+                "finished_subtasks": "N/A",
+                "critical_steps": True,
+                "breadth": "2 agents",
+                "depth": None,
+            },
+        }
+    )
+
+    candidate = parse_generated_task_completion(completion)
+    assert candidate.orchestrator.spawn_count == 0
+    assert candidate.orchestrator.finished_subtasks == 0
+    assert candidate.orchestrator.critical_steps == 1
+    assert candidate.orchestrator.depth == 0
+
+
+def test_swarm_v2_generator_reward_is_robust_to_parse_crashes():
+    """Reward function must never raise: any malformed completion gets a floor reward."""
+    cfg = SelfPlayTrainingConfig(pipeline_mode="swarm_v2")
+    env = OSINTEnvironment(EnvironmentConfig(seed=33, n_users=14, max_steps=6))
+    reward_fn = GeneratorRewardFunction(
+        graph=env.graph,
+        answerer_judge=DummyJudge(answer="x"),
+        weights=GeneratorRewardWeights(),
+        max_support_edges=cfg.swarm_v2.validation.max_support_edges,
+        pipeline_mode="swarm_v2",
+        swarm_v2_validation=cfg.swarm_v2.validation,
+        swarm_v2_shared_context=cfg.swarm_v2.shared_context,
+        parl_max_parallel_hint=cfg.swarm_v2.generator_swarm.max_agents,
+    )
+
+    garbage_orchestrator = json.dumps(
+        {
+            "question": "Q?",
+            "answer": "y",
+            "supporting_edges": [{"src": "a", "rel": "r", "dst": "y", "confidence": 1.0}],
+            "tool_trace": [],
+            "orchestrator": {"spawn_count": "none"},
+        }
+    )
+
+    scores = reward_fn(completions=["", "{not really json", garbage_orchestrator])
+    assert len(scores) == 3
+    for score in scores:
+        assert -1.8 <= score <= 1.2
+
+
 def test_swarm_v2_dry_run_writes_new_artifacts_and_preserves_legacy_contract(tmp_path: Path):
     env_cfg = EnvironmentConfig(seed=11, n_users=14, max_steps=6)
     train_cfg = SelfPlayTrainingConfig(

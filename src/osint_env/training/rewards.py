@@ -253,15 +253,47 @@ def _parse_subagent_outputs(value: Any) -> list[str]:
     return out
 
 
+def _coerce_int(value: Any, default: int) -> int:
+    """Best-effort int coercion that NEVER raises.
+
+    Models routinely emit garbage like ``"none"``, ``"N/A"``, ``true``,
+    ``"2 agents"`` for fields the schema requires to be integers. The
+    reward function runs inside the GRPO training loop, so a single
+    ``ValueError`` here crashes the entire training job. Be defensive.
+    """
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        if value != value or value in (float("inf"), float("-inf")):
+            return default
+        return int(value)
+    if isinstance(value, str):
+        token = value.strip()
+        if not token:
+            return default
+        try:
+            return int(token)
+        except ValueError:
+            try:
+                return int(float(token))
+            except ValueError:
+                return default
+    return default
+
+
 def _parse_orchestrator(value: Any) -> SwarmOrchestratorTelemetry:
     if not isinstance(value, dict):
         return SwarmOrchestratorTelemetry()
     return SwarmOrchestratorTelemetry(
-        spawn_count=max(0, int(value.get("spawn_count", 0) or 0)),
-        finished_subtasks=max(0, int(value.get("finished_subtasks", 0) or 0)),
-        critical_steps=max(1, int(value.get("critical_steps", 1) or 1)),
-        breadth=max(0, int(value.get("breadth", 0) or 0)),
-        depth=max(0, int(value.get("depth", 0) or 0)),
+        spawn_count=max(0, _coerce_int(value.get("spawn_count"), 0)),
+        finished_subtasks=max(0, _coerce_int(value.get("finished_subtasks"), 0)),
+        critical_steps=max(1, _coerce_int(value.get("critical_steps"), 1)),
+        breadth=max(0, _coerce_int(value.get("breadth"), 0)),
+        depth=max(0, _coerce_int(value.get("depth"), 0)),
     )
 
 
@@ -923,11 +955,42 @@ class GeneratorRewardFunction:
         batch_reasons: Counter[str] = Counter()
         valid_count = 0
         for completion in completions:
-            text = decode_completion_text(completion)
-            candidate = parse_generated_task_completion(text, max_support_edges=self.max_support_edges)
+            try:
+                text = decode_completion_text(completion)
+            except Exception:
+                text = ""
+            try:
+                candidate = parse_generated_task_completion(
+                    text, max_support_edges=self.max_support_edges
+                )
+            except Exception as exc:
+                # Hard guard: a single malformed completion must NEVER take
+                # down GRPO. Fall through to the invalid-floor with a tiny
+                # text signal so the group still has reward variance.
+                print(
+                    f"[reward_debug][parse_error] {type(exc).__name__}: {exc}; "
+                    f"text_head={text[:120]!r}"
+                )
+                rewards.append(
+                    float(max(-1.8, -0.6 + self._completion_text_signal(text)))
+                )
+                batch_reasons["parse_error"] += 1
+                continue
 
             if self.pipeline_mode == "swarm_v2":
-                reward, validation_result = self._swarm_v2_reward(candidate, completion_text=text)
+                try:
+                    reward, validation_result = self._swarm_v2_reward(
+                        candidate, completion_text=text
+                    )
+                except Exception as exc:
+                    print(
+                        f"[reward_debug][reward_error] {type(exc).__name__}: {exc}"
+                    )
+                    rewards.append(
+                        float(max(-1.8, -0.6 + self._completion_text_signal(text)))
+                    )
+                    batch_reasons["reward_error"] += 1
+                    continue
                 rewards.append(float(max(-1.8, min(1.2, reward))))
                 if validation_result.is_valid and candidate.question:
                     valid_count += 1
