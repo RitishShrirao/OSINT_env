@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 import random
@@ -320,6 +321,8 @@ def _safe_build_grpo_config(
     phase: KimiGRPOPhaseConfig,
     output_dir: str,
     grpo_config_cls: Any,
+    report_to: list[str] | None = None,
+    run_name: str = "",
 ) -> Any:
     kwargs: dict[str, Any] = {
         "output_dir": output_dir,
@@ -341,8 +344,10 @@ def _safe_build_grpo_config(
         "remove_unused_columns": False,
         "use_vllm": bool(phase.use_vllm),
         "vllm_mode": str(phase.vllm_mode),
-        "report_to": [],
+        "report_to": list(report_to or []),
     }
+    if str(run_name).strip():
+        kwargs["run_name"] = str(run_name).strip()
 
     signature = inspect.signature(grpo_config_cls.__init__)
     filtered = {key: value for key, value in kwargs.items() if key in signature.parameters}
@@ -379,12 +384,20 @@ def _train_grpo_phase(
     output_dir: Path,
     tuning_mode: str,
     lora: LoraTuningConfig,
+    report_to: list[str] | None = None,
+    run_name: str = "",
 ) -> dict[str, Any]:
     Dataset, GRPOConfig, GRPOTrainer = _require_training_stack()
 
     output_dir.mkdir(parents=True, exist_ok=True)
     dataset = Dataset.from_list(rows)
-    args = _safe_build_grpo_config(phase=phase, output_dir=str(output_dir), grpo_config_cls=GRPOConfig)
+    args = _safe_build_grpo_config(
+        phase=phase,
+        output_dir=str(output_dir),
+        grpo_config_cls=GRPOConfig,
+        report_to=report_to,
+        run_name=run_name,
+    )
 
     trainer_kwargs: dict[str, Any] = {
         "model": model_name_or_path,
@@ -415,6 +428,18 @@ def _train_grpo_phase(
         "train_rows": len(rows),
         "tuning_mode": str(tuning_mode).strip().lower() or "full",
     }
+
+
+def _resolve_reporting(training_config: SelfPlayTrainingConfig, phase_name: str, round_index: int) -> tuple[list[str], str]:
+    if not training_config.wandb_enabled:
+        return [], ""
+    if training_config.wandb_project:
+        os.environ["WANDB_PROJECT"] = str(training_config.wandb_project)
+    if training_config.wandb_entity:
+        os.environ["WANDB_ENTITY"] = str(training_config.wandb_entity)
+    prefix = str(training_config.wandb_run_name_prefix).strip() or "self-play"
+    run_name = f"{prefix}-r{round_index:03d}-{phase_name}"
+    return ["wandb"], run_name
 
 
 def _resolve_initial_models(cfg: SelfPlayTrainingConfig) -> tuple[str, str]:
@@ -904,6 +929,11 @@ def _run_adversarial_self_play_swarm_v2(
             }
 
             if not effective_dry_run:
+                answerer_pre_report_to, answerer_pre_run_name = _resolve_reporting(
+                    training_config=training_config,
+                    phase_name="answerer-pre",
+                    round_index=round_index,
+                )
                 answerer_pre_reward = AnswererRewardFunction(
                     graph=env.graph,
                     pipeline_mode="swarm_v2",
@@ -917,6 +947,8 @@ def _run_adversarial_self_play_swarm_v2(
                     output_dir=round_dir / f"{training_config.answerer_phase.output_subdir}_pre",
                     tuning_mode=tuning_mode,
                     lora=training_config.lora,
+                    report_to=answerer_pre_report_to,
+                    run_name=answerer_pre_run_name,
                 )
                 answerer_model = str(answerer_pre_train_result["model_path"])
                 if topology == "shared":
@@ -937,6 +969,11 @@ def _run_adversarial_self_play_swarm_v2(
         }
 
         if not effective_dry_run:
+            generator_report_to, generator_run_name = _resolve_reporting(
+                training_config=training_config,
+                phase_name="generator",
+                round_index=round_index,
+            )
             generator_reward = GeneratorRewardFunction(
                 graph=env.graph,
                 answerer_judge=AnswererJudge(
@@ -958,6 +995,8 @@ def _run_adversarial_self_play_swarm_v2(
                 output_dir=round_dir / training_config.generator_phase.output_subdir,
                 tuning_mode=tuning_mode,
                 lora=training_config.lora,
+                report_to=generator_report_to,
+                run_name=generator_run_name,
             )
             generator_model = str(generator_train_result["model_path"])
             if topology == "shared":
@@ -1038,6 +1077,11 @@ def _run_adversarial_self_play_swarm_v2(
         }
 
         if not effective_dry_run:
+            answerer_report_to, answerer_run_name = _resolve_reporting(
+                training_config=training_config,
+                phase_name="answerer",
+                round_index=round_index,
+            )
             answerer_reward = AnswererRewardFunction(
                 graph=env.graph,
                 pipeline_mode="swarm_v2",
@@ -1051,6 +1095,8 @@ def _run_adversarial_self_play_swarm_v2(
                 output_dir=round_dir / training_config.answerer_phase.output_subdir,
                 tuning_mode=tuning_mode,
                 lora=training_config.lora,
+                report_to=answerer_report_to,
+                run_name=answerer_run_name,
             )
             answerer_model = str(answerer_train_result["model_path"])
             if topology == "shared":
@@ -1174,6 +1220,11 @@ def run_adversarial_self_play(
             }
 
             if not effective_dry_run:
+                answerer_pre_report_to, answerer_pre_run_name = _resolve_reporting(
+                    training_config=training_config,
+                    phase_name="answerer-pre",
+                    round_index=round_index,
+                )
                 answerer_pre_reward = AnswererRewardFunction(graph=env.graph)
                 answerer_pre_train_result = _train_grpo_phase(
                     model_name_or_path=answerer_model,
@@ -1183,6 +1234,8 @@ def run_adversarial_self_play(
                     output_dir=round_dir / f"{training_config.answerer_phase.output_subdir}_pre",
                     tuning_mode=tuning_mode,
                     lora=training_config.lora,
+                    report_to=answerer_pre_report_to,
+                    run_name=answerer_pre_run_name,
                 )
                 answerer_model = str(answerer_pre_train_result["model_path"])
                 if topology == "shared":
@@ -1202,6 +1255,11 @@ def run_adversarial_self_play(
         }
 
         if not effective_dry_run:
+            generator_report_to, generator_run_name = _resolve_reporting(
+                training_config=training_config,
+                phase_name="generator",
+                round_index=round_index,
+            )
             generator_reward = GeneratorRewardFunction(
                 graph=env.graph,
                 answerer_judge=AnswererJudge(
@@ -1219,6 +1277,8 @@ def run_adversarial_self_play(
                 output_dir=round_dir / training_config.generator_phase.output_subdir,
                 tuning_mode=tuning_mode,
                 lora=training_config.lora,
+                report_to=generator_report_to,
+                run_name=generator_run_name,
             )
             generator_model = str(generator_train_result["model_path"])
             if topology == "shared":
@@ -1274,6 +1334,11 @@ def run_adversarial_self_play(
         }
 
         if not effective_dry_run:
+            answerer_report_to, answerer_run_name = _resolve_reporting(
+                training_config=training_config,
+                phase_name="answerer",
+                round_index=round_index,
+            )
             answerer_reward = AnswererRewardFunction(graph=env.graph)
             answerer_train_result = _train_grpo_phase(
                 model_name_or_path=answerer_model,
@@ -1283,6 +1348,8 @@ def run_adversarial_self_play(
                 output_dir=round_dir / training_config.answerer_phase.output_subdir,
                 tuning_mode=tuning_mode,
                 lora=training_config.lora,
+                report_to=answerer_report_to,
+                run_name=answerer_run_name,
             )
             answerer_model = str(answerer_train_result["model_path"])
             if topology == "shared":

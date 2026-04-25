@@ -112,6 +112,10 @@ class SelfPlayTrainingConfig:
     rounds: int = 3
     output_dir: str = "artifacts/self_play"
     dry_run: bool = True
+    wandb_enabled: bool = False
+    wandb_project: str = "osint-self-play"
+    wandb_entity: str = ""
+    wandb_run_name_prefix: str = "self-play"
     pipeline_mode: str = "legacy"
     model_topology: str = "dual"
     phase_schedule: str = "generator_answerer"
@@ -349,6 +353,11 @@ def load_self_play_config(path: str | Path | None) -> SelfPlayTrainingConfig:
         rounds=_parse_int(payload.get("rounds"), defaults.rounds, floor=1),
         output_dir=str(payload.get("output_dir", defaults.output_dir)).strip() or defaults.output_dir,
         dry_run=_parse_bool(payload.get("dry_run"), defaults.dry_run),
+        wandb_enabled=_parse_bool(payload.get("wandb_enabled"), defaults.wandb_enabled),
+        wandb_project=str(payload.get("wandb_project", defaults.wandb_project)).strip() or defaults.wandb_project,
+        wandb_entity=str(payload.get("wandb_entity", defaults.wandb_entity)).strip(),
+        wandb_run_name_prefix=str(payload.get("wandb_run_name_prefix", defaults.wandb_run_name_prefix)).strip()
+        or defaults.wandb_run_name_prefix,
         pipeline_mode=_parse_str_choice(
             payload.get("pipeline_mode"),
             defaults.pipeline_mode,

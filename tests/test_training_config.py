@@ -16,6 +16,8 @@ def test_self_play_config_defaults_when_missing():
     assert cfg.generator_reward_weights.hardness > 0.0
     assert cfg.swarm_v2.generator_swarm.shared_context is True
     assert cfg.swarm_v2.validation.max_support_edges >= 1
+    assert cfg.wandb_enabled is False
+    assert cfg.wandb_project == "osint-self-play"
 
 
 def test_self_play_config_parses_overrides(tmp_path: Path):
@@ -27,6 +29,10 @@ def test_self_play_config_parses_overrides(tmp_path: Path):
                 "output_dir": "artifacts/custom_self_play",
                 "dry_run": False,
                 "pipeline_mode": "swarm_v2",
+                "wandb_enabled": True,
+                "wandb_project": "osint-train-tests",
+                "wandb_entity": "example-team",
+                "wandb_run_name_prefix": "ci-self-play",
                 "model_topology": "shared",
                 "phase_schedule": "answerer_generator_answerer",
                 "tuning_mode": "lora",
@@ -102,6 +108,10 @@ def test_self_play_config_parses_overrides(tmp_path: Path):
     assert cfg.output_dir == "artifacts/custom_self_play"
     assert cfg.dry_run is False
     assert cfg.pipeline_mode == "swarm_v2"
+    assert cfg.wandb_enabled is True
+    assert cfg.wandb_project == "osint-train-tests"
+    assert cfg.wandb_entity == "example-team"
+    assert cfg.wandb_run_name_prefix == "ci-self-play"
     assert cfg.model_topology == "shared"
     assert cfg.phase_schedule == "answerer_generator_answerer"
     assert cfg.tuning_mode == "lora"

@@ -176,6 +176,30 @@ When you have compute and the train dependencies installed, remove `--dry-run` (
 
 The training config also supports `"model_topology": "dual"|"shared"`, `"phase_schedule": "generator_answerer"|"answerer_generator_answerer"`, and `"tuning_mode": "full"|"lora"` so you can switch between two-model vs single-model self-play and full fine-tuning vs LoRA adapters.
 
+### Hugging Face Space Smoke Run (Qwen 3.5 0.8B + W&B)
+
+For a short verification run (enough to confirm W&B logging before scaling up), use:
+
+```bash
+osint-env train-self-play --config config/shared_config.json --train-config config/self_play_training_hf_a10g_smoke.json
+```
+
+This config:
+
+- uses `Qwen/Qwen3.5-0.8B`
+- enables W&B reporting (`wandb_enabled: true`)
+- keeps training intentionally short (`rounds=1`, `max_steps=5` per phase)
+- uses LoRA with small batch settings so it can run as a smoke test on an A10G
+
+Space setup checklist:
+
+1. In Space **Settings -> Hardware**, select **NVIDIA A10G (large)**.
+2. In Space **Settings -> Variables and secrets**, set `WANDB_API_KEY`.
+3. Optionally set `WANDB_ENTITY` if your project belongs to a team.
+4. Install training extras in the Space environment: `python -m pip install -e ".[train]"`.
+
+W&B run naming is controlled by `wandb_run_name_prefix` and will emit phase-specific runs like `...-r001-generator` and `...-r001-answerer`.
+
 ### Reward Functions In Self-Play (Generator + Answerer)
 
 Self-play trains two policies with role-specific reward functions defined in `src/osint_env/training/rewards.py`.
