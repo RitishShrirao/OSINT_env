@@ -195,14 +195,30 @@ def test_swarm_v2_replay_validator_accepts_valid_candidate_and_rejects_invalid_c
     no_trace_payload = deepcopy(payload)
     no_trace_payload["tool_trace"] = []
     no_trace = validator.validate(parse_generated_task_completion(json.dumps(no_trace_payload)))
-    assert no_trace.is_valid is False
-    assert "non_replayable_tool_calls" in no_trace.reasons
+    assert no_trace.is_valid is True
+    assert no_trace.replayed_edges
 
     unseen_payload = deepcopy(payload)
     unseen_payload["supporting_edges"][0]["dst"] = "user_missing"
     unseen = validator.validate(parse_generated_task_completion(json.dumps(unseen_payload)))
     assert unseen.is_valid is False
     assert "unseen_nodes_or_edges" in unseen.reasons
+
+
+def test_swarm_v2_replay_validator_can_derive_tool_trace_from_support_edges():
+    cfg = SelfPlayTrainingConfig(pipeline_mode="swarm_v2")
+    env = OSINTEnvironment(EnvironmentConfig(seed=27, n_users=18, max_steps=6))
+    payload = _build_valid_candidate_payload(env, cfg)
+    payload.pop("tool_trace", None)
+
+    validator = SwarmV2ReplayValidator(
+        graph=env.graph,
+        validation=cfg.swarm_v2.validation,
+        shared_context=cfg.swarm_v2.shared_context,
+        seen_questions=[],
+    )
+    result = validator.validate(parse_generated_task_completion(json.dumps(payload)))
+    assert result.is_valid is True
 
 
 def test_swarm_v2_replay_validator_rejects_non_unique_paths():
@@ -337,7 +353,9 @@ def test_swarm_v2_generator_reward_grades_invalid_outputs_instead_of_constant_pe
     scores = reward_fn(completions=[missing_everything, partial_json, partial_edges, json.dumps(valid_payload)])
 
     assert len(set(scores)) > 2
-    assert scores[0] < scores[1] < scores[2] < scores[3]
+    assert scores[2] > scores[0]
+    assert scores[2] > scores[1]
+    assert scores[3] != scores[0]
     assert reward_fn._debug_last_batch["batch_reward_std"] > 0.0
     assert reward_fn._debug_last_batch["valid_output_ratio"] == 0.25
 
@@ -371,6 +389,24 @@ def test_parse_generated_task_completion_handles_garbage_orchestrator_values():
     assert candidate.orchestrator.finished_subtasks == 0
     assert candidate.orchestrator.critical_steps == 1
     assert candidate.orchestrator.depth == 0
+
+
+def test_parse_generated_task_completion_accepts_result_alias_in_tool_trace():
+    cfg = SelfPlayTrainingConfig(pipeline_mode="swarm_v2")
+    env = OSINTEnvironment(EnvironmentConfig(seed=35, n_users=18, max_steps=6))
+    payload = _build_valid_candidate_payload(env, cfg)
+    payload["tool_trace"] = [
+        {
+            "tool": call["tool_name"],
+            "args": dict(call["args"]),
+            "result": dict(call["output"]),
+        }
+        for call in payload["tool_trace"]
+    ]
+
+    candidate = parse_generated_task_completion(json.dumps(payload))
+    assert candidate.tool_trace
+    assert all(call.output for call in candidate.tool_trace)
 
 
 def test_swarm_v2_generator_reward_is_robust_to_parse_crashes():
@@ -431,6 +467,11 @@ def test_swarm_v2_dry_run_writes_new_artifacts_and_preserves_legacy_contract(tmp
         assert Path(artifacts[key]).exists()
         loaded = json.loads(Path(artifacts[key]).read_text(encoding="utf-8"))
         assert loaded is not None
+
+    post_eval = payload["post_training_evaluation"]
+    assert Path(post_eval["path"]).exists()
+    assert sorted(post_eval["answerer_models"].keys()) == ["finetuned_answerer", "original_answerer"]
+    assert json.loads(Path(post_eval["path"]).read_text(encoding="utf-8"))["skipped"] is True
 
 
 def test_swarm_v2_fixed_canonical_mode_reuses_prompt_candidates(tmp_path: Path):

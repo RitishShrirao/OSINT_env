@@ -11,7 +11,7 @@ class KimiGRPOPhaseConfig:
     """Configuration for one GRPO phase in the alternating self-play loop."""
 
     model_name_or_path: str = "Qwen/Qwen2.5-0.5B-Instruct"
-    learning_rate: float = 1e-6
+    learning_rate: float = 3e-6
     max_steps: int = 64
     per_device_train_batch_size: int = 2
     gradient_accumulation_steps: int = 4
@@ -27,7 +27,17 @@ class KimiGRPOPhaseConfig:
     scale_rewards: str = "none"
     logging_steps: int = 10
     save_steps: int = 50
+    save_total_limit: int = 2
     output_subdir: str = "phase"
+    optim: str = "adamw_torch_fused"
+    bf16: bool = True
+    tf32: bool = True
+    gradient_checkpointing: bool = False
+    dataloader_num_workers: int = 2
+    dataloader_persistent_workers: bool = True
+    dataloader_prefetch_factor: int = 2
+    generation_batch_size: int = 8
+    max_prompt_length: int = 1024
     use_vllm: bool = False
     vllm_mode: str = "colocate"
 
@@ -36,10 +46,10 @@ class KimiGRPOPhaseConfig:
 class GeneratorRewardWeights:
     """Weighted components for adversarial task-generator reward."""
 
-    validity: float = 0.35
-    hardness: float = 0.45
-    diversity: float = 0.10
-    consistency: float = 0.10
+    validity: float = 0.45
+    hardness: float = 0.20
+    diversity: float = 0.15
+    consistency: float = 0.20
 
 
 @dataclass(slots=True)
@@ -130,14 +140,25 @@ class SelfPlayTrainingConfig:
     max_graph_context_edges: int = 100
     max_support_edges: int = 8
     answerer_judge_max_new_tokens: int = 48
+    generated_task_max_new_tokens: int = 512
+    post_training_eval_questions: int = 24
+    post_training_eval_answer_max_new_tokens: int = 128
     generator_reward_weights: GeneratorRewardWeights = field(default_factory=GeneratorRewardWeights)
     lora: LoraTuningConfig = field(default_factory=LoraTuningConfig)
     swarm_v2: SwarmV2Config = field(default_factory=SwarmV2Config)
     generator_phase: KimiGRPOPhaseConfig = field(
-        default_factory=lambda: KimiGRPOPhaseConfig(output_subdir="generator")
+        default_factory=lambda: KimiGRPOPhaseConfig(
+            output_subdir="generator",
+            learning_rate=5e-6,
+            max_completion_length=384,
+        )
     )
     answerer_phase: KimiGRPOPhaseConfig = field(
-        default_factory=lambda: KimiGRPOPhaseConfig(output_subdir="answerer")
+        default_factory=lambda: KimiGRPOPhaseConfig(
+            output_subdir="answerer",
+            learning_rate=3e-6,
+            max_completion_length=192,
+        )
     )
 
 
@@ -224,6 +245,42 @@ def _parse_phase(data: dict[str, Any], fallback: KimiGRPOPhaseConfig) -> KimiGRP
         logging_steps=_parse_int(data.get("logging_steps"), fallback.logging_steps, floor=1),
         save_steps=_parse_int(data.get("save_steps"), fallback.save_steps, floor=1),
         output_subdir=str(data.get("output_subdir", fallback.output_subdir)).strip() or fallback.output_subdir,
+        optim=str(data.get("optim", fallback.optim)).strip() or fallback.optim,
+        bf16=_parse_bool(data.get("bf16"), fallback.bf16),
+        tf32=_parse_bool(data.get("tf32"), fallback.tf32),
+        gradient_checkpointing=_parse_bool(
+            data.get("gradient_checkpointing"),
+            fallback.gradient_checkpointing,
+        ),
+        dataloader_num_workers=_parse_int(
+            data.get("dataloader_num_workers"),
+            fallback.dataloader_num_workers,
+            floor=0,
+        ),
+        dataloader_persistent_workers=_parse_bool(
+            data.get("dataloader_persistent_workers"),
+            fallback.dataloader_persistent_workers,
+        ),
+        dataloader_prefetch_factor=_parse_int(
+            data.get("dataloader_prefetch_factor"),
+            fallback.dataloader_prefetch_factor,
+            floor=1,
+        ),
+        generation_batch_size=_parse_int(
+            data.get("generation_batch_size"),
+            fallback.generation_batch_size,
+            floor=1,
+        ),
+        max_prompt_length=_parse_int(
+            data.get("max_prompt_length"),
+            fallback.max_prompt_length,
+            floor=32,
+        ),
+        save_total_limit=_parse_int(
+            data.get("save_total_limit"),
+            fallback.save_total_limit,
+            floor=1,
+        ),
         use_vllm=_parse_bool(data.get("use_vllm"), fallback.use_vllm),
         vllm_mode=str(data.get("vllm_mode", fallback.vllm_mode)).strip() or fallback.vllm_mode,
     )
@@ -231,10 +288,10 @@ def _parse_phase(data: dict[str, Any], fallback: KimiGRPOPhaseConfig) -> KimiGRP
 
 def _parse_generator_weights(data: dict[str, Any]) -> GeneratorRewardWeights:
     return GeneratorRewardWeights(
-        validity=_parse_float(data.get("validity"), 0.35),
-        hardness=_parse_float(data.get("hardness"), 0.45),
-        diversity=_parse_float(data.get("diversity"), 0.10),
-        consistency=_parse_float(data.get("consistency"), 0.10),
+        validity=_parse_float(data.get("validity"), 0.45),
+        hardness=_parse_float(data.get("hardness"), 0.20),
+        diversity=_parse_float(data.get("diversity"), 0.15),
+        consistency=_parse_float(data.get("consistency"), 0.20),
     )
 
 
@@ -418,6 +475,21 @@ def load_self_play_config(path: str | Path | None) -> SelfPlayTrainingConfig:
         answerer_judge_max_new_tokens=_parse_int(
             payload.get("answerer_judge_max_new_tokens"),
             defaults.answerer_judge_max_new_tokens,
+            floor=1,
+        ),
+        generated_task_max_new_tokens=_parse_int(
+            payload.get("generated_task_max_new_tokens"),
+            defaults.generated_task_max_new_tokens,
+            floor=32,
+        ),
+        post_training_eval_questions=_parse_int(
+            payload.get("post_training_eval_questions"),
+            defaults.post_training_eval_questions,
+            floor=1,
+        ),
+        post_training_eval_answer_max_new_tokens=_parse_int(
+            payload.get("post_training_eval_answer_max_new_tokens"),
+            defaults.post_training_eval_answer_max_new_tokens,
             floor=1,
         ),
         generator_reward_weights=_parse_generator_weights(

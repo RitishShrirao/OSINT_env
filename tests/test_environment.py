@@ -30,6 +30,22 @@ def test_search_memory_tool_returns_results_after_tool_use():
     assert obs.tool_outputs[-1]["output"]["count"] >= 1
 
 
+def test_search_shared_context_returns_task_local_hits():
+    env = OSINTEnvironment(EnvironmentConfig(max_steps=6, seed=7))
+    obs = env.reset()
+    assert obs.task["shared_context_available"] is True
+    answer = str(env.state.task.answer if env.state else "")
+
+    obs, reward, done, _ = env.step(
+        Action(ActionType.CALL_TOOL, {"tool_name": "search_shared_context", "args": {"query": answer, "k": 5}})
+    )
+    assert done is False
+    assert isinstance(reward, float)
+    assert obs.tool_outputs[-1]["tool"] == "search_shared_context"
+    assert obs.tool_outputs[-1]["output"]["shared_context_available"] is True
+    assert obs.tool_outputs[-1]["output"]["count"] >= 1
+
+
 def test_invalid_tool_call_does_not_crash_episode():
     env = OSINTEnvironment(EnvironmentConfig(max_steps=4, seed=8))
     env.reset()

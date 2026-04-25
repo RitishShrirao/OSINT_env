@@ -18,6 +18,7 @@ from osint_env.data.generator import (
 )
 from osint_env.domain.models import Edge, EnvironmentConfig, TaskInstance
 from osint_env.env.environment import OSINTEnvironment
+from osint_env.env.reward import compute_graph_f1
 from osint_env.llm import build_llm_client
 from osint_env.training.config import (
     KimiGRPOPhaseConfig,
@@ -31,6 +32,8 @@ from osint_env.training.rewards import (
     GeneratorRewardFunction,
     SwarmV2ReplayValidator,
     decode_completion_text,
+    extract_answer_from_completion,
+    normalize_answer,
     parse_generated_task_completion,
 )
 
@@ -99,6 +102,92 @@ def _edges_from_payload(rows: Any, max_edges: int) -> list[Edge]:
     return edges
 
 
+def _compact_shared_context(
+    shared_context: dict[str, Any],
+    max_nodes: int = 8,
+    max_edges: int = 6,
+) -> dict[str, Any]:
+    return {
+        "nodes": list(shared_context.get("nodes", []))[:max_nodes],
+        "edges": list(shared_context.get("edges", []))[:max_edges],
+    }
+
+
+def _task_shared_context(
+    env: OSINTEnvironment,
+    task: TaskInstance,
+    cfg: SelfPlayTrainingConfig,
+) -> dict[str, Any]:
+    metadata = dict(task.metadata or {})
+    canonical_graph = metadata.get("canonical_graph")
+    if isinstance(canonical_graph, dict):
+        return {
+            "nodes": list(canonical_graph.get("nodes", []))[: cfg.swarm_v2.shared_context.max_nodes],
+            "edges": list(canonical_graph.get("edges", []))[: cfg.swarm_v2.shared_context.max_edges],
+        }
+
+    deterministic_seed = sum(ord(ch) for ch in task.task_id)
+    return _graph_context_for_prompt(
+        env=env,
+        max_nodes=cfg.swarm_v2.shared_context.max_nodes,
+        max_edges=cfg.swarm_v2.shared_context.max_edges,
+        rng=random.Random(deterministic_seed),
+    )
+
+
+def _swarm_v2_worker_packets(
+    canonical_candidate: dict[str, Any],
+    shared_context: dict[str, Any],
+    swarm_cfg: SwarmV2SwarmConfig,
+) -> dict[str, Any]:
+    path_edges = _edges_from_payload(
+        canonical_candidate.get("path", canonical_candidate.get("edges", [])),
+        max_edges=max(1, swarm_cfg.max_depth * 2),
+    )
+    if not path_edges:
+        path_edges = _edges_from_payload(canonical_candidate.get("edges", []), max_edges=2)
+    relation_path = [edge.rel for edge in path_edges]
+    start_node = path_edges[0].src if path_edges else ""
+    return {
+        "path_agent": {
+            "path_edges": [_edge_payload(edge) for edge in path_edges],
+            "goal": "Choose one contiguous replayable path from the canonical candidate.",
+        },
+        "question_agent": {
+            "start_node": start_node,
+            "relation_path": relation_path,
+            "goal": "Write a compact question that describes the path without leaking the answer.",
+        },
+        "context_agent": {
+            "shared_context": _compact_shared_context(shared_context),
+            "goal": "Keep support/context usage compact and graph-grounded.",
+        },
+        "planner": {
+            "max_agents": int(swarm_cfg.max_agents),
+            "max_breadth": int(swarm_cfg.max_breadth),
+            "max_depth": int(swarm_cfg.max_depth),
+        },
+    }
+
+
+def _serialize_tool_trace(tool_trace: Any) -> list[dict[str, Any]]:
+    serialized: list[dict[str, Any]] = []
+    for call in tool_trace or []:
+        tool_name = getattr(call, "tool_name", "")
+        args = getattr(call, "args", {})
+        output = getattr(call, "output", {})
+        if not tool_name:
+            continue
+        serialized.append(
+            {
+                "tool_name": str(tool_name),
+                "args": dict(args) if isinstance(args, dict) else {},
+                "output": dict(output) if isinstance(output, dict) else {},
+            }
+        )
+    return serialized
+
+
 
 def _canonical_example_payload(
     graph: Any,
@@ -113,7 +202,6 @@ def _canonical_example_payload(
             "answer": "",
             "task_type": "swarm_v2_trace",
             "supporting_edges": [],
-            "tool_trace": [],
             "subagent_outputs": ["path_agent: no replayable edge"],
             "orchestrator": {
                 "spawn_count": 1,
@@ -126,16 +214,18 @@ def _canonical_example_payload(
 
     traced_edges = traced_edges[:2]
     spawn_count = min(swarm_cfg.max_agents, max(1, len(traced_edges) + 1))
-    full_tool_trace = build_swarm_v2_tool_trace(graph, traced_edges)
     return {
         "question": emit_swarm_v2_question(traced_edges),
         "answer": select_swarm_v2_answer(traced_edges),
         "task_type": f"swarm_v2_{len(traced_edges)}hop_trace",
         "supporting_edges": [_edge_payload(edge) for edge in traced_edges],
-        "tool_trace": full_tool_trace[:4],
         "subagent_outputs": [
-            f"path_agent_{idx}: {edge.src}->{edge.dst}"
+            f"path_agent_{idx}: {edge.src} --{edge.rel}--> {edge.dst}"
             for idx, edge in enumerate(traced_edges)
+        ]
+        + [
+            "question_agent: emitted compact relation-path question",
+            "context_agent: kept shared context focused on replayable edges",
         ],
         "orchestrator": {
             "spawn_count": spawn_count,
@@ -176,10 +266,7 @@ def _swarm_v2_answer_prompt(
     swarm_cfg: SwarmV2SwarmConfig,
 ) -> str:
     del swarm_cfg  # kept for signature compatibility
-    compact_context = {
-        "nodes": list(shared_context.get("nodes", []))[:8],
-        "edges": list(shared_context.get("edges", []))[:6],
-    }
+    compact_context = _compact_shared_context(shared_context)
     return (
         "You answer one OSINT graph question using ONLY the shared context.\n"
         "Output rules:\n"
@@ -222,21 +309,7 @@ def _build_swarm_v2_answerer_rows(
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for task in tasks:
-        metadata = dict(task.metadata or {})
-        canonical_graph = metadata.get("canonical_graph")
-        if isinstance(canonical_graph, dict):
-            shared_context = {
-                "nodes": list(canonical_graph.get("nodes", []))[: cfg.swarm_v2.shared_context.max_nodes],
-                "edges": list(canonical_graph.get("edges", []))[: cfg.swarm_v2.shared_context.max_edges],
-            }
-        else:
-            deterministic_seed = sum(ord(ch) for ch in task.task_id)
-            shared_context = _graph_context_for_prompt(
-                env=env,
-                max_nodes=cfg.swarm_v2.shared_context.max_nodes,
-                max_edges=cfg.swarm_v2.shared_context.max_edges,
-                rng=random.Random(deterministic_seed),
-            )
+        shared_context = _task_shared_context(env=env, task=task, cfg=cfg)
 
         rows.append(
             {
@@ -338,31 +411,39 @@ def _swarm_v2_generator_prompt(
     anchors = "\n".join(f"- {question}" for question in anchor_questions)
     canonical_mode = str(canonical_graph_mode).strip().lower() or "generate"
     example_payload = _canonical_example_payload(graph, canonical_candidate, swarm_cfg)
+    worker_packets = _swarm_v2_worker_packets(
+        canonical_candidate=canonical_candidate,
+        shared_context=shared_context,
+        swarm_cfg=swarm_cfg,
+    )
     canonical_instruction = (
         "You may propose canonical_graph updates when they improve replayability and keep it graph-grounded."
         if canonical_mode == "generate"
         else "Reuse the provided canonical candidate as-is; do not add, remove, or modify canonical_graph nodes/edges."
     )
-    canonical_compact = {
-        "nodes": list(canonical_candidate.get("nodes", []))[:8],
-        "edges": list(canonical_candidate.get("edges", []))[:6],
-    }
+    canonical_compact = _compact_shared_context(canonical_candidate)
     return (
-        "You generate ONE OSINT question/answer task as compact JSON.\n"
+        "You coordinate a compact multi-agent OSINT task-generation swarm.\n"
         "Output rules:\n"
         "- Return ONLY one JSON object. No markdown. No prose. End with }.\n"
-        "- Required keys: question, answer, task_type, supporting_edges, tool_trace, "
-        "subagent_outputs, orchestrator.\n"
+        "- Required keys: question, answer, task_type, supporting_edges, subagent_outputs, orchestrator.\n"
+        "- Optional keys: canonical_graph, validation.\n"
         "- supporting_edges: non-empty list of {src, rel, dst, confidence}, taken from canonical edges.\n"
-        "- tool_trace: non-empty list of {tool, args, result} using only "
-        "enumerate_neighbors|trace_path|select_answer|emit_question.\n"
-        "- answer = final dst of the trace. question describes the path.\n"
+        "- supporting_edges must form one contiguous replayable path. Keep it compact.\n"
+        "- Do NOT emit verbose tool traces or neighbor dumps; replay tools are derived from supporting_edges.\n"
+        "- answer = final dst of the trace. question describes the path without leaking the answer.\n"
+        "- subagent_outputs: 2-4 terse strings summarizing path_agent/question_agent/context_agent work.\n"
         "- orchestrator: integer keys spawn_count, finished_subtasks, critical_steps, breadth, depth.\n"
         f"- canonical_graph_mode={canonical_mode}: {canonical_instruction}\n"
+        "- Favor minimal shared context per worker so question generation stays parallel-friendly.\n"
         "Example (copy schema, not values):\n"
         f"{json.dumps(example_payload, separators=(',', ':'), sort_keys=True)}\n"
+        "Worker packets:\n"
+        f"{json.dumps(worker_packets, separators=(',', ':'), sort_keys=True)}\n"
         "Canonical candidate (use these edges):\n"
         f"{json.dumps(canonical_compact, separators=(',', ':'), sort_keys=True)}\n"
+        "Shared context:\n"
+        f"{json.dumps(_compact_shared_context(shared_context), separators=(',', ':'), sort_keys=True)}\n"
         f"Avoid these prior questions: {anchors}\n"
         "JSON:"
     )
@@ -410,6 +491,15 @@ def _build_swarm_v2_generator_rows(
                 "prompt": prompt,
                 "candidate_id": f"candidate_{idx}",
                 "canonical_graph_json": json.dumps(canonical_candidate, sort_keys=True),
+                "shared_context_json": json.dumps(shared_context, sort_keys=True),
+                "worker_packets_json": json.dumps(
+                    _swarm_v2_worker_packets(
+                        canonical_candidate=canonical_candidate,
+                        shared_context=shared_context,
+                        swarm_cfg=cfg.swarm_v2.generator_swarm,
+                    ),
+                    sort_keys=True,
+                ),
             }
         )
         canonical_candidates.append(canonical_candidate)
@@ -442,6 +532,16 @@ def _safe_build_grpo_config(
         "scale_rewards": str(phase.scale_rewards),
         "logging_steps": int(phase.logging_steps),
         "save_steps": int(phase.save_steps),
+        "save_total_limit": int(phase.save_total_limit),
+        "optim": str(phase.optim),
+        "bf16": bool(phase.bf16),
+        "tf32": bool(phase.tf32),
+        "gradient_checkpointing": bool(phase.gradient_checkpointing),
+        "dataloader_num_workers": int(phase.dataloader_num_workers),
+        "dataloader_persistent_workers": bool(phase.dataloader_persistent_workers),
+        "dataloader_prefetch_factor": int(phase.dataloader_prefetch_factor),
+        "generation_batch_size": int(phase.generation_batch_size),
+        "max_prompt_length": int(phase.max_prompt_length),
         "remove_unused_columns": False,
         "use_vllm": bool(phase.use_vllm),
         "vllm_mode": str(phase.vllm_mode),
@@ -550,16 +650,25 @@ def _train_grpo_phase(
 
     final_dir = output_dir / "final_model"
     trainer.save_model(str(final_dir))
+    trainer_tokenizer = getattr(trainer, "processing_class", None) or getattr(trainer, "tokenizer", None)
+    if trainer_tokenizer is not None and hasattr(trainer_tokenizer, "save_pretrained"):
+        trainer_tokenizer.save_pretrained(str(final_dir))
+    checkpoint_dirs = [str(path) for path in sorted(output_dir.glob("checkpoint-*")) if path.is_dir()]
 
     global_step = int(getattr(train_output, "global_step", 0))
     training_loss = float(getattr(train_output, "training_loss", 0.0))
 
+    total_param_count = int(sum(param.numel() for param in trainer.model.parameters()))
     result = {
         "model_path": str(final_dir),
+        "final_model_path": str(final_dir),
+        "phase_output_dir": str(output_dir),
+        "checkpoint_dirs": checkpoint_dirs,
         "global_step": global_step,
         "training_loss": training_loss,
         "train_rows": len(rows),
         "tuning_mode": str(tuning_mode).strip().lower() or "full",
+        "is_full_finetune": str(tuning_mode).strip().lower() != "lora",
     }
 
     log_history = list(getattr(getattr(trainer, "state", None), "log_history", []) or [])
@@ -599,7 +708,13 @@ def _train_grpo_phase(
         "grad_norm_max": max(grad_norm_values) if grad_norm_values else 0.0,
         "entropy_min": min(entropy_values) if entropy_values else 0.0,
         "entropy_max": max(entropy_values) if entropy_values else 0.0,
+        "total_param_count": total_param_count,
         "trainable_param_count": trainable_param_count,
+        "trainable_fraction": (
+            float(trainable_param_count / total_param_count)
+            if total_param_count > 0
+            else 0.0
+        ),
         "params_with_grad": params_with_grad,
         "nonzero_grad_tensors": nonzero_grad_tensors,
         "fingerprint_param_count": len(pre_update_fingerprint),
@@ -721,8 +836,10 @@ def _sample_generated_tasks_with_model(
     round_index: int,
     count: int,
     max_support_edges: int,
+    max_new_tokens: int,
 ) -> list[TaskInstance]:
     from transformers import AutoModelForCausalLM, AutoTokenizer
+    import torch
 
     if count <= 0:
         return []
@@ -730,10 +847,12 @@ def _sample_generated_tasks_with_model(
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
     if tokenizer.pad_token is None and tokenizer.eos_token is not None:
         tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(model_name_or_path)
+    model_kwargs: dict[str, Any] = {}
+    if torch.cuda.is_available():
+        model_kwargs["device_map"] = "auto"
+        model_kwargs["torch_dtype"] = torch.bfloat16
+    model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **model_kwargs)
     model.eval()
-
-    import torch
 
     device = next(model.parameters()).device
     generated: list[TaskInstance] = []
@@ -747,7 +866,7 @@ def _sample_generated_tasks_with_model(
         with torch.no_grad():
             output = model.generate(
                 **encoded,
-                max_new_tokens=256,
+                max_new_tokens=max(64, int(max_new_tokens)),
                 do_sample=True,
                 top_p=0.95,
                 temperature=1.0,
@@ -841,6 +960,256 @@ def _save_payload(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
 
 
+def _generate_answerer_completion_texts_with_model(
+    model_name_or_path: str,
+    prompts: list[str],
+    max_new_tokens: int,
+) -> list[str]:
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    import torch
+
+    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+    if tokenizer.pad_token is None and tokenizer.eos_token is not None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    model_kwargs: dict[str, Any] = {}
+    if torch.cuda.is_available():
+        model_kwargs["device_map"] = "auto"
+        model_kwargs["torch_dtype"] = torch.bfloat16
+    model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **model_kwargs)
+    model.eval()
+    device = next(model.parameters()).device
+
+    completions: list[str] = []
+    for prompt in prompts:
+        encoded = tokenizer(prompt, return_tensors="pt")
+        encoded = {key: value.to(device) for key, value in encoded.items()}
+        with torch.no_grad():
+            output = model.generate(
+                **encoded,
+                max_new_tokens=max(16, int(max_new_tokens)),
+                do_sample=False,
+                pad_token_id=tokenizer.eos_token_id,
+            )
+        completion_ids = output[0][encoded["input_ids"].shape[1] :]
+        completions.append(tokenizer.decode(completion_ids, skip_special_tokens=True))
+    return completions
+
+
+def _top_validation_reasons(validation_reports: list[dict[str, Any]]) -> list[tuple[str, int]]:
+    counts: dict[str, int] = {}
+    for report in validation_reports:
+        validation = report.get("validation", {}) if isinstance(report, dict) else {}
+        reasons = validation.get("reasons", []) if isinstance(validation, dict) else []
+        for reason in reasons:
+            token = str(reason).strip()
+            if not token:
+                continue
+            counts[token] = counts.get(token, 0) + 1
+    return sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+
+
+def _run_post_training_evaluation(
+    env_config: EnvironmentConfig,
+    training_config: SelfPlayTrainingConfig,
+    generator_model: str,
+    answerer_models: dict[str, str],
+    output_dir: Path,
+    pipeline_mode: str,
+    effective_dry_run: bool,
+) -> dict[str, Any]:
+    tasks_path = output_dir / "post_training_eval_generated_tasks.json"
+    validation_path = output_dir / "post_training_eval_validation_reports.json"
+    payload_path = output_dir / "post_training_evaluation.json"
+    payload: dict[str, Any] = {
+        "pipeline_mode": pipeline_mode,
+        "generator_model": generator_model,
+        "answerer_models": dict(answerer_models),
+        "generated_tasks_path": str(tasks_path),
+        "validation_reports_path": str(validation_path),
+        "skipped": False,
+    }
+
+    if effective_dry_run:
+        payload.update({"skipped": True, "reason": "dry_run"})
+        _save_payload(validation_path, [])
+        _save_payload(tasks_path, [])
+        _save_payload(payload_path, payload)
+        payload["path"] = str(payload_path)
+        return payload
+
+    try:
+        env = OSINTEnvironment(env_config, llm=build_llm_client(env_config.llm))
+        rng = random.Random(env_config.seed + 9973)
+        validation_reports: list[dict[str, Any]] = []
+
+        if pipeline_mode == "swarm_v2":
+            generator_rows, prompt_canonical_candidates = _build_swarm_v2_generator_rows(env, training_config, rng)
+            completion_texts = _sample_swarm_v2_completion_texts_with_model(
+                env=env,
+                cfg=training_config,
+                model_name_or_path=generator_model,
+                prompts=[row["prompt"] for row in generator_rows],
+                count=max(1, training_config.post_training_eval_questions * 2),
+                seen_questions=[task.question for task in env.tasks],
+            )
+            generated_tasks, validation_reports, _, _ = _materialize_swarm_v2_completions(
+                env=env,
+                cfg=training_config,
+                completion_texts=completion_texts,
+                round_index=max(1, training_config.rounds) + 1,
+                seen_questions=[task.question for task in env.tasks],
+                prompt_canonical_candidates=prompt_canonical_candidates,
+            )
+            if not generated_tasks:
+                generated_tasks, validation_reports, _, _ = _materialize_swarm_v2_completions(
+                    env=env,
+                    cfg=training_config,
+                    completion_texts=_fallback_swarm_v2_completion_texts(
+                        env=env,
+                        cfg=training_config,
+                        round_index=max(1, training_config.rounds) + 1,
+                        rng=rng,
+                    ),
+                    round_index=max(1, training_config.rounds) + 1,
+                    seen_questions=[task.question for task in env.tasks],
+                    prompt_canonical_candidates=None,
+                )
+            generated_tasks = generated_tasks[: max(1, training_config.post_training_eval_questions)]
+            answer_rows = _build_swarm_v2_answerer_rows(env, generated_tasks, training_config)
+            reward_fn = AnswererRewardFunction(
+                graph=env.graph,
+                pipeline_mode="swarm_v2",
+                parl_max_parallel_hint=training_config.swarm_v2.answerer_swarm.max_agents,
+            )
+        else:
+            generator_rows = _build_generator_rows(env=env, cfg=training_config, rng=rng)
+            generated_tasks = _sample_generated_tasks_with_model(
+                model_name_or_path=generator_model,
+                prompts=[row["prompt"] for row in generator_rows],
+                round_index=max(1, training_config.rounds) + 1,
+                count=max(1, training_config.post_training_eval_questions),
+                max_support_edges=training_config.max_support_edges,
+                max_new_tokens=training_config.generated_task_max_new_tokens,
+            )
+            if not generated_tasks:
+                generated_tasks = _fallback_generated_tasks(
+                    base_tasks=list(env.tasks),
+                    round_index=max(1, training_config.rounds) + 1,
+                    count=max(1, training_config.post_training_eval_questions),
+                    rng=rng,
+                )
+            answer_rows = _build_answerer_rows(generated_tasks)
+            reward_fn = AnswererRewardFunction(graph=env.graph)
+
+        _save_tasks(tasks_path, generated_tasks)
+        _save_payload(validation_path, validation_reports)
+
+        model_evaluations: dict[str, dict[str, Any]] = {}
+        for model_label, answerer_model in answerer_models.items():
+            answerer_completions = _generate_answerer_completion_texts_with_model(
+                model_name_or_path=answerer_model,
+                prompts=[row["prompt"] for row in answer_rows],
+                max_new_tokens=training_config.post_training_eval_answer_max_new_tokens,
+            )
+            rewards = reward_fn(
+                prompts=[row["prompt"] for row in answer_rows],
+                completions=answerer_completions,
+                answer=[row["answer"] for row in answer_rows],
+                question=[row["question"] for row in answer_rows],
+                supporting_edges_json=[row["supporting_edges_json"] for row in answer_rows],
+                difficulty=[row["difficulty"] for row in answer_rows],
+            )
+
+            episodes: list[dict[str, Any]] = []
+            for task, row, completion_text, reward in zip(generated_tasks, answer_rows, answerer_completions, rewards):
+                support_edges = AnswererRewardFunction._parse_support_edges(row["supporting_edges_json"])
+                pred_edges = AnswererRewardFunction._extract_predicted_edges(completion_text, support_edges)
+                predicted_answer = normalize_answer(extract_answer_from_completion(completion_text))
+                target_answer = normalize_answer(task.answer)
+                graph_f1 = compute_graph_f1(pred_edges, support_edges)
+                episodes.append(
+                    {
+                        "task_id": task.task_id,
+                        "task_type": task.task_type,
+                        "question": task.question,
+                        "task_answer": target_answer,
+                        "agent_answer": predicted_answer,
+                        "reward": float(reward),
+                        "graph_f1": float(graph_f1),
+                        "success": int(predicted_answer == target_answer),
+                        "support_edge_count": len(support_edges),
+                        "predicted_edge_count": len(pred_edges),
+                        "completion_length": len(completion_text),
+                    }
+                )
+
+            episode_count = len(episodes)
+            model_evaluations[model_label] = {
+                "model_path": answerer_model,
+                "episodes": episodes,
+                "summary": {
+                    "episodes": episode_count,
+                    "task_success_rate": (
+                        float(sum(row["success"] for row in episodes) / max(1, episode_count))
+                        if episodes
+                        else 0.0
+                    ),
+                    "avg_reward": (
+                        float(sum(float(row["reward"]) for row in episodes) / max(1, episode_count))
+                        if episodes
+                        else 0.0
+                    ),
+                    "avg_graph_f1": (
+                        float(sum(float(row["graph_f1"]) for row in episodes) / max(1, episode_count))
+                        if episodes
+                        else 0.0
+                    ),
+                    "avg_completion_length": (
+                        float(sum(int(row["completion_length"]) for row in episodes) / max(1, episode_count))
+                        if episodes
+                        else 0.0
+                    ),
+                },
+            }
+
+        final_summary = model_evaluations.get("finetuned_answerer", {}).get("summary", {})
+        baseline_summary = model_evaluations.get("original_answerer", {}).get("summary", {})
+        summary = {
+            "generated_task_count": len(generated_tasks),
+            "generator_valid_rate": (
+                float(len(generated_tasks) / max(1, len(validation_reports)))
+                if validation_reports
+                else 1.0
+            ),
+            "compared_models": sorted(model_evaluations.keys()),
+            "finetuned_answerer": dict(final_summary),
+            "original_answerer": dict(baseline_summary),
+            "delta_vs_original": {
+                "task_success_rate": float(final_summary.get("task_success_rate", 0.0) - baseline_summary.get("task_success_rate", 0.0)),
+                "avg_reward": float(final_summary.get("avg_reward", 0.0) - baseline_summary.get("avg_reward", 0.0)),
+                "avg_graph_f1": float(final_summary.get("avg_graph_f1", 0.0) - baseline_summary.get("avg_graph_f1", 0.0)),
+            },
+            "top_generator_invalid_reasons": _top_validation_reasons(validation_reports)[:5],
+        }
+        payload.update(
+            {
+                "summary": summary,
+                "model_evaluations": model_evaluations,
+            }
+        )
+    except Exception as exc:
+        payload.update({"skipped": True, "reason": f"{type(exc).__name__}: {exc}"})
+
+    if not tasks_path.exists():
+        _save_payload(tasks_path, [])
+    if not validation_path.exists():
+        _save_payload(validation_path, [])
+    _save_payload(payload_path, payload)
+    payload["path"] = str(payload_path)
+    return payload
+
+
 def _fallback_swarm_v2_completion_texts(
     env: OSINTEnvironment,
     cfg: SelfPlayTrainingConfig,
@@ -914,6 +1283,7 @@ def _sample_swarm_v2_completion_texts_with_model(
     seen_questions: list[str],
 ) -> list[str]:
     from transformers import AutoModelForCausalLM, AutoTokenizer
+    import torch
 
     if count <= 0:
         return []
@@ -921,10 +1291,12 @@ def _sample_swarm_v2_completion_texts_with_model(
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
     if tokenizer.pad_token is None and tokenizer.eos_token is not None:
         tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(model_name_or_path)
+    model_kwargs: dict[str, Any] = {}
+    if torch.cuda.is_available():
+        model_kwargs["device_map"] = "auto"
+        model_kwargs["torch_dtype"] = torch.bfloat16
+    model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **model_kwargs)
     model.eval()
-
-    import torch
 
     device = next(model.parameters()).device
     completions: list[str] = []
@@ -946,7 +1318,7 @@ def _sample_swarm_v2_completion_texts_with_model(
             with torch.no_grad():
                 output = model.generate(
                     **encoded,
-                    max_new_tokens=max(256, int(cfg.generator_phase.max_completion_length)),
+                    max_new_tokens=max(64, int(cfg.generated_task_max_new_tokens)),
                     do_sample=True,
                     top_p=top_p,
                     temperature=temperature,
@@ -1003,6 +1375,10 @@ def _materialize_swarm_v2_completions(
             max_support_edges=cfg.swarm_v2.validation.max_support_edges,
         )
         validation = validator.validate(candidate)
+        replay_edges = list(validation.replayed_edges or candidate.supporting_edges)
+        materialized_tool_trace = _serialize_tool_trace(candidate.tool_trace)
+        if not materialized_tool_trace and replay_edges:
+            materialized_tool_trace = build_swarm_v2_tool_trace(env.graph, replay_edges)
 
         if use_fixed_canonical and prompt_canonical_candidates and completion_idx < len(prompt_canonical_candidates):
             canonical_graph = dict(prompt_canonical_candidates[completion_idx])
@@ -1045,14 +1421,7 @@ def _materialize_swarm_v2_completions(
             {
                 "candidate_index": completion_idx,
                 "question": candidate.question,
-                "tool_trace": [
-                    {
-                        "tool_name": call.tool_name,
-                        "args": dict(call.args),
-                        "output": dict(call.output),
-                    }
-                    for call in candidate.tool_trace
-                ],
+                "tool_trace": materialized_tool_trace,
                 "replayed_edges": validation.to_dict()["replayed_edges"],
             }
         )
@@ -1078,14 +1447,7 @@ def _materialize_swarm_v2_completions(
             "difficulty": "hard",
             "scenario": "swarm_v2_trace",
             "canonical_graph": canonical_graph,
-            "tool_trace": [
-                {
-                    "tool_name": call.tool_name,
-                    "args": dict(call.args),
-                    "output": dict(call.output),
-                }
-                for call in candidate.tool_trace
-            ],
+            "tool_trace": materialized_tool_trace,
             "subagent_outputs": list(candidate.subagent_outputs),
             "validation": validation.to_dict(),
             "shared_context_budget": {
@@ -1106,7 +1468,7 @@ def _materialize_swarm_v2_completions(
                 task_type=candidate.task_type or "swarm_v2_trace",
                 question=candidate.question,
                 answer=candidate.answer,
-                supporting_edges=list(validation.replayed_edges or candidate.supporting_edges),
+                supporting_edges=replay_edges,
                 metadata=metadata,
             )
         )
@@ -1132,6 +1494,8 @@ def _run_adversarial_self_play_swarm_v2(
     seed_tasks = list(env.tasks)
     seed_questions = [task.question for task in seed_tasks]
     generator_model, answerer_model = _resolve_initial_models(training_config)
+    initial_generator_model = str(generator_model)
+    initial_answerer_model = str(answerer_model)
     rng = random.Random(env_config.seed)
 
     bootstrap_completions = _fallback_swarm_v2_completion_texts(
@@ -1383,6 +1747,18 @@ def _run_adversarial_self_play_swarm_v2(
             }
         )
 
+    post_training_evaluation = _run_post_training_evaluation(
+        env_config=env_config,
+        training_config=training_config,
+        generator_model=generator_model,
+        answerer_models={
+            "finetuned_answerer": answerer_model,
+            "original_answerer": initial_answerer_model,
+        },
+        output_dir=run_dir,
+        pipeline_mode="swarm_v2",
+        effective_dry_run=effective_dry_run,
+    )
     final_payload = {
         "dry_run": effective_dry_run,
         "pipeline_mode": "swarm_v2",
@@ -1396,6 +1772,11 @@ def _run_adversarial_self_play_swarm_v2(
             "generator": generator_model,
             "answerer": answerer_model,
         },
+        "initial_models": {
+            "generator": initial_generator_model,
+            "answerer": initial_answerer_model,
+        },
+        "post_training_evaluation": post_training_evaluation,
         "kimi_objective_mapping": {
             "grouped_rollouts": "TRL GRPO num_generations",
             "mean_centered_advantage": "GRPO relative reward baseline",
@@ -1437,6 +1818,8 @@ def run_adversarial_self_play(
     seed_tasks = list(env.tasks)
 
     generator_model, answerer_model = _resolve_initial_models(training_config)
+    initial_generator_model = str(generator_model)
+    initial_answerer_model = str(answerer_model)
 
     rng = random.Random(env_config.seed)
     rounds_payload: list[dict[str, Any]] = []
@@ -1557,6 +1940,7 @@ def run_adversarial_self_play(
                 round_index=round_index,
                 count=training_config.generated_tasks_per_round,
                 max_support_edges=training_config.max_support_edges,
+                max_new_tokens=training_config.generated_task_max_new_tokens,
             )
             if not generated_tasks:
                 generated_tasks = _fallback_generated_tasks(
@@ -1641,6 +2025,18 @@ def run_adversarial_self_play(
             }
         )
 
+    post_training_evaluation = _run_post_training_evaluation(
+        env_config=env_config,
+        training_config=training_config,
+        generator_model=generator_model,
+        answerer_models={
+            "finetuned_answerer": answerer_model,
+            "original_answerer": initial_answerer_model,
+        },
+        output_dir=run_dir,
+        pipeline_mode="legacy",
+        effective_dry_run=effective_dry_run,
+    )
     final_payload = {
         "dry_run": effective_dry_run,
         "pipeline_mode": "legacy",
@@ -1654,6 +2050,11 @@ def run_adversarial_self_play(
             "generator": generator_model,
             "answerer": answerer_model,
         },
+        "initial_models": {
+            "generator": initial_generator_model,
+            "answerer": initial_answerer_model,
+        },
+        "post_training_evaluation": post_training_evaluation,
         "kimi_objective_mapping": {
             "grouped_rollouts": "TRL GRPO num_generations",
             "mean_centered_advantage": "GRPO relative reward baseline",

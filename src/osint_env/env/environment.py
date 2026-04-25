@@ -137,6 +137,10 @@ class OSINTEnvironment(Env):
                 top_k = int(args.get("k", 5)) if str(args.get("k", "")).strip() else 5
                 results = self.semantic_memory.search(query=query, k=max(1, top_k)) if query else []
                 output = {"results": results, "count": len(results)}
+            elif tool_name == "search_shared_context":
+                query = str(args.get("query", "")).strip()
+                top_k = int(args.get("k", 5)) if str(args.get("k", "")).strip() else 5
+                output = self._search_shared_context(query=query, k=max(1, top_k))
             else:
                 output = self.tools.call(tool_name, args)
         except Exception as exc:
@@ -207,6 +211,67 @@ class OSINTEnvironment(Env):
         matches = sum(1 for token in clues if token in haystack)
         return matches / len(clues)
 
+    def _task_shared_context(self) -> dict[str, Any]:
+        if self.state is None:
+            return {"nodes": [], "edges": []}
+        metadata = dict(self.state.task.metadata or {})
+        canonical_graph = metadata.get("canonical_graph")
+        if isinstance(canonical_graph, dict):
+            return {
+                "nodes": list(canonical_graph.get("nodes", [])),
+                "edges": list(canonical_graph.get("edges", [])),
+            }
+
+        nodes = sorted({edge.src for edge in self.state.task.supporting_edges} | {edge.dst for edge in self.state.task.supporting_edges})
+        edges = [
+            {
+                "src": edge.src,
+                "rel": edge.rel,
+                "dst": edge.dst,
+                "confidence": float(edge.confidence),
+            }
+            for edge in self.state.task.supporting_edges
+        ]
+        return {"nodes": nodes, "edges": edges}
+
+    def _search_shared_context(self, query: str, k: int = 5) -> dict[str, Any]:
+        shared_context = self._task_shared_context()
+        needle = str(query or "").strip().lower()
+        results: list[dict[str, Any]] = []
+
+        for node_id in shared_context.get("nodes", []):
+            token = str(node_id).strip()
+            if not token:
+                continue
+            if needle and needle not in token.lower():
+                continue
+            results.append({"type": "node", "node_id": token})
+
+        for edge in shared_context.get("edges", []):
+            if not isinstance(edge, dict):
+                continue
+            src = str(edge.get("src", "")).strip()
+            rel = str(edge.get("rel", "")).strip()
+            dst = str(edge.get("dst", "")).strip()
+            haystack = " ".join(part for part in (src, rel, dst) if part).lower()
+            if needle and needle not in haystack:
+                continue
+            results.append(
+                {
+                    "type": "edge",
+                    "src": src,
+                    "rel": rel,
+                    "dst": dst,
+                    "confidence": float(edge.get("confidence", 1.0)),
+                }
+            )
+
+        return {
+            "results": results[: max(1, int(k))],
+            "count": len(results),
+            "shared_context_available": bool(shared_context.get("nodes") or shared_context.get("edges")),
+        }
+
     def _accumulate_reward_components(self, values: dict[str, float]) -> None:
         if self.state is None:
             return
@@ -218,11 +283,17 @@ class OSINTEnvironment(Env):
             raise RuntimeError("State is not initialized.")
         metadata = dict(self.state.task.metadata or {})
         grader = metadata.get("grader") if isinstance(metadata.get("grader"), dict) else None
+        shared_context = self._task_shared_context()
         task_payload = {
             "task_id": self.state.task.task_id,
             "task_type": self.state.task.task_type,
             "question": self.state.task.question,
             "difficulty": self.state.difficulty,
+            "shared_context_available": bool(shared_context.get("nodes") or shared_context.get("edges")),
+            "shared_context_size": {
+                "nodes": len(shared_context.get("nodes", [])),
+                "edges": len(shared_context.get("edges", [])),
+            },
             "grader": (
                 dict(grader)
                 if grader is not None

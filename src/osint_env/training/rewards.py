@@ -8,6 +8,7 @@ from functools import lru_cache
 from typing import Any
 
 from osint_env.data.generator import (
+    build_swarm_v2_tool_trace,
     emit_swarm_v2_question,
     enumerate_swarm_v2_neighbors,
     select_swarm_v2_answer,
@@ -224,7 +225,7 @@ def _parse_tool_trace(value: Any) -> list[SwarmReplayToolCall]:
             continue
         tool_name = str(row.get("tool_name", row.get("tool", ""))).strip()
         args = row.get("args", {})
-        output = row.get("output", {})
+        output = row.get("output", row.get("result", {}))
         if not tool_name:
             continue
         out.append(
@@ -281,6 +282,12 @@ def _coerce_int(value: Any, default: int) -> int:
             try:
                 return int(float(token))
             except ValueError:
+                match = re.search(r"[-+]?\d+(?:\.\d+)?", token)
+                if match:
+                    try:
+                        return int(float(match.group(0)))
+                    except ValueError:
+                        return default
                 return default
     return default
 
@@ -497,11 +504,16 @@ class SwarmV2ReplayValidator:
         replayed_edges: list[Edge] = []
         replayed_answer = ""
         replayed_question = ""
+        declared_answer = ""
+        declared_question = ""
+        tool_trace = list(candidate.tool_trace)
+        trace_path_source: Any = candidate.supporting_edges
 
-        if not candidate.tool_trace:
-            return ["non_replayable_tool_calls"], replayed_edges, replayed_answer, replayed_question
+        if not tool_trace and candidate.supporting_edges:
+            synthesized_trace = build_swarm_v2_tool_trace(self.graph, candidate.supporting_edges)
+            tool_trace = _parse_tool_trace(synthesized_trace)
 
-        for call in candidate.tool_trace:
+        for call in tool_trace:
             if call.tool_name == "enumerate_neighbors":
                 node_id = str(call.args.get("node_id", "")).strip()
                 expected_edge = call.args.get("expected_edge", {})
@@ -520,21 +532,31 @@ class SwarmV2ReplayValidator:
                     if expected_key not in {(edge.src, edge.rel, edge.dst) for edge in neighbors}:
                         reasons.append("non_replayable_tool_calls")
             elif call.tool_name == "trace_path":
-                candidate_path = call.args.get("path", candidate.supporting_edges)
-                replayed_edges = trace_swarm_v2_path(self.graph, candidate_path)
+                trace_path_source = call.args.get("path", trace_path_source)
+                replayed_edges = trace_swarm_v2_path(self.graph, trace_path_source)
                 if not replayed_edges:
                     reasons.append("non_replayable_tool_calls")
             elif call.tool_name == "select_answer":
-                replayed_answer = select_swarm_v2_answer(replayed_edges)
-                if not replayed_answer:
-                    reasons.append("non_replayable_tool_calls")
+                declared_answer = normalize_answer(str(call.output.get("answer", "")).strip())
             elif call.tool_name == "emit_question":
-                replayed_question = emit_swarm_v2_question(replayed_edges)
-                if not replayed_question:
-                    reasons.append("non_replayable_tool_calls")
+                declared_question = str(call.output.get("question", "")).strip()
             else:
                 reasons.append("non_replayable_tool_calls")
 
+        if not replayed_edges:
+            replayed_edges = trace_swarm_v2_path(self.graph, trace_path_source)
+        if not replayed_edges and candidate.supporting_edges:
+            replayed_edges = trace_swarm_v2_path(self.graph, candidate.supporting_edges)
+        if not replayed_edges:
+            reasons.append("non_replayable_tool_calls")
+            return reasons, replayed_edges, replayed_answer, replayed_question
+
+        replayed_answer = select_swarm_v2_answer(replayed_edges)
+        replayed_question = emit_swarm_v2_question(replayed_edges)
+        if declared_answer and declared_answer != normalize_answer(replayed_answer):
+            reasons.append("non_replayable_tool_calls")
+        if declared_question and declared_question != replayed_question:
+            reasons.append("non_replayable_tool_calls")
         return reasons, replayed_edges, replayed_answer, replayed_question
 
     def validate(self, candidate: GeneratedTaskCandidate) -> ReplayValidationResult:
@@ -747,37 +769,37 @@ class GeneratorRewardFunction:
         #   (3) tiny text-level signal so completely-collapsed completions
         #       differ from completions that at least *attempt* JSON.
         reason_penalty = {
-            "missing_question_or_answer": 0.45,
-            "malformed_support_edges": 0.30,
-            "non_replayable_tool_calls": 0.40,
-            "non_unique_derivation_path": 0.25,
-            "unseen_nodes_or_edges": 0.30,
-            "answer_leakage": 0.40,
-            "duplicate_or_near_duplicate": 0.20,
-            "context_or_support_budget_overflow": 0.20,
+            "missing_question_or_answer": 0.35,
+            "malformed_support_edges": 0.25,
+            "non_replayable_tool_calls": 0.25,
+            "non_unique_derivation_path": 0.20,
+            "unseen_nodes_or_edges": 0.25,
+            "answer_leakage": 0.30,
+            "duplicate_or_near_duplicate": 0.15,
+            "context_or_support_budget_overflow": 0.15,
         }
-        penalty = 0.20
+        penalty = 0.10
         for reason in validation_result.reasons:
             penalty += reason_penalty.get(reason, 0.10)
 
         partial_credit = 0.0
         if candidate.question:
-            partial_credit += 0.30
+            partial_credit += 0.25
         if candidate.answer:
-            partial_credit += 0.30
+            partial_credit += 0.25
         if candidate.supporting_edges:
-            partial_credit += min(0.40, 0.10 * len(candidate.supporting_edges))
+            partial_credit += min(0.36, 0.12 * len(candidate.supporting_edges))
         if candidate.tool_trace:
-            partial_credit += min(0.35, 0.08 * len(candidate.tool_trace))
+            partial_credit += min(0.20, 0.05 * len(candidate.tool_trace))
         if candidate.subagent_outputs:
             partial_credit += 0.10
         if candidate.canonical_edges or candidate.canonical_nodes:
-            partial_credit += 0.10
+            partial_credit += 0.12
 
         text_signal = self._completion_text_signal(completion_text)
 
         reward = partial_credit - penalty + text_signal
-        return float(max(-1.8, min(-0.05, reward)))
+        return float(max(-1.25, min(-0.02, reward)))
 
     @staticmethod
     def _completion_text_signal(completion_text: str) -> float:
@@ -930,15 +952,24 @@ class GeneratorRewardFunction:
         swarm_diversity = self._swarm_diversity_score(candidate)
         context_pressure = self._context_pressure_score(validation_result)
         parl_parallel, parl_finish = self._parl_scores(candidate)
+        hardness_component = max(0.0, min(1.0, (hardness + 0.4) / 1.4))
+        consistency_component = max(
+            0.0,
+            min(
+                1.0,
+                (0.55 * context_pressure)
+                + (0.25 * parl_parallel)
+                + (0.20 * parl_finish),
+            ),
+        )
+        completion_component = max(0.0, min(1.0, self._completion_text_signal(completion_text) / 0.25))
 
         reward = (
-            0.25  # valid JSON/schema
-            + 0.30  # replayable derivation
-            + (0.30 * hardness)
-            + (0.15 * swarm_diversity)
-            + (0.10 * context_pressure)
-            + (0.025 * parl_parallel)
-            + (0.025 * parl_finish)
+            self.weights.validity
+            + (self.weights.hardness * hardness_component)
+            + (self.weights.diversity * swarm_diversity)
+            + (self.weights.consistency * consistency_component)
+            + (0.05 * completion_component)
         )
         return reward, validation_result
 

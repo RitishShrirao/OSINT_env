@@ -22,6 +22,7 @@ train = [
 	"accelerate>=0.33.0",
 	"trl>=0.15.0",
 	"peft>=0.11.0",
+	"huggingface_hub>=0.34.0",
 	"pillow",
 	"torchvision",
 	"wandb",
@@ -30,6 +31,7 @@ train = [
 [project.scripts]
 osint-env = "osint_env.cli:main"
 server = "osint_env.server_entry:main"
+osint-env-launch-hf-job = "osint_env.training.hf_jobs:main"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

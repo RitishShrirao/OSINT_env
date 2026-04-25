@@ -7,6 +7,7 @@ from osint_env.domain.models import Action, ActionType
 from osint_env.env.environment import OSINTEnvironment
 from osint_env.env.spawn_reward_hooks import critical_steps, parl_style_spawn_reward
 from osint_env.llm.interface import LLMClient, RuleBasedMockLLM
+from osint_env.platforms.tool_schemas import build_lookup_tools
 
 
 class SwarmAgentRunner:
@@ -135,12 +136,13 @@ class SwarmAgentRunner:
                 "content": (
                     f"question: {obs.task['question']}\n"
                     f"agent_role: {role}_{agent_idx}\n"
+                    f"shared_context_available: {bool(obs.task.get('shared_context_available', False))}\n"
                     "Return concise tool plan."
                 ),
             }
         ]
         try:
-            response = self.llm.generate(messages, tools=[])
+            response = self.llm.generate(messages, tools=build_lookup_tools())
         except Exception:
             response = None
 
@@ -160,6 +162,11 @@ class SwarmAgentRunner:
             return calls
 
         question = str(obs.task.get("question", "")).lower()
+        shared_context_available = bool(obs.task.get("shared_context_available", False))
+        shared_query = self._shared_context_query(str(obs.task.get("question", "")))
+        if shared_context_available and role in {"explorer", "reasoner"}:
+            return [{"tool_name": "search_shared_context", "args": {"query": shared_query, "k": 5}}]
+
         if role == "explorer":
             if "event" in question:
                 return [{"tool_name": "search_threads", "args": {"topic": "security"}}]
@@ -181,6 +188,19 @@ class SwarmAgentRunner:
             return [{"tool_name": "get_profile", "args": {"user_id": user_tokens[0]}}]
 
         return [{"tool_name": "search_people", "args": {"org": "Apex"}}]
+
+    @staticmethod
+    def _shared_context_query(question: str) -> str:
+        id_match = re.search(r"\b(?:alias|user|post|thr|thread|org|loc|event)_[A-Za-z0-9_]+\b", question)
+        if id_match:
+            return id_match.group(0)
+        path_match = re.search(r"relation path\s+(.+?),\s*which entity", question, flags=re.IGNORECASE)
+        if path_match:
+            first_relation = path_match.group(1).split("->", 1)[0].strip()
+            if first_relation:
+                return first_relation
+        tokens = re.findall(r"[A-Za-z0-9_]+", question)
+        return tokens[0] if tokens else question
 
     def _edge_plan(self, agent_idx: int) -> dict[str, Any] | None:
         if self.env.state is None or not self.env.state.task.supporting_edges:

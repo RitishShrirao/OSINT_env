@@ -174,9 +174,27 @@ osint-env train-self-play --config config/shared_config.json --train-config conf
 
 When you have compute and the train dependencies installed, remove `--dry-run` (or set `"dry_run": false` in the training config) to execute TRL GRPO updates for alternating generator and answerer phases.
 
+For a standalone Linux server or SSH box, there is also a wrapper script that activates a venv, optionally installs train deps, and runs the same command:
+
+```bash
+VENV_PATH="$HOME/arl" \
+INSTALL_TRAIN_DEPS=1 \
+TRAIN_ENV_CONFIG_PATH="config/shared_config.json" \
+TRAIN_SELF_PLAY_CONFIG_PATH="config/self_play_training_hf_a10g_smoke.json" \
+TRAIN_SELF_PLAY_OUTPUT_DIR="artifacts/self_play_server" \
+bash scripts/train_self_play_standalone.sh
+```
+
+Useful overrides for the standalone script:
+
+- `BOOTSTRAP_VENV=1` to create the virtualenv if it does not exist
+- `TRAIN_SELF_PLAY_ROUNDS=2` to override the number of rounds
+- `RUN_SELF_PLAY_DRY_RUN=1` to materialize artifacts without GRPO updates
+- `TRAIN_SETUP_COMMAND='python -m pip install flash-attn --no-build-isolation'` for host-specific extras
+
 The training config also supports `"model_topology": "dual"|"shared"`, `"phase_schedule": "generator_answerer"|"answerer_generator_answerer"`, `"tuning_mode": "full"|"lora"`, and `"canonical_graph_mode": "generate"|"fixed"` so you can switch between two-model vs single-model self-play, full fine-tuning vs LoRA adapters, and whether canonical graph structure is generated each round or kept fixed while training question/answer behavior.
 
-### Hugging Face Space Smoke Run (Qwen 3.5 0.8B + W&B)
+### Hugging Face Job A10G Run (Separate From The Space)
 
 For a short verification run (enough to confirm W&B logging before scaling up), use:
 
@@ -186,27 +204,42 @@ osint-env train-self-play --config config/shared_config.json --train-config conf
 
 This config:
 
-- uses `Qwen/Qwen3.5-0.8B`
+- uses `Qwen/Qwen2.5-0.5B-Instruct`
 - enables W&B reporting (`wandb_enabled: true`)
 - uses `pipeline_mode: "swarm_v2"` with `canonical_graph_mode: "fixed"` to keep canonical graph candidates stable while training question/answer behavior
-- keeps training intentionally short (`rounds=1`, `max_steps=5` per phase)
-- uses LoRA with small batch settings so it can run as a smoke test on an A10G
+- keeps training intentionally short (`rounds=2`, `max_steps=50` per phase)
+- uses full fine-tuning plus fused AdamW, bf16/tf32, larger generation batches, and extra dataloader workers to make better use of an A10G
 
 To enable canonical graph generation during swarm_v2 training, switch `"canonical_graph_mode"` to `"generate"` in the training config.
 
-Space setup checklist:
+If you want the Space to stay on CPU and train separately on paid GPU compute, launch a dedicated Hugging Face Job instead of training inside the Space:
 
-1. In Space **Settings -> Hardware**, select **NVIDIA A10G (large)**.
-2. In Space **Settings -> Variables and secrets**, set `WANDB_API_KEY`.
-3. Set `HF_TOKEN` in Space secrets to avoid unauthenticated Hub downloads and stricter rate limits.
-4. Optionally set `WANDB_ENTITY` if your project belongs to a team.
-5. Set `RUN_SELF_PLAY_TRAINING=1` in Space variables to trigger training during container startup.
-6. Optional overrides:
+```bash
+osint-env-launch-hf-job \
+  --hf-token "$HF_TOKEN" \
+  --job-image "pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel" \
+  --repo-url "https://github.com/your-org/meta-knowledge-graph.git" \
+  --repo-ref "main" \
+  --flavor "a10g-small" \
+  --env-config "config/shared_config.json" \
+  --train-config "config/self_play_training_hf_a10g_smoke.json" \
+  --output-bucket "your-hf-bucket" \
+  --wait
+```
+
+The launcher talks to the Hugging Face Jobs API through `huggingface_hub`, so the Space can remain on CPU while the training job runs on separate A10G compute.
+
+Optional Space startup wiring still exists if you want it:
+
+1. Keep the Space on CPU if it is serving inference/UI only.
+2. Set `RUN_SELF_PLAY_TRAINING=1` only if you intentionally want startup-time training inside the Space container.
+3. Optional overrides:
    - `TRAIN_SELF_PLAY_CONFIG_PATH` (default: `config/self_play_training_hf_a10g_smoke.json`)
    - `TRAIN_ENV_CONFIG_PATH` (default: `config/shared_config.json`)
-   - `RUN_SELF_PLAY_DRY_RUN=1` to test startup wiring without GRPO updates.
-   - `OSINT_TRAIN_STRICT_ASSERTS=1` to fail fast when reward variance, KL, loss, grad norms, or parameter updates stay zero.
-7. Restart the Space and monitor build/runtime logs for the training run.
+   - `TRAIN_SELF_PLAY_OUTPUT_DIR` to override where artifacts land
+   - `RUN_SELF_PLAY_DRY_RUN=1` to test startup wiring without GRPO updates
+   - `RUN_SELF_PLAY_BACKGROUND=1` to keep the API up while startup-time training runs
+   - `OSINT_TRAIN_STRICT_ASSERTS=1` to fail fast when reward variance, KL, loss, grad norms, or parameter updates stay zero
 
 W&B run naming is controlled by `wandb_run_name_prefix` and will emit phase-specific runs like `...-r001-generator` and `...-r001-answerer`.
 
@@ -229,10 +262,10 @@ In `legacy` pipeline mode, the reward is a weighted sum:
 
 Default weights (configurable through `generator_reward_weights` in training config):
 
-- `validity`: `0.35`
-- `hardness`: `0.45`
-- `diversity`: `0.10`
-- `consistency`: `0.10`
+- `validity`: `0.45`
+- `hardness`: `0.20`
+- `diversity`: `0.15`
+- `consistency`: `0.20`
 
 In `swarm_v2` pipeline mode, generation uses strict replay/validation first, then a structured reward:
 
