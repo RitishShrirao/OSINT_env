@@ -1,0 +1,45 @@
+[project]
+name = "osint-rl-env"
+version = "0.1.0"
+description = "OSINT-style multi-platform information ecosystem environment for LLM agents."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+	"openenv>=0.1.13",
+	"openai>=1.40.0",
+	"fastapi>=0.115.0",
+	"requests>=2.32.3",
+	"uvicorn>=0.30.0",
+]
+
+[project.optional-dependencies]
+dev = [
+	"pytest>=8.0.0",
+]
+train = [
+	"datasets>=2.20.0",
+	"transformers>=4.45.0",
+	"accelerate>=0.33.0",
+	"trl>=0.15.0",
+	"peft>=0.11.0",
+	"pillow",
+	"torchvision",
+	"wandb",
+]
+
+[project.scripts]
+osint-env = "osint_env.cli:main"
+server = "osint_env.server_entry:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

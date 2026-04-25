@@ -1,0 +1,64 @@
+{
+  "seeding": {
+    "seeded_nodes": [
+      {
+        "node_id": "alias_smoke_001",
+        "node_type": "alias",
+        "attrs": {
+          "handle": "@smoke_alias"
+        }
+      },
+      {
+        "node_id": "user_smoke_001",
+        "node_type": "user",
+        "attrs": {
+          "name": "Smoke User",
+          "org": "Apex Dynamics",
+          "location": "Bengaluru"
+        }
+      },
+      {
+        "node_id": "org_smoke_001",
+        "node_type": "org",
+        "attrs": {
+          "name": "Apex Dynamics"
+        }
+      }
+    ],
+    "seeded_edges": [
+      {
+        "src": "alias_smoke_001",
+        "rel": "alias_of",
+        "dst": "user_smoke_001",
+        "confidence": 1.0
+      },
+      {
+        "src": "user_smoke_001",
+        "rel": "works_at",
+        "dst": "org_smoke_001",
+        "confidence": 1.0
+      }
+    ],
+    "seeded_questions": [
+      {
+        "task_type": "identity_resolution",
+        "question": "Which canonical user owns alias alias_smoke_001?",
+        "answer": "user_smoke_001",
+        "supporting_edges": [
+          {
+            "src": "alias_smoke_001",
+            "rel": "alias_of",
+            "dst": "user_smoke_001"
+          }
+        ],
+        "metadata": {
+          "source": "ollama_smoke"
+        }
+      }
+    ],
+    "llm_generate_remaining_graph": false,
+    "llm_generate_remaining_tasks": false,
+    "llm_generated_edge_budget": 0,
+    "llm_generated_task_budget": 0
+  }
+}

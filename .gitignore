@@ -1,0 +1,12 @@
+*.pyc
+blueprint.txt
+*.egg-info
+artifacts/*
+*.html
+osint_dashboard.html
+.venv/
+.tmp_compare/
+metaQA/
+.codex
+TODO.txt
+uv.lock

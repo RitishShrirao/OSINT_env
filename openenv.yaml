@@ -1,0 +1,66 @@
+name: osint-openenv
+version: 0.1.0
+description: Synthetic OSINT benchmark environment exposed over HTTP.
+tasks:
+  - id: seed_task_0
+    difficulty: easy
+    max_steps: 24
+    grader:
+      type: difficulty_exact_match
+      answer_type: node_id
+      case_sensitive: true
+      reward_profile: easy
+  - id: seed_task_10
+    difficulty: medium
+    max_steps: 24
+    grader:
+      type: difficulty_exact_match
+      answer_type: node_id
+      case_sensitive: true
+      reward_profile: medium
+  - id: seed_task_20
+    difficulty: hard
+    max_steps: 24
+    grader:
+      type: difficulty_exact_match
+      answer_type: node_id
+      case_sensitive: true
+      reward_profile: hard
+transport:
+  type: http
+  base_path: /
+endpoints:
+  health:
+    method: GET
+    path: /health
+  metadata:
+    method: GET
+    path: /api/environment
+  tasks:
+    method: GET
+    path: /openenv/tasks
+  reset:
+    method: POST
+    path: /reset
+  step:
+    method: POST
+    path: /step
+  state:
+    method: GET
+    path: /state
+models:
+  action_space:
+    - CALL_TOOL
+    - ADD_EDGE
+    - ANSWER
+  task_fields:
+    - task_id
+    - task_type
+    - question
+    - difficulty
+    - grader
+  observation_fields:
+    - tool_outputs
+    - graph_snapshot
+    - action_history
+    - task
