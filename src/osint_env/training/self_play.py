@@ -992,13 +992,16 @@ def _materialize_swarm_v2_completions(
     replay_traces: list[dict[str, Any]] = []
 
     for completion_idx, completion_text in enumerate(completion_texts):
+        use_fixed_canonical = str(cfg.canonical_graph_mode).strip().lower() == "fixed"
+        if use_fixed_canonical and prompt_canonical_candidates and completion_idx >= len(prompt_canonical_candidates):
+            break
+
         candidate = parse_generated_task_completion(
             completion_text,
             max_support_edges=cfg.swarm_v2.validation.max_support_edges,
         )
         validation = validator.validate(candidate)
 
-        use_fixed_canonical = str(cfg.canonical_graph_mode).strip().lower() == "fixed"
         if use_fixed_canonical and prompt_canonical_candidates and completion_idx < len(prompt_canonical_candidates):
             canonical_graph = dict(prompt_canonical_candidates[completion_idx])
         else:

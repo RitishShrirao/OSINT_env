@@ -15,6 +15,8 @@ from osint_env.env.environment import OSINTEnvironment
 from osint_env.training import SelfPlayTrainingConfig, run_adversarial_self_play
 from osint_env.training.config import GeneratorRewardWeights
 from osint_env.training.rewards import (
+    decode_completion_text,
+    extract_answer_from_completion,
     GeneratorRewardFunction,
     SwarmV2ReplayValidator,
     parse_generated_task_completion,
@@ -75,6 +77,99 @@ def _build_valid_candidate_payload(env: OSINTEnvironment, cfg: SelfPlayTrainingC
             "depth": 1,
         },
     }
+
+
+def test_decode_completion_text_handles_nested_content_parts():
+    payload = {"question": "Q", "answer": "A", "supporting_edges": []}
+    completion = [
+        {
+            "role": "assistant",
+            "content": [
+                {
+                    "type": "text",
+                    "text": json.dumps(payload),
+                }
+            ],
+        }
+    ]
+
+    decoded = decode_completion_text(completion)
+    parsed = parse_generated_task_completion(decoded)
+
+    assert decoded == json.dumps(payload)
+    assert parsed.question == "Q"
+    assert parsed.answer == "A"
+    assert parsed.is_valid is True
+    assert extract_answer_from_completion(decoded) == "A"
+
+
+def test_parse_generated_task_completion_prefers_relevant_json_blob():
+    payload = {"question": "Q", "answer": "A", "supporting_edges": []}
+    completion_text = (
+        'Example: {"note": "ignore"}\n'
+        f"Final: {json.dumps(payload)}\n"
+        '{"trailing": true}'
+    )
+
+    parsed = parse_generated_task_completion(completion_text)
+
+    assert parsed.question == "Q"
+    assert parsed.answer == "A"
+    assert parsed.is_valid is True
+
+
+def test_swarm_v2_duplicate_check_does_not_reject_distinct_relation_paths():
+    cfg = SelfPlayTrainingConfig(pipeline_mode="swarm_v2")
+    env = OSINTEnvironment(EnvironmentConfig(seed=41, n_users=18, max_steps=6))
+    path_candidates = build_swarm_v2_path_candidates(
+        env.graph,
+        rng=random.Random(19),
+        count=8,
+        min_hops=2,
+        max_hops=cfg.swarm_v2.validation.max_path_hops,
+    )
+    assert len(path_candidates) >= 2
+
+    payload_a = {
+        "canonical_graph": build_swarm_v2_canonical_subgraph(env.graph, path_candidates[0], max_extra_edges=2),
+        "question": emit_swarm_v2_question(path_candidates[0]),
+        "answer": select_swarm_v2_answer(path_candidates[0]),
+        "task_type": "swarm_v2_trace",
+        "supporting_edges": [_edge_payload(edge) for edge in path_candidates[0]],
+        "tool_trace": build_swarm_v2_tool_trace(env.graph, path_candidates[0]),
+        "subagent_outputs": ["path_agent: candidate_a"],
+        "orchestrator": {"spawn_count": 2, "finished_subtasks": 2, "critical_steps": 2, "breadth": 2, "depth": 1},
+    }
+    payload_b = {
+        "canonical_graph": build_swarm_v2_canonical_subgraph(env.graph, path_candidates[1], max_extra_edges=2),
+        "question": emit_swarm_v2_question(path_candidates[1]),
+        "answer": select_swarm_v2_answer(path_candidates[1]),
+        "task_type": "swarm_v2_trace",
+        "supporting_edges": [_edge_payload(edge) for edge in path_candidates[1]],
+        "tool_trace": build_swarm_v2_tool_trace(env.graph, path_candidates[1]),
+        "subagent_outputs": ["path_agent: candidate_b"],
+        "orchestrator": {"spawn_count": 2, "finished_subtasks": 2, "critical_steps": 2, "breadth": 2, "depth": 1},
+    }
+    assert payload_a["question"] != payload_b["question"]
+
+    distinct_validator = SwarmV2ReplayValidator(
+        graph=env.graph,
+        validation=cfg.swarm_v2.validation,
+        shared_context=cfg.swarm_v2.shared_context,
+        seen_questions=[str(payload_b["question"])],
+    )
+    distinct_result = distinct_validator.validate(parse_generated_task_completion(json.dumps(payload_a)))
+    assert distinct_result.is_valid is True
+
+    duplicate_validator = SwarmV2ReplayValidator(
+        graph=env.graph,
+        validation=cfg.swarm_v2.validation,
+        shared_context=cfg.swarm_v2.shared_context,
+        seen_questions=[str(payload_a["question"])],
+    )
+    duplicate_result = duplicate_validator.validate(parse_generated_task_completion(json.dumps(payload_a)))
+    assert duplicate_result.is_valid is False
+    assert "duplicate_or_near_duplicate" in duplicate_result.reasons
 
 
 def test_swarm_v2_replay_validator_accepts_valid_candidate_and_rejects_invalid_cases():

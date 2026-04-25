@@ -23,35 +23,101 @@ from osint_env.training.config import (
 )
 
 
+def _iter_text_fragments(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        token = value.strip()
+        return [token] if token else []
+    if isinstance(value, list):
+        out: list[str] = []
+        for item in value:
+            out.extend(_iter_text_fragments(item))
+        return out
+    if isinstance(value, dict):
+        out: list[str] = []
+        for key in ("content", "text", "output_text", "message", "choices"):
+            if key in value:
+                out.extend(_iter_text_fragments(value.get(key)))
+        return out
+    return [str(value)]
+
+
 def decode_completion_text(completion: Any) -> str:
-    if isinstance(completion, str):
-        return completion
-    if isinstance(completion, list):
-        parts: list[str] = []
-        for item in completion:
-            if isinstance(item, str):
-                parts.append(item)
-            elif isinstance(item, dict):
-                parts.append(str(item.get("content", "")))
-        return "\n".join(part for part in parts if part)
-    if isinstance(completion, dict):
-        return str(completion.get("content", ""))
-    return str(completion)
+    parts = _iter_text_fragments(completion)
+    return "\n".join(part for part in parts if part)
 
 
-def _extract_json_blob(text: str) -> Any:
+def _extract_json_candidates(text: str) -> list[Any]:
     candidate = str(text or "").strip()
     if not candidate:
+        return []
+
+    out: list[Any] = []
+    try:
+        parsed = json.loads(candidate)
+    except json.JSONDecodeError:
+        parsed = None
+    if isinstance(parsed, dict):
+        out.append(parsed)
+
+    for start_idx, ch in enumerate(candidate):
+        if ch != "{":
+            continue
+
+        depth = 0
+        in_string = False
+        escape = False
+        for end_idx in range(start_idx, len(candidate)):
+            current = candidate[end_idx]
+            if escape:
+                escape = False
+                continue
+            if current == "\\":
+                escape = True
+                continue
+            if current == '"':
+                in_string = not in_string
+                continue
+            if in_string:
+                continue
+            if current == "{":
+                depth += 1
+            elif current == "}":
+                depth -= 1
+                if depth < 0:
+                    break
+                if depth != 0:
+                    continue
+                snippet = candidate[start_idx : end_idx + 1]
+                try:
+                    parsed = json.loads(snippet)
+                except json.JSONDecodeError:
+                    break
+                if isinstance(parsed, dict) and parsed not in out:
+                    out.append(parsed)
+                break
+    return out
+
+
+def _extract_json_blob(text: str, preferred_keys: tuple[str, ...] = ()) -> Any:
+    blobs = _extract_json_candidates(text)
+    if not blobs:
         return None
-    left = candidate.find("{")
-    right = candidate.rfind("}")
-    if left >= 0 and right > left:
-        snippet = candidate[left : right + 1]
-        try:
-            return json.loads(snippet)
-        except json.JSONDecodeError:
-            return None
-    return None
+    if not preferred_keys:
+        return blobs[0]
+
+    best_blob = blobs[0]
+    best_score = -1
+    preferred = set(preferred_keys)
+    for blob in blobs:
+        if not isinstance(blob, dict):
+            continue
+        score = sum(1 for key in preferred if key in blob)
+        if score > best_score:
+            best_blob = blob
+            best_score = score
+    return best_blob
 
 
 def normalize_answer(text: str) -> str:
@@ -63,7 +129,7 @@ def normalize_answer(text: str) -> str:
 
 
 def extract_answer_from_completion(completion_text: str) -> str:
-    blob = _extract_json_blob(completion_text)
+    blob = _extract_json_blob(completion_text, preferred_keys=("answer",))
     if isinstance(blob, dict):
         answer = str(blob.get("answer", "")).strip()
         if answer:
@@ -216,7 +282,10 @@ class GeneratedTaskCandidate:
 
 
 def parse_generated_task_completion(completion_text: str, max_support_edges: int = 8) -> GeneratedTaskCandidate:
-    blob = _extract_json_blob(completion_text)
+    blob = _extract_json_blob(
+        completion_text,
+        preferred_keys=("question", "answer", "supporting_edges", "tool_trace", "canonical_graph"),
+    )
 
     question = ""
     answer = ""
@@ -287,6 +356,44 @@ def _jaccard_similarity(left: str, right: str) -> float:
     if not a or not b:
         return 0.0
     return len(a & b) / max(1, len(a | b))
+
+
+_SWARM_V2_QUESTION_RE = re.compile(
+    r"^If you start at (?P<start>.+?) and follow the relation path "
+    r"(?P<relations>.+?), which entity do you reach after (?P<hops>\d+) hops\?$"
+)
+
+
+def _swarm_v2_question_signature(question: str) -> tuple[str, tuple[str, ...], int] | None:
+    match = _SWARM_V2_QUESTION_RE.match(str(question or "").strip())
+    if not match:
+        return None
+    start = normalize_answer(match.group("start")).lower()
+    relations = tuple(
+        token.strip().lower()
+        for token in match.group("relations").split("->")
+        if token.strip()
+    )
+    if not start or not relations:
+        return None
+    return start, relations, int(match.group("hops"))
+
+
+def _swarm_v2_question_similarity(left: str, right: str) -> float:
+    left_sig = _swarm_v2_question_signature(left)
+    right_sig = _swarm_v2_question_signature(right)
+    if left_sig is None or right_sig is None:
+        return _jaccard_similarity(left, right)
+
+    left_start, left_relations, left_hops = left_sig
+    right_start, right_relations, right_hops = right_sig
+    start_score = 1.0 if left_start == right_start else 0.0
+    path_score = 1.0 if left_relations == right_relations else _jaccard_similarity(
+        " ".join(left_relations),
+        " ".join(right_relations),
+    )
+    hop_score = 1.0 if left_hops == right_hops else 0.0
+    return (0.55 * start_score) + (0.35 * path_score) + (0.10 * hop_score)
 
 
 def _distinct_ngram_ratio(texts: list[str], n: int = 2) -> float:
@@ -453,7 +560,7 @@ class SwarmV2ReplayValidator:
         duplicate_similarity = 0.0
         if candidate.question and self.seen_questions:
             duplicate_similarity = max(
-                _jaccard_similarity(candidate.question, seen_question)
+                _swarm_v2_question_similarity(candidate.question, seen_question)
                 for seen_question in self.seen_questions
             )
             if duplicate_similarity >= self.validation.duplicate_similarity_threshold:
