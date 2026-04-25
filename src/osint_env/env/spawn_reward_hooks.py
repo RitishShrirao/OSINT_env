@@ -1,6 +1,18 @@
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
+
+
+@dataclass(slots=True)
+class PARLRewardBreakdown:
+    total: float
+    auxiliary: float
+    parallel: float
+    finish: float
+    latency: float
+    breadth_bonus: float
+    depth_penalty: float
 
 
 def critical_steps(main_steps: list[int], parallel_subagent_steps: list[list[int]]) -> int:
@@ -57,6 +69,43 @@ def parl_style_spawn_reward(
     depth = max(0, int(depth or 0))
     max_parallel_hint = max(0, int(max_parallel_hint or 0))
 
+    breakdown = parl_reward_breakdown(
+        task_outcome_reward=task_outcome_reward,
+        spawn_count=spawn_count,
+        finished_subtasks=finished_subtasks,
+        critical_steps=critical_steps,
+        lambda_parallel=lambda_parallel,
+        lambda_finish=lambda_finish,
+        anneal=anneal,
+        breadth=breadth,
+        depth=depth,
+        max_parallel_hint=max_parallel_hint,
+    )
+    return breakdown.total
+
+
+def parl_reward_breakdown(
+    task_outcome_reward: float,
+    spawn_count: int,
+    finished_subtasks: int,
+    critical_steps: int,
+    lambda_parallel: float = 0.15,
+    lambda_finish: float = 0.20,
+    anneal: float = 1.0,
+    breadth: int | None = None,
+    depth: int | None = None,
+    max_parallel_hint: int | None = None,
+) -> PARLRewardBreakdown:
+    spawn_count = max(0, int(spawn_count))
+    finished_subtasks = max(0, int(finished_subtasks))
+    critical_steps = max(1, int(critical_steps))
+    anneal = max(0.0, min(1.0, anneal))
+    lambda_parallel = max(0.0, float(lambda_parallel))
+    lambda_finish = max(0.0, float(lambda_finish))
+    breadth = max(0, int(breadth or 0))
+    depth = max(0, int(depth or 0))
+    max_parallel_hint = max(0, int(max_parallel_hint or 0))
+
     if spawn_count == 0:
         r_parallel = 0.0
         r_finish = 0.0
@@ -90,4 +139,13 @@ def parl_style_spawn_reward(
         + breadth_bonus
         + depth_penalty
     )
-    return float(task_outcome_reward) + (anneal * auxiliary)
+    total = float(task_outcome_reward) + (anneal * auxiliary)
+    return PARLRewardBreakdown(
+        total=total,
+        auxiliary=anneal * auxiliary,
+        parallel=r_parallel,
+        finish=r_finish,
+        latency=r_latency,
+        breadth_bonus=breadth_bonus,
+        depth_penalty=depth_penalty,
+    )

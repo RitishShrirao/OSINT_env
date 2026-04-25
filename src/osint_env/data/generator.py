@@ -33,6 +33,266 @@ class PlatformViews:
     alias_lookup: dict[str, str]
 
 
+def _edge_payload(edge: Edge) -> dict[str, Any]:
+    return {
+        "src": edge.src,
+        "rel": edge.rel,
+        "dst": edge.dst,
+        "confidence": float(edge.confidence),
+    }
+
+
+def _normalize_swarm_v2_path_edges(path: list[Edge | dict[str, Any]]) -> list[Edge]:
+    out: list[Edge] = []
+    for row in path:
+        if isinstance(row, Edge):
+            out.append(Edge(row.src, row.rel, row.dst, float(row.confidence)))
+            continue
+        if not isinstance(row, dict):
+            return []
+        src = str(row.get("src", "")).strip()
+        rel = str(row.get("rel", "")).strip()
+        dst = str(row.get("dst", "")).strip()
+        if not src or not rel or not dst:
+            return []
+        try:
+            confidence = float(row.get("confidence", 1.0))
+        except (TypeError, ValueError):
+            confidence = 1.0
+        out.append(Edge(src=src, rel=rel, dst=dst, confidence=confidence))
+    return out
+
+
+def enumerate_swarm_v2_neighbors(graph: CanonicalGraph, node_id: str) -> list[Edge]:
+    edges = [edge for edge in graph.edges if edge.src == node_id]
+    edges.sort(key=lambda edge: (edge.src, edge.rel, edge.dst))
+    return [Edge(edge.src, edge.rel, edge.dst, float(edge.confidence)) for edge in edges]
+
+
+def trace_swarm_v2_path(graph: CanonicalGraph, path: list[Edge | dict[str, Any]]) -> list[Edge]:
+    edges = _normalize_swarm_v2_path_edges(path)
+    if not edges:
+        return []
+
+    graph_edges = {(edge.src, edge.rel, edge.dst) for edge in graph.edges}
+    for idx, edge in enumerate(edges):
+        if (edge.src, edge.rel, edge.dst) not in graph_edges:
+            return []
+        if idx > 0 and edges[idx - 1].dst != edge.src:
+            return []
+    return edges
+
+
+def select_swarm_v2_answer(path_edges: list[Edge]) -> str:
+    if not path_edges:
+        return ""
+    return path_edges[-1].dst
+
+
+def emit_swarm_v2_question(path_edges: list[Edge]) -> str:
+    if not path_edges:
+        return ""
+    start = path_edges[0].src
+    relation_path = " -> ".join(edge.rel for edge in path_edges)
+    hops = len(path_edges)
+    return (
+        f"If you start at {start} and follow the relation path {relation_path}, "
+        f"which entity do you reach after {hops} hops?"
+    )
+
+
+def build_swarm_v2_tool_trace(graph: CanonicalGraph, path_edges: list[Edge]) -> list[dict[str, Any]]:
+    traced = trace_swarm_v2_path(graph, path_edges)
+    if not traced:
+        return []
+
+    tool_trace: list[dict[str, Any]] = []
+    for idx, edge in enumerate(traced):
+        neighbors = enumerate_swarm_v2_neighbors(graph, edge.src)
+        tool_trace.append(
+            {
+                "tool_name": "enumerate_neighbors",
+                "args": {
+                    "node_id": edge.src,
+                    "hop_index": idx,
+                    "expected_edge": _edge_payload(edge),
+                },
+                "output": {
+                    "neighbors": [_edge_payload(candidate) for candidate in neighbors],
+                },
+            }
+        )
+
+    tool_trace.append(
+        {
+            "tool_name": "trace_path",
+            "args": {
+                "path": [_edge_payload(edge) for edge in traced],
+            },
+            "output": {
+                "path": [_edge_payload(edge) for edge in traced],
+            },
+        }
+    )
+
+    answer = select_swarm_v2_answer(traced)
+    tool_trace.append(
+        {
+            "tool_name": "select_answer",
+            "args": {
+                "strategy": "path_dst",
+            },
+            "output": {
+                "answer": answer,
+            },
+        }
+    )
+
+    question = emit_swarm_v2_question(traced)
+    tool_trace.append(
+        {
+            "tool_name": "emit_question",
+            "args": {
+                "style": "relation_path_v1",
+            },
+            "output": {
+                "question": question,
+            },
+        }
+    )
+    return tool_trace
+
+
+def build_swarm_v2_canonical_subgraph(
+    graph: CanonicalGraph,
+    path_edges: list[Edge],
+    max_extra_edges: int = 4,
+) -> dict[str, Any]:
+    traced = trace_swarm_v2_path(graph, path_edges)
+    if not traced:
+        return {"nodes": [], "edges": [], "path": []}
+
+    path_nodes = {traced[0].src}
+    for edge in traced:
+        path_nodes.add(edge.src)
+        path_nodes.add(edge.dst)
+
+    path_keys = {(edge.src, edge.rel, edge.dst) for edge in traced}
+    extra_edges: list[Edge] = []
+    for edge in graph.edges:
+        key = (edge.src, edge.rel, edge.dst)
+        if key in path_keys:
+            continue
+        if edge.src in path_nodes or edge.dst in path_nodes:
+            extra_edges.append(Edge(edge.src, edge.rel, edge.dst, float(edge.confidence)))
+        if len(extra_edges) >= max(0, int(max_extra_edges)):
+            break
+
+    subgraph_edges = list(traced) + extra_edges
+    subgraph_nodes = sorted({edge.src for edge in subgraph_edges} | {edge.dst for edge in subgraph_edges})
+    return {
+        "nodes": subgraph_nodes,
+        "edges": [_edge_payload(edge) for edge in subgraph_edges],
+        "path": [_edge_payload(edge) for edge in traced],
+        "answer": select_swarm_v2_answer(traced),
+    }
+
+
+def build_swarm_v2_path_candidates(
+    graph: CanonicalGraph,
+    rng: random.Random,
+    count: int,
+    min_hops: int = 2,
+    max_hops: int = 4,
+) -> list[list[Edge]]:
+    if count <= 0:
+        return []
+
+    outgoing: dict[str, list[Edge]] = {}
+    for edge in graph.edges:
+        outgoing.setdefault(edge.src, []).append(edge)
+
+    def path_match_count(path: list[Edge], limit: int = 4) -> int:
+        if not path:
+            return 0
+        relations = [edge.rel for edge in path]
+        answer = path[-1].dst
+        start = path[0].src
+        match_count = 0
+        stack: list[tuple[str, int, tuple[str, ...]]] = [(start, 0, (start,))]
+        while stack:
+            node_id, rel_idx, seen_nodes = stack.pop()
+            if rel_idx >= len(relations):
+                if node_id == answer:
+                    match_count += 1
+                    if match_count >= limit:
+                        return match_count
+                continue
+            relation = relations[rel_idx]
+            for edge in outgoing.get(node_id, []):
+                if edge.rel != relation:
+                    continue
+                if edge.dst in seen_nodes:
+                    continue
+                stack.append((edge.dst, rel_idx + 1, seen_nodes + (edge.dst,)))
+        return match_count
+
+    starts = [node_id for node_id, edges in outgoing.items() if edges]
+    if not starts:
+        return []
+
+    seen: set[tuple[tuple[str, str, str], ...]] = set()
+    candidates: list[list[Edge]] = []
+    attempt_budget = max(16, count * 20)
+    lower_hops = max(1, int(min_hops))
+    upper_hops = max(lower_hops, int(max_hops))
+
+    for _ in range(attempt_budget):
+        if len(candidates) >= count:
+            break
+
+        current = rng.choice(starts)
+        target_hops = rng.randint(lower_hops, upper_hops)
+        path: list[Edge] = []
+        visited_nodes = {current}
+
+        for _hop in range(target_hops):
+            options = [edge for edge in outgoing.get(current, []) if edge.dst not in visited_nodes]
+            if not options:
+                break
+            edge = rng.choice(options)
+            path.append(Edge(edge.src, edge.rel, edge.dst, float(edge.confidence)))
+            current = edge.dst
+            visited_nodes.add(current)
+
+        if len(path) < lower_hops:
+            continue
+        if path_match_count(path) != 1:
+            continue
+
+        key = tuple((edge.src, edge.rel, edge.dst) for edge in path)
+        if key in seen:
+            continue
+        seen.add(key)
+        candidates.append(path)
+
+    if candidates:
+        return candidates[:count]
+
+    # Fall back to unique 1-hop paths only when the graph is too shallow for multi-hop traces.
+    for edge in graph.edges:
+        key = ((edge.src, edge.rel, edge.dst),)
+        if key in seen:
+            continue
+        if path_match_count([edge]) != 1:
+            continue
+        seen.add(key)
+        candidates.append([Edge(edge.src, edge.rel, edge.dst, float(edge.confidence))])
+        if len(candidates) >= count:
+            break
+    return candidates[:count]
+
+
 class DatasetGenerator:
     def __init__(self, config: EnvironmentConfig, llm: LLMClient | None = None):
         self.config = config

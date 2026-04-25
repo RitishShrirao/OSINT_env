@@ -6,3 +6,5 @@ artifacts/*
 .venv/
 .tmp_compare/
 metaQA/
+.codex
+TODO.txt

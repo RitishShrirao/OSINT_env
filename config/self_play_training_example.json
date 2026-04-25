@@ -2,6 +2,7 @@
   "rounds": 3,
   "output_dir": "artifacts/self_play",
   "dry_run": true,
+  "pipeline_mode": "swarm_v2",
   "model_topology": "dual",
   "phase_schedule": "generator_answerer",
   "tuning_mode": "full",
@@ -26,6 +27,37 @@
     "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"],
     "bias": "none",
     "task_type": "CAUSAL_LM"
+  },
+  "swarm_v2": {
+    "generator_swarm": {
+      "shared_context": true,
+      "max_agents": 4,
+      "max_breadth": 3,
+      "max_depth": 2,
+      "planner_rounds": 2,
+      "tools_per_agent": 2
+    },
+    "answerer_swarm": {
+      "shared_context": true,
+      "max_agents": 3,
+      "max_breadth": 2,
+      "max_depth": 2,
+      "planner_rounds": 2,
+      "tools_per_agent": 2
+    },
+    "validation": {
+      "max_support_edges": 8,
+      "max_path_hops": 4,
+      "max_context_nodes": 14,
+      "max_context_edges": 8,
+      "duplicate_similarity_threshold": 0.8
+    },
+    "shared_context": {
+      "shared_by_default": true,
+      "max_nodes": 14,
+      "max_edges": 8,
+      "target_pressure": 0.85
+    }
   },
   "generator_phase": {
     "model_name_or_path": "Qwen/Qwen2.5-0.5B-Instruct",

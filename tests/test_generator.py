@@ -2,7 +2,15 @@ import json
 import re
 from threading import Lock
 
-from osint_env.data.generator import DatasetGenerator
+from osint_env.data.generator import (
+    DatasetGenerator,
+    build_swarm_v2_canonical_subgraph,
+    build_swarm_v2_path_candidates,
+    build_swarm_v2_tool_trace,
+    emit_swarm_v2_question,
+    select_swarm_v2_answer,
+    trace_swarm_v2_path,
+)
 from osint_env.domain.models import EnvironmentConfig
 from osint_env.llm.interface import LLMResponse
 
@@ -132,3 +140,25 @@ def test_task_generation_uses_parallel_shared_context_workers():
     task_prompts = [prompt for prompt in llm.prompts if "SEED_TASK_EXPANSION_AGENT" in prompt]
     assert len(task_prompts) >= 2
     assert all("SHARED_CONTEXT" in prompt for prompt in task_prompts)
+
+
+def test_swarm_v2_path_tools_replay_a_valid_multi_hop_trace():
+    gen = DatasetGenerator(EnvironmentConfig(n_users=20, seed=17))
+    graph = gen.build_canonical_graph()
+    candidates = build_swarm_v2_path_candidates(graph, gen.rng, count=4, min_hops=2, max_hops=3)
+
+    assert candidates
+    traced = trace_swarm_v2_path(graph, candidates[0])
+    assert traced
+    assert len(traced) >= 2
+
+    question = emit_swarm_v2_question(traced)
+    answer = select_swarm_v2_answer(traced)
+    tool_trace = build_swarm_v2_tool_trace(graph, traced)
+    canonical = build_swarm_v2_canonical_subgraph(graph, traced, max_extra_edges=2)
+
+    assert question.startswith("If you start at")
+    assert answer == traced[-1].dst
+    assert any(call["tool_name"] == "trace_path" for call in tool_trace)
+    assert canonical["path"]
+    assert canonical["answer"] == answer

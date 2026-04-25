@@ -54,12 +54,65 @@ class LoraTuningConfig:
 
 
 @dataclass(slots=True)
+class SwarmV2SwarmConfig:
+    """Config for one orchestrated swarm role inside the swarm_v2 pipeline."""
+
+    shared_context: bool = True
+    max_agents: int = 4
+    max_breadth: int = 3
+    max_depth: int = 2
+    planner_rounds: int = 2
+    tools_per_agent: int = 2
+
+
+@dataclass(slots=True)
+class SwarmV2ValidationConfig:
+    """Validation and replay limits for swarm_v2 task generation."""
+
+    max_support_edges: int = 8
+    max_path_hops: int = 4
+    max_context_nodes: int = 14
+    max_context_edges: int = 8
+    duplicate_similarity_threshold: float = 0.8
+
+
+@dataclass(slots=True)
+class SwarmV2SharedContextConfig:
+    """Shared context budgets used by both generator and answerer swarms."""
+
+    shared_by_default: bool = True
+    max_nodes: int = 14
+    max_edges: int = 8
+    target_pressure: float = 0.85
+
+
+@dataclass(slots=True)
+class SwarmV2Config:
+    """Config block for the config-gated Swarm Self-Play v2 pipeline."""
+
+    generator_swarm: SwarmV2SwarmConfig = field(default_factory=SwarmV2SwarmConfig)
+    answerer_swarm: SwarmV2SwarmConfig = field(
+        default_factory=lambda: SwarmV2SwarmConfig(
+            shared_context=True,
+            max_agents=3,
+            max_breadth=2,
+            max_depth=2,
+            planner_rounds=2,
+            tools_per_agent=2,
+        )
+    )
+    validation: SwarmV2ValidationConfig = field(default_factory=SwarmV2ValidationConfig)
+    shared_context: SwarmV2SharedContextConfig = field(default_factory=SwarmV2SharedContextConfig)
+
+
+@dataclass(slots=True)
 class SelfPlayTrainingConfig:
     """Top-level adversarial self-play training configuration."""
 
     rounds: int = 3
     output_dir: str = "artifacts/self_play"
     dry_run: bool = True
+    pipeline_mode: str = "legacy"
     model_topology: str = "dual"
     phase_schedule: str = "generator_answerer"
     tuning_mode: str = "full"
@@ -73,6 +126,7 @@ class SelfPlayTrainingConfig:
     answerer_judge_max_new_tokens: int = 48
     generator_reward_weights: GeneratorRewardWeights = field(default_factory=GeneratorRewardWeights)
     lora: LoraTuningConfig = field(default_factory=LoraTuningConfig)
+    swarm_v2: SwarmV2Config = field(default_factory=SwarmV2Config)
     generator_phase: KimiGRPOPhaseConfig = field(
         default_factory=lambda: KimiGRPOPhaseConfig(output_subdir="generator")
     )
@@ -188,6 +242,86 @@ def _parse_lora_config(data: dict[str, Any], fallback: LoraTuningConfig) -> Lora
     )
 
 
+def _parse_swarm_v2_swarm_config(
+    data: dict[str, Any],
+    fallback: SwarmV2SwarmConfig,
+) -> SwarmV2SwarmConfig:
+    return SwarmV2SwarmConfig(
+        shared_context=_parse_bool(data.get("shared_context"), fallback.shared_context),
+        max_agents=_parse_int(data.get("max_agents"), fallback.max_agents, floor=1),
+        max_breadth=_parse_int(data.get("max_breadth"), fallback.max_breadth, floor=1),
+        max_depth=_parse_int(data.get("max_depth"), fallback.max_depth, floor=1),
+        planner_rounds=_parse_int(data.get("planner_rounds"), fallback.planner_rounds, floor=1),
+        tools_per_agent=_parse_int(data.get("tools_per_agent"), fallback.tools_per_agent, floor=1),
+    )
+
+
+def _parse_swarm_v2_validation_config(
+    data: dict[str, Any],
+    fallback: SwarmV2ValidationConfig,
+    legacy_max_support_edges: int,
+) -> SwarmV2ValidationConfig:
+    default_max_support_edges = (
+        _parse_int(data.get("max_support_edges"), legacy_max_support_edges, floor=1)
+        if "max_support_edges" not in data
+        else _parse_int(data.get("max_support_edges"), fallback.max_support_edges, floor=1)
+    )
+    return SwarmV2ValidationConfig(
+        max_support_edges=default_max_support_edges,
+        max_path_hops=_parse_int(data.get("max_path_hops"), fallback.max_path_hops, floor=1),
+        max_context_nodes=_parse_int(data.get("max_context_nodes"), fallback.max_context_nodes, floor=1),
+        max_context_edges=_parse_int(data.get("max_context_edges"), fallback.max_context_edges, floor=1),
+        duplicate_similarity_threshold=max(
+            0.0,
+            min(
+                1.0,
+                _parse_float(
+                    data.get("duplicate_similarity_threshold"),
+                    fallback.duplicate_similarity_threshold,
+                ),
+            ),
+        ),
+    )
+
+
+def _parse_swarm_v2_shared_context_config(
+    data: dict[str, Any],
+    fallback: SwarmV2SharedContextConfig,
+) -> SwarmV2SharedContextConfig:
+    return SwarmV2SharedContextConfig(
+        shared_by_default=_parse_bool(data.get("shared_by_default"), fallback.shared_by_default),
+        max_nodes=_parse_int(data.get("max_nodes"), fallback.max_nodes, floor=1),
+        max_edges=_parse_int(data.get("max_edges"), fallback.max_edges, floor=1),
+        target_pressure=max(0.0, min(1.0, _parse_float(data.get("target_pressure"), fallback.target_pressure))),
+    )
+
+
+def _parse_swarm_v2_config(
+    data: dict[str, Any],
+    fallback: SwarmV2Config,
+    legacy_max_support_edges: int,
+) -> SwarmV2Config:
+    return SwarmV2Config(
+        generator_swarm=_parse_swarm_v2_swarm_config(
+            _as_dict(data.get("generator_swarm")),
+            fallback.generator_swarm,
+        ),
+        answerer_swarm=_parse_swarm_v2_swarm_config(
+            _as_dict(data.get("answerer_swarm")),
+            fallback.answerer_swarm,
+        ),
+        validation=_parse_swarm_v2_validation_config(
+            _as_dict(data.get("validation")),
+            fallback.validation,
+            legacy_max_support_edges=legacy_max_support_edges,
+        ),
+        shared_context=_parse_swarm_v2_shared_context_config(
+            _as_dict(data.get("shared_context")),
+            fallback.shared_context,
+        ),
+    )
+
+
 def load_self_play_config(path: str | Path | None) -> SelfPlayTrainingConfig:
     if not path:
         return SelfPlayTrainingConfig()
@@ -204,11 +338,22 @@ def load_self_play_config(path: str | Path | None) -> SelfPlayTrainingConfig:
     generator_phase = _parse_phase(_as_dict(payload.get("generator_phase")), defaults.generator_phase)
     answerer_phase = _parse_phase(_as_dict(payload.get("answerer_phase")), defaults.answerer_phase)
     lora_cfg = _parse_lora_config(_as_dict(payload.get("lora")), defaults.lora)
+    legacy_max_support_edges = _parse_int(payload.get("max_support_edges"), defaults.max_support_edges, floor=1)
+    swarm_v2_cfg = _parse_swarm_v2_config(
+        _as_dict(payload.get("swarm_v2")),
+        defaults.swarm_v2,
+        legacy_max_support_edges=legacy_max_support_edges,
+    )
 
     return SelfPlayTrainingConfig(
         rounds=_parse_int(payload.get("rounds"), defaults.rounds, floor=1),
         output_dir=str(payload.get("output_dir", defaults.output_dir)).strip() or defaults.output_dir,
         dry_run=_parse_bool(payload.get("dry_run"), defaults.dry_run),
+        pipeline_mode=_parse_str_choice(
+            payload.get("pipeline_mode"),
+            defaults.pipeline_mode,
+            {"legacy", "swarm_v2"},
+        ),
         model_topology=_parse_str_choice(
             payload.get("model_topology"),
             defaults.model_topology,
@@ -252,7 +397,7 @@ def load_self_play_config(path: str | Path | None) -> SelfPlayTrainingConfig:
             defaults.max_graph_context_edges,
             floor=1,
         ),
-        max_support_edges=_parse_int(payload.get("max_support_edges"), defaults.max_support_edges, floor=1),
+        max_support_edges=legacy_max_support_edges,
         answerer_judge_max_new_tokens=_parse_int(
             payload.get("answerer_judge_max_new_tokens"),
             defaults.answerer_judge_max_new_tokens,
@@ -262,6 +407,7 @@ def load_self_play_config(path: str | Path | None) -> SelfPlayTrainingConfig:
             _as_dict(payload.get("generator_reward_weights"))
         ),
         lora=lora_cfg,
+        swarm_v2=swarm_v2_cfg,
         generator_phase=generator_phase,
         answerer_phase=answerer_phase,
     )
