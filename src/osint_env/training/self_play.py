@@ -3,6 +3,7 @@ from __future__ import annotations
 import inspect
 import json
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 import random
@@ -44,6 +45,111 @@ class _RoundArtifacts:
     generator_dataset_path: str
     answerer_dataset_path: str
     generated_tasks_path: str
+
+
+def _is_true_env(value: str | None) -> bool:
+    token = str(value or "").strip().lower()
+    return token in {"1", "true", "yes", "y", "on"}
+
+
+def _resolve_hf_upload_token() -> str:
+    for env_name in ("HF_TOKEN", "HUGGINGFACE_HUB_TOKEN", "HUGGING_FACE_HUB_TOKEN"):
+        token = str(os.getenv(env_name, "")).strip()
+        if token:
+            return token
+    return ""
+
+
+def _slugify_hf_repo_name(value: str) -> str:
+    token = re.sub(r"[^a-zA-Z0-9._-]+", "-", str(value).strip().lower())
+    token = re.sub(r"-{2,}", "-", token).strip("-.")
+    return token
+
+
+def _default_hf_checkpoint_repo_id(run_dir: Path) -> str:
+    explicit = str(os.getenv("OSINT_HF_CHECKPOINT_REPO_ID", "")).strip()
+    if explicit:
+        return explicit
+
+    space_id = str(os.getenv("SPACE_ID") or os.getenv("HF_SPACE_ID") or "").strip()
+    if "/" not in space_id:
+        return ""
+
+    owner, _, space_name = space_id.partition("/")
+    suffix = str(os.getenv("OSINT_HF_CHECKPOINT_REPO_SUFFIX", "-checkpoints")).strip() or "-checkpoints"
+    repo_name = _slugify_hf_repo_name(f"{space_name}{suffix}") or "osint-self-play-checkpoints"
+    return f"{owner}/{repo_name}"
+
+
+def _hf_checkpoint_repo_prefix(run_dir: Path) -> str:
+    explicit = str(os.getenv("OSINT_HF_CHECKPOINT_PATH_PREFIX", "")).strip().strip("/")
+    if explicit:
+        return explicit
+    return _slugify_hf_repo_name(run_dir.name) or "self-play"
+
+
+def _hf_relative_repo_path(local_path: Path, run_dir: Path) -> str:
+    prefix = _hf_checkpoint_repo_prefix(run_dir)
+    try:
+        relative = local_path.relative_to(run_dir).as_posix()
+    except ValueError:
+        relative = local_path.name
+    return f"{prefix}/{relative}".strip("/")
+
+
+def _maybe_upload_folder_to_hf(local_dir: Path, run_dir: Path, commit_message: str) -> None:
+    repo_id = _default_hf_checkpoint_repo_id(run_dir)
+    token = _resolve_hf_upload_token()
+    if not repo_id or not token or not local_dir.exists():
+        return
+
+    try:
+        from huggingface_hub import HfApi
+    except ImportError:
+        print("[self_play][hf_upload] huggingface_hub missing; skipping checkpoint upload.")
+        return
+
+    repo_type = str(os.getenv("OSINT_HF_CHECKPOINT_REPO_TYPE", "model")).strip() or "model"
+    private = _is_true_env(os.getenv("OSINT_HF_CHECKPOINT_REPO_PRIVATE", "1"))
+    path_in_repo = _hf_relative_repo_path(local_dir, run_dir)
+    api = HfApi(token=token)
+    api.create_repo(repo_id=repo_id, repo_type=repo_type, private=private, exist_ok=True)
+    api.upload_folder(
+        folder_path=str(local_dir),
+        repo_id=repo_id,
+        repo_type=repo_type,
+        path_in_repo=path_in_repo,
+        commit_message=commit_message,
+        ignore_patterns=["*.pyc", "__pycache__", ".DS_Store"],
+    )
+    print(f"[self_play][hf_upload] uploaded {local_dir} -> {repo_type}:{repo_id}/{path_in_repo}")
+
+
+def _maybe_upload_file_to_hf(local_file: Path, run_dir: Path, commit_message: str) -> None:
+    repo_id = _default_hf_checkpoint_repo_id(run_dir)
+    token = _resolve_hf_upload_token()
+    if not repo_id or not token or not local_file.exists():
+        return
+
+    try:
+        from huggingface_hub import HfApi
+    except ImportError:
+        print("[self_play][hf_upload] huggingface_hub missing; skipping artifact upload.")
+        return
+
+    repo_type = str(os.getenv("OSINT_HF_CHECKPOINT_REPO_TYPE", "model")).strip() or "model"
+    private = _is_true_env(os.getenv("OSINT_HF_CHECKPOINT_REPO_PRIVATE", "1"))
+    path_in_repo = _hf_relative_repo_path(local_file, run_dir)
+    api = HfApi(token=token)
+    api.create_repo(repo_id=repo_id, repo_type=repo_type, private=private, exist_ok=True)
+    api.upload_file(
+        path_or_fileobj=str(local_file),
+        repo_id=repo_id,
+        repo_type=repo_type,
+        path_in_repo=path_in_repo,
+        commit_message=commit_message,
+    )
+    print(f"[self_play][hf_upload] uploaded {local_file} -> {repo_type}:{repo_id}/{path_in_repo}")
 
 
 
@@ -1489,6 +1595,11 @@ def _run_adversarial_self_play_swarm_v2(
 
     run_dir = Path(training_config.output_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
+    checkpoint_repo_id = _default_hf_checkpoint_repo_id(run_dir)
+    if checkpoint_repo_id and _resolve_hf_upload_token():
+        print(f"[self_play][hf_upload] checkpoint uploads enabled -> {checkpoint_repo_id}")
+    else:
+        print("[self_play][hf_upload] checkpoint uploads disabled; set HF token and/or OSINT_HF_CHECKPOINT_REPO_ID.")
 
     env = OSINTEnvironment(env_config, llm=build_llm_client(env_config.llm))
     seed_tasks = list(env.tasks)
@@ -1566,6 +1677,11 @@ def _run_adversarial_self_play_swarm_v2(
                     report_to=answerer_pre_report_to,
                     run_name=answerer_pre_run_name,
                 )
+                _maybe_upload_folder_to_hf(
+                    round_dir / f"{training_config.answerer_phase.output_subdir}_pre",
+                    run_dir,
+                    f"Upload answerer-pre checkpoints for round {round_index:03d}",
+                )
                 answerer_model = str(answerer_pre_train_result["model_path"])
                 if topology == "shared":
                     generator_model = answerer_model
@@ -1613,6 +1729,11 @@ def _run_adversarial_self_play_swarm_v2(
                 lora=training_config.lora,
                 report_to=generator_report_to,
                 run_name=generator_run_name,
+            )
+            _maybe_upload_folder_to_hf(
+                round_dir / training_config.generator_phase.output_subdir,
+                run_dir,
+                f"Upload generator checkpoints for round {round_index:03d}",
             )
             generator_model = str(generator_train_result["model_path"])
             if topology == "shared":
@@ -1719,6 +1840,11 @@ def _run_adversarial_self_play_swarm_v2(
                 report_to=answerer_report_to,
                 run_name=answerer_run_name,
             )
+            _maybe_upload_folder_to_hf(
+                round_dir / training_config.answerer_phase.output_subdir,
+                run_dir,
+                f"Upload answerer checkpoints for round {round_index:03d}",
+            )
             answerer_model = str(answerer_train_result["model_path"])
             if topology == "shared":
                 generator_model = answerer_model
@@ -1790,6 +1916,8 @@ def _run_adversarial_self_play_swarm_v2(
     summary_path = run_dir / "self_play_summary.json"
     summary_path.write_text(json.dumps(final_payload, indent=2, sort_keys=True), encoding="utf-8")
     final_payload["summary_path"] = str(summary_path)
+    _maybe_upload_file_to_hf(summary_path, run_dir, "Upload self-play summary")
+    _maybe_upload_file_to_hf(run_dir / "post_training_evaluation.json", run_dir, "Upload post-training evaluation")
     return final_payload
 
 
@@ -1813,6 +1941,11 @@ def run_adversarial_self_play(
 
     run_dir = Path(training_config.output_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
+    checkpoint_repo_id = _default_hf_checkpoint_repo_id(run_dir)
+    if checkpoint_repo_id and _resolve_hf_upload_token():
+        print(f"[self_play][hf_upload] checkpoint uploads enabled -> {checkpoint_repo_id}")
+    else:
+        print("[self_play][hf_upload] checkpoint uploads disabled; set HF token and/or OSINT_HF_CHECKPOINT_REPO_ID.")
 
     env = OSINTEnvironment(env_config, llm=build_llm_client(env_config.llm))
     seed_tasks = list(env.tasks)
@@ -1878,6 +2011,11 @@ def run_adversarial_self_play(
                     report_to=answerer_pre_report_to,
                     run_name=answerer_pre_run_name,
                 )
+                _maybe_upload_folder_to_hf(
+                    round_dir / f"{training_config.answerer_phase.output_subdir}_pre",
+                    run_dir,
+                    f"Upload answerer-pre checkpoints for round {round_index:03d}",
+                )
                 answerer_model = str(answerer_pre_train_result["model_path"])
                 if topology == "shared":
                     generator_model = answerer_model
@@ -1920,6 +2058,11 @@ def run_adversarial_self_play(
                 lora=training_config.lora,
                 report_to=generator_report_to,
                 run_name=generator_run_name,
+            )
+            _maybe_upload_folder_to_hf(
+                round_dir / training_config.generator_phase.output_subdir,
+                run_dir,
+                f"Upload generator checkpoints for round {round_index:03d}",
             )
             generator_model = str(generator_train_result["model_path"])
             if topology == "shared":
@@ -1992,6 +2135,11 @@ def run_adversarial_self_play(
                 lora=training_config.lora,
                 report_to=answerer_report_to,
                 run_name=answerer_run_name,
+            )
+            _maybe_upload_folder_to_hf(
+                round_dir / training_config.answerer_phase.output_subdir,
+                run_dir,
+                f"Upload answerer checkpoints for round {round_index:03d}",
             )
             answerer_model = str(answerer_train_result["model_path"])
             if topology == "shared":
@@ -2067,5 +2215,7 @@ def run_adversarial_self_play(
     summary_path = run_dir / "self_play_summary.json"
     summary_path.write_text(json.dumps(final_payload, indent=2, sort_keys=True), encoding="utf-8")
     final_payload["summary_path"] = str(summary_path)
+    _maybe_upload_file_to_hf(summary_path, run_dir, "Upload self-play summary")
+    _maybe_upload_file_to_hf(run_dir / "post_training_evaluation.json", run_dir, "Upload post-training evaluation")
 
     return final_payload

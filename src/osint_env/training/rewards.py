@@ -953,7 +953,7 @@ class GeneratorRewardFunction:
         context_pressure = self._context_pressure_score(validation_result)
         parl_parallel, parl_finish = self._parl_scores(candidate)
         hardness_component = max(0.0, min(1.0, (hardness + 0.4) / 1.4))
-        consistency_component = max( 
+        consistency_component = max(
             0.0,
             min(
                 1.0,

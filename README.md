@@ -180,7 +180,7 @@ For a standalone Linux server or SSH box, there is also a wrapper script that ac
 VENV_PATH="$HOME/arl" \
 INSTALL_TRAIN_DEPS=1 \
 TRAIN_ENV_CONFIG_PATH="config/shared_config.json" \
-TRAIN_SELF_PLAY_CONFIG_PATH="config/self_play_training_hf_a10g_smoke.json" \
+TRAIN_SELF_PLAY_CONFIG_PATH="config/self_play_training_hf_l40s_full.json" \
 TRAIN_SELF_PLAY_OUTPUT_DIR="artifacts/self_play_server" \
 bash scripts/train_self_play_standalone.sh
 ```
@@ -194,12 +194,12 @@ Useful overrides for the standalone script:
 
 The training config also supports `"model_topology": "dual"|"shared"`, `"phase_schedule": "generator_answerer"|"answerer_generator_answerer"`, `"tuning_mode": "full"|"lora"`, and `"canonical_graph_mode": "generate"|"fixed"` so you can switch between two-model vs single-model self-play, full fine-tuning vs LoRA adapters, and whether canonical graph structure is generated each round or kept fixed while training question/answer behavior.
 
-### Hugging Face Job A10G Run (Separate From The Space)
+### Hugging Face Job L40S Run (Separate From The Space)
 
-For a short verification run (enough to confirm W&B logging before scaling up), use:
+For a budgeted full fine-tuning run on `l40s` hardware, use:
 
 ```bash
-osint-env train-self-play --config config/shared_config.json --train-config config/self_play_training_hf_a10g_smoke.json
+osint-env train-self-play --config config/shared_config.json --train-config config/self_play_training_hf_l40s_full.json
 ```
 
 This config:
@@ -207,8 +207,8 @@ This config:
 - uses `Qwen/Qwen2.5-0.5B-Instruct`
 - enables W&B reporting (`wandb_enabled: true`)
 - uses `pipeline_mode: "swarm_v2"` with `canonical_graph_mode: "fixed"` to keep canonical graph candidates stable while training question/answer behavior
-- keeps training intentionally short (`rounds=2`, `max_steps=50` per phase)
-- uses full fine-tuning plus fused AdamW, bf16/tf32, larger generation batches, and extra dataloader workers to make better use of an A10G
+- keeps the VRAM-heavy settings aligned with the smoke config while extending runtime (`rounds=6`, `max_steps=120` per phase)
+- uses full fine-tuning plus fused AdamW, bf16/tf32, larger generation batches, and extra dataloader workers to make better use of an L40S
 
 To enable canonical graph generation during swarm_v2 training, switch `"canonical_graph_mode"` to `"generate"` in the training config.
 
@@ -220,25 +220,29 @@ osint-env-launch-hf-job \
   --job-image "pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel" \
   --repo-url "https://github.com/your-org/meta-knowledge-graph.git" \
   --repo-ref "main" \
-  --flavor "a10g-small" \
+  --flavor "l40s" \
   --env-config "config/shared_config.json" \
-  --train-config "config/self_play_training_hf_a10g_smoke.json" \
+  --train-config "config/self_play_training_hf_l40s_full.json" \
   --output-bucket "your-hf-bucket" \
   --wait
 ```
 
-The launcher talks to the Hugging Face Jobs API through `huggingface_hub`, so the Space can remain on CPU while the training job runs on separate A10G compute.
+The launcher talks to the Hugging Face Jobs API through `huggingface_hub`, so the Space can remain on CPU while the training job runs on separate L40S compute.
 
 Optional Space startup wiring still exists if you want it:
 
 1. Keep the Space on CPU if it is serving inference/UI only.
-2. Set `RUN_SELF_PLAY_TRAINING=1` only if you intentionally want startup-time training inside the Space container.
+2. The startup script now defaults to running self-play on boot with the full L40S config.
 3. Optional overrides:
-   - `TRAIN_SELF_PLAY_CONFIG_PATH` (default: `config/self_play_training_hf_a10g_smoke.json`)
+   - `RUN_SELF_PLAY_TRAINING=0` to disable startup-time training
+   - `TRAIN_SELF_PLAY_CONFIG_PATH` (default: `config/self_play_training_hf_l40s_full.json`)
    - `TRAIN_ENV_CONFIG_PATH` (default: `config/shared_config.json`)
    - `TRAIN_SELF_PLAY_OUTPUT_DIR` to override where artifacts land
    - `RUN_SELF_PLAY_DRY_RUN=1` to test startup wiring without GRPO updates
    - `RUN_SELF_PLAY_BACKGROUND=1` to keep the API up while startup-time training runs
+   - `OSINT_HF_CHECKPOINT_REPO_ID` to force uploads into a specific HF model repo
+   - `OSINT_HF_CHECKPOINT_REPO_TYPE` to switch repo type (`model` by default)
+   - `OSINT_HF_CHECKPOINT_REPO_PRIVATE=0` to create/update a public checkpoint repo
    - `OSINT_TRAIN_STRICT_ASSERTS=1` to fail fast when reward variance, KL, loss, grad norms, or parameter updates stay zero
 
 W&B run naming is controlled by `wandb_run_name_prefix` and will emit phase-specific runs like `...-r001-generator` and `...-r001-answerer`.
