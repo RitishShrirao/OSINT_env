@@ -15,6 +15,7 @@ DRY_RUN_FLAG="${RUN_SELF_PLAY_DRY_RUN:-0}"
 
 if _is_true "$RUN_FLAG"; then
   echo "[space_start] RUN_SELF_PLAY_TRAINING enabled."
+  echo "[space_start] Training start: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
   echo "[space_start] Env config: ${ENV_CONFIG_PATH}"
   echo "[space_start] Train config: ${TRAIN_CONFIG_PATH}"
   if _is_true "$DRY_RUN_FLAG"; then
@@ -24,6 +25,8 @@ if _is_true "$RUN_FLAG"; then
     echo "[space_start] Running self-play training."
     osint-env train-self-play --config "${ENV_CONFIG_PATH}" --train-config "${TRAIN_CONFIG_PATH}"
   fi
+  echo "[space_start] Self-play command completed."
+  echo "[space_start] Training end: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 else
   echo "[space_start] RUN_SELF_PLAY_TRAINING disabled. Skipping self-play run."
 fi

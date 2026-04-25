@@ -441,6 +441,8 @@ def _train_grpo_phase(
             raise RuntimeError("Installed TRL version does not expose peft_config in GRPOTrainer.")
         trainer_kwargs["peft_config"] = _build_lora_config(lora)
 
+    phase_label = str(run_name).strip() or str(output_dir.name)
+    print(f"[self_play] Starting phase: {phase_label} rows={len(rows)} max_steps={phase.max_steps}")
     trainer = GRPOTrainer(**trainer_kwargs)
     train_output = trainer.train()
 
@@ -450,13 +452,18 @@ def _train_grpo_phase(
     global_step = int(getattr(train_output, "global_step", 0))
     training_loss = float(getattr(train_output, "training_loss", 0.0))
 
-    return {
+    result = {
         "model_path": str(final_dir),
         "global_step": global_step,
         "training_loss": training_loss,
         "train_rows": len(rows),
         "tuning_mode": str(tuning_mode).strip().lower() or "full",
     }
+    print(
+        "[self_play] Finished phase: "
+        f"{phase_label} global_step={global_step} training_loss={training_loss} output={final_dir}"
+    )
+    return result
 
 
 def _resolve_reporting(training_config: SelfPlayTrainingConfig, phase_name: str, round_index: int) -> tuple[list[str], str]:
