@@ -20,8 +20,9 @@ COPY --chown=user scripts $HOME/app/scripts
 COPY --chown=user server.py $HOME/app/server.py
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -e .
+    pip install --no-cache-dir -e ".[train]" && \
+    chmod +x $HOME/app/scripts/space_start.sh
 
 EXPOSE 7860
 
-CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT:-7860}"]
+CMD ["sh", "/home/user/app/scripts/space_start.sh"]
