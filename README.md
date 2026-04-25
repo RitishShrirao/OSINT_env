@@ -176,6 +176,59 @@ When you have compute and the train dependencies installed, remove `--dry-run` (
 
 The training config also supports `"model_topology": "dual"|"shared"`, `"phase_schedule": "generator_answerer"|"answerer_generator_answerer"`, and `"tuning_mode": "full"|"lora"` so you can switch between two-model vs single-model self-play and full fine-tuning vs LoRA adapters.
 
+### Reward Functions In Self-Play (Generator + Answerer)
+
+Self-play trains two policies with role-specific reward functions defined in `src/osint_env/training/rewards.py`.
+
+Generator reward (`GeneratorRewardFunction`) and answerer reward (`AnswererRewardFunction`) are both returned to GRPO as scalar scores per completion, and both are clipped to a stable range before optimization.
+
+#### Generator Reward (Task-Proposing Agent)
+
+The generator is rewarded for producing valid, grounded, diverse, and hard tasks.
+
+In `legacy` pipeline mode, the reward is a weighted sum:
+
+- `validity`: checks non-empty `question`, non-empty `answer`, and bounded `supporting_edges`.
+- `hardness`: uses a frozen answerer judge; reward is higher when the judge gets the generated question wrong.
+- `diversity`: penalizes near-duplicate questions via token-level Jaccard similarity against prior generated questions.
+- `consistency`: checks that support edges exist in the canonical graph and that the answer/question are graph-grounded.
+
+Default weights (configurable through `generator_reward_weights` in training config):
+
+- `validity`: `0.35`
+- `hardness`: `0.45`
+- `diversity`: `0.10`
+- `consistency`: `0.10`
+
+In `swarm_v2` pipeline mode, generation uses strict replay/validation first, then a structured reward:
+
+- Hard-gated validation via `SwarmV2ReplayValidator` (invalid samples get a fixed negative reward path).
+- Reward components include validity, derivability/replayability, hardness, swarm diversity, shared-context pressure targeting, and PARL-inspired orchestration bonuses (`parallel` + `finish`).
+- Invalid or non-replayable candidates are penalized before the weighted positive terms are applied.
+
+#### Answerer Reward (Question-Solving Agent)
+
+The answerer reward wraps environment-native grading so train-time behavior matches benchmark-time incentives.
+
+For each completion, `AnswererRewardFunction`:
+
+- extracts the predicted answer from completion text/JSON,
+- reconstructs a transient `TaskInstance` from row fields (`question`, `answer`, `supporting_edges_json`, `difficulty`),
+- optionally extracts predicted supporting edges from JSON or text,
+- calls `compute_answer_reward(...)` from `src/osint_env/env/reward.py`.
+
+`compute_answer_reward` combines exact answer quality with graph-utility shaping:
+
+- output format validity and exact correctness,
+- knowledge-carrier and knowledge-indexing utility,
+- connectivity and supporting-edge F1 against task support edges,
+- efficiency and compactness penalties,
+- relation/entity informativeness and repetition control (difficulty-dependent).
+
+Difficulty controls (`easy`, `medium`, `hard`) are preserved during training exactly as in the environment scorer, so the answerer sees the same tiered reward profile used in evaluation.
+
+In `swarm_v2`, the answerer reward also adds PARL-style orchestration credit (spawn/finish behavior) on top of base answer reward when orchestrator telemetry is present in the completion payload.
+
 Detailed design notes are in `docs/adversarial_self_play.md`.
 
 ## OpenAI Baseline
