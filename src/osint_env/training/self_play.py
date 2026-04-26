@@ -179,6 +179,80 @@ def _require_training_stack() -> tuple[Any, Any, Any]:
     return Dataset, GRPOConfig, GRPOTrainer
 
 
+def _build_hf_checkpoint_upload_callback(output_dir: Path, run_dir: Path) -> Any:
+    """Return a Trainer callback that uploads each fresh ``checkpoint-*`` to
+    HF Hub the moment Transformers' Trainer writes it to disk. Returns None
+    if uploads are disabled or transformers is unavailable.
+
+    This pairs with ``_maybe_download_phase_checkpoints_from_hf`` so a Space
+    that gets restarted mid-phase can pull the most recent checkpoint and
+    warm-start instead of starting from step 0. Honors the same env vars as
+    the post-phase upload helper:
+    - ``OSINT_HF_CHECKPOINT_REPO_ID`` (or auto-derived from ``SPACE_ID``)
+    - ``OSINT_HF_CHECKPOINT_REPO_TYPE`` (default ``model``)
+    - ``OSINT_HF_UPLOAD_ON_SAVE`` (default ``1``; set to 0 to disable)
+    """
+    if not _is_true_env(os.getenv("OSINT_HF_UPLOAD_ON_SAVE", "1")):
+        return None
+
+    repo_id = _default_hf_checkpoint_repo_id(run_dir)
+    token = _resolve_hf_upload_token()
+    if not repo_id or not token:
+        return None
+
+    try:
+        from transformers import TrainerCallback
+    except ImportError:
+        print(
+            "[self_play][hf_upload] transformers.TrainerCallback unavailable; "
+            "intermediate checkpoint uploads disabled.",
+            flush=True,
+        )
+        return None
+
+    captured_output_dir = output_dir
+    captured_run_dir = run_dir
+
+    class _HfHubCheckpointUploadCallback(TrainerCallback):  # type: ignore[misc]
+        """Upload the latest local ``checkpoint-*`` directory after each save."""
+
+        def __init__(self) -> None:
+            self._last_uploaded_step: int | None = None
+            self._failures = 0
+
+        def on_save(self, args: Any, state: Any, control: Any, **kwargs: Any) -> Any:  # noqa: D401
+            try:
+                latest = _latest_local_checkpoint(captured_output_dir)
+                if latest is None:
+                    return control
+                step = int(latest.name.split("-", 1)[1]) if "-" in latest.name else 0
+                if self._last_uploaded_step is not None and step <= self._last_uploaded_step:
+                    return control
+                print(
+                    f"[self_play][hf_upload] on_save uploading {latest.name} "
+                    f"to HF Hub (phase_dir={captured_output_dir.name}, step={step}).",
+                    flush=True,
+                )
+                _maybe_upload_folder_to_hf(
+                    latest,
+                    captured_run_dir,
+                    f"Intermediate checkpoint upload step={step} ({captured_output_dir.name})",
+                )
+                self._last_uploaded_step = step
+                self._failures = 0
+            except Exception as exc:  # noqa: BLE001
+                self._failures += 1
+                print(
+                    f"[self_play][hf_upload] on_save upload failed "
+                    f"({type(exc).__name__}: {exc}). failures={self._failures}. "
+                    "Continuing training; next save will retry.",
+                    flush=True,
+                )
+            return control
+
+    return _HfHubCheckpointUploadCallback()
+
+
 def _latest_local_checkpoint(output_dir: Path) -> Path | None:
     if not output_dir.exists():
         return None
@@ -917,6 +991,15 @@ def _train_grpo_phase(
         "reward_funcs": _coerce_named_reward_func(reward_function),
         "train_dataset": dataset,
     }
+
+    upload_callback = _build_hf_checkpoint_upload_callback(output_dir, run_dir_for_resume)
+    if upload_callback is not None:
+        trainer_kwargs["callbacks"] = [upload_callback]
+        print(
+            f"[self_play][hf_upload] phase={phase_label} intermediate checkpoint "
+            f"uploads enabled (every save_steps={phase.save_steps}).",
+            flush=True,
+        )
 
     if str(tuning_mode).strip().lower() == "lora":
         trainer_signature = inspect.signature(GRPOTrainer.__init__)
