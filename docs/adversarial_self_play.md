@@ -122,6 +122,8 @@ Per round and phase you will now find:
 - `self_play_summary.json`: top-level run summary.
 - `post_training_evaluation.json`: generated-question evaluation written after training.
 
+If `HF_TOKEN` is available, the trainer can also mirror phase folders and summary artifacts to a Hugging Face repo. By default it derives a repo on the same account as the Space using `SPACE_ID`/`HF_SPACE_ID` and a `-checkpoints` suffix. You can override that with `OSINT_HF_CHECKPOINT_REPO_ID`.
+
 ## Compute Mode
 
 When compute is available:
@@ -142,7 +144,7 @@ Example:
 VENV_PATH="$HOME/arl" \
 INSTALL_TRAIN_DEPS=1 \
 TRAIN_ENV_CONFIG_PATH="config/shared_config.json" \
-TRAIN_SELF_PLAY_CONFIG_PATH="config/self_play_training_hf_a10g_smoke.json" \
+TRAIN_SELF_PLAY_CONFIG_PATH="config/self_play_training_hf_l40s_full.json" \
 TRAIN_SELF_PLAY_OUTPUT_DIR="artifacts/self_play_server" \
 bash scripts/train_self_play_standalone.sh
 ```

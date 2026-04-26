@@ -9,9 +9,9 @@ _is_true() {
 }
 
 ENV_CONFIG_PATH="${TRAIN_ENV_CONFIG_PATH:-config/shared_config.json}"
-TRAIN_CONFIG_PATH="${TRAIN_SELF_PLAY_CONFIG_PATH:-config/self_play_training_hf_a10g_smoke.json}"
+TRAIN_CONFIG_PATH="${TRAIN_SELF_PLAY_CONFIG_PATH:-config/self_play_training_hf_l40s_full.json}"
 TRAIN_OUTPUT_DIR="${TRAIN_SELF_PLAY_OUTPUT_DIR:-}"
-RUN_FLAG="${RUN_SELF_PLAY_TRAINING:-0}"
+RUN_FLAG="${RUN_SELF_PLAY_TRAINING:-1}"
 DRY_RUN_FLAG="${RUN_SELF_PLAY_DRY_RUN:-0}"
 BACKGROUND_FLAG="${RUN_SELF_PLAY_BACKGROUND:-1}"
 
@@ -43,6 +43,9 @@ if _is_true "$RUN_FLAG"; then
   echo "[space_start] Train config: ${TRAIN_CONFIG_PATH}"
   if [ -n "${TRAIN_OUTPUT_DIR}" ]; then
     echo "[space_start] Train output dir: ${TRAIN_OUTPUT_DIR}"
+  fi
+  if [ -n "${OSINT_HF_CHECKPOINT_REPO_ID:-}" ]; then
+    echo "[space_start] HF checkpoint repo: ${OSINT_HF_CHECKPOINT_REPO_ID}"
   fi
   if _is_true "$BACKGROUND_FLAG"; then
     echo "[space_start] Launching self-play in background so the Space API can stay online."
