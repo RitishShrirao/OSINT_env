@@ -192,6 +192,8 @@ Useful overrides for the standalone script:
 - `RUN_SELF_PLAY_DRY_RUN=1` to materialize artifacts without GRPO updates
 - `TRAIN_SETUP_COMMAND='python -m pip install flash-attn --no-build-isolation'` for host-specific extras
 
+If you want a Colab-native path instead, use [notebooks/self_play_training_colab.ipynb](notebooks/self_play_training_colab.ipynb). It clones the repo, installs `.[train]`, reads `HF_TOKEN` and optional `WANDB_API_KEY` from Colab Secrets, writes Colab-tuned config files, and runs the same self-play Python entrypoint as the CLI.
+
 The training config also supports `"model_topology": "dual"|"shared"`, `"phase_schedule": "generator_answerer"|"answerer_generator_answerer"`, `"tuning_mode": "full"|"lora"`, and `"canonical_graph_mode": "generate"|"fixed"` so you can switch between two-model vs single-model self-play, full fine-tuning vs LoRA adapters, and whether canonical graph structure is generated each round or kept fixed while training question/answer behavior.
 
 ### Hugging Face Job L40S Run (Separate From The Space)
