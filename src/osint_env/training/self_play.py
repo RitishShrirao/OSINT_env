@@ -179,6 +179,120 @@ def _require_training_stack() -> tuple[Any, Any, Any]:
     return Dataset, GRPOConfig, GRPOTrainer
 
 
+def _latest_local_checkpoint(output_dir: Path) -> Path | None:
+    if not output_dir.exists():
+        return None
+    candidates: list[tuple[int, Path]] = []
+    for path in output_dir.glob("checkpoint-*"):
+        if not path.is_dir():
+            continue
+        suffix = path.name.split("-", 1)[-1]
+        try:
+            step = int(suffix)
+        except ValueError:
+            continue
+        candidates.append((step, path))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda item: item[0])
+    return candidates[-1][1]
+
+
+def _final_model_already_present(output_dir: Path) -> bool:
+    final_dir = output_dir / "final_model"
+    if not final_dir.is_dir():
+        return False
+    safetensors = list(final_dir.glob("*.safetensors"))
+    legacy_bin = list(final_dir.glob("pytorch_model*.bin"))
+    return bool(safetensors or legacy_bin)
+
+
+def _maybe_download_phase_checkpoints_from_hf(output_dir: Path, run_dir: Path) -> Path | None:
+    """If no local checkpoint exists, try to recover the latest checkpoint
+    for this phase from the HF Hub repo we already upload to. Returns the
+    local path of the restored ``checkpoint-*`` directory, or None.
+
+    Designed to make Space restarts non-destructive: training state is
+    pushed to ``OSINT_HF_CHECKPOINT_REPO_ID`` after every phase, so on a
+    fresh container we can pull it back and resume.
+    """
+    if _latest_local_checkpoint(output_dir) is not None:
+        return _latest_local_checkpoint(output_dir)
+    repo_id = _default_hf_checkpoint_repo_id(run_dir)
+    token = _resolve_hf_upload_token()
+    if not repo_id or not token:
+        return None
+
+    try:
+        from huggingface_hub import HfApi, snapshot_download
+    except ImportError:
+        return None
+
+    repo_type = str(os.getenv("OSINT_HF_CHECKPOINT_REPO_TYPE", "model")).strip() or "model"
+    api = HfApi(token=token)
+    try:
+        files = list(api.list_repo_files(repo_id=repo_id, repo_type=repo_type))
+    except Exception as exc:  # noqa: BLE001
+        print(
+            f"[self_play][resume] could not list files in {repo_id}: "
+            f"{type(exc).__name__}: {exc}",
+            flush=True,
+        )
+        return None
+
+    phase_prefix = _hf_relative_repo_path(output_dir, run_dir)
+    phase_prefix_clean = phase_prefix.strip("/") + "/"
+    candidate_steps: dict[int, list[str]] = {}
+    for remote_path in files:
+        if not remote_path.startswith(phase_prefix_clean):
+            continue
+        relative = remote_path[len(phase_prefix_clean) :]
+        parts = relative.split("/", 1)
+        if len(parts) < 2 or not parts[0].startswith("checkpoint-"):
+            continue
+        try:
+            step = int(parts[0].split("-", 1)[1])
+        except ValueError:
+            continue
+        candidate_steps.setdefault(step, []).append(remote_path)
+
+    if not candidate_steps:
+        return None
+
+    best_step = max(candidate_steps.keys())
+    target_local_dir = output_dir / f"checkpoint-{best_step}"
+    target_local_dir.mkdir(parents=True, exist_ok=True)
+    print(
+        f"[self_play][resume] downloading phase checkpoint from HF Hub: "
+        f"repo={repo_id} prefix={phase_prefix_clean}checkpoint-{best_step} "
+        f"-> {target_local_dir}",
+        flush=True,
+    )
+    try:
+        snapshot_download(
+            repo_id=repo_id,
+            repo_type=repo_type,
+            local_dir=str(output_dir),
+            allow_patterns=[f"{phase_prefix_clean}checkpoint-{best_step}/*"],
+            token=token,
+        )
+        downloaded_root = output_dir / phase_prefix_clean.rstrip("/") / f"checkpoint-{best_step}"
+        if downloaded_root.exists() and downloaded_root != target_local_dir:
+            for item in downloaded_root.iterdir():
+                dest = target_local_dir / item.name
+                if dest.exists():
+                    continue
+                item.replace(dest)
+        return target_local_dir if target_local_dir.exists() else None
+    except Exception as exc:  # noqa: BLE001
+        print(
+            f"[self_play][resume] failed to download checkpoint from HF Hub: "
+            f"{type(exc).__name__}: {exc}",
+            flush=True,
+        )
+        return None
+
+
 
 def _task_to_edge_json(task: TaskInstance) -> str:
     payload = [
@@ -731,6 +845,63 @@ def _train_grpo_phase(
     Dataset, GRPOConfig, GRPOTrainer = _require_training_stack()
 
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    phase_label = str(run_name).strip() or str(output_dir.name)
+    reward_class_name = type(reward_function).__name__
+
+    # Output layout: <run_dir>/round_NNN/<phase_subdir>. Match the run_dir
+    # used by the corresponding HF upload helpers so resume paths line up
+    # with where checkpoints were written.
+    run_dir_for_resume = output_dir.parents[1] if len(output_dir.parents) >= 2 else output_dir.parent
+
+    if _final_model_already_present(output_dir):
+        final_dir = output_dir / "final_model"
+        print(
+            f"[self_play][resume] phase={phase_label} already has final_model at {final_dir}. "
+            f"Skipping retrain on Space restart.",
+            flush=True,
+        )
+        checkpoint_dirs = [str(path) for path in sorted(output_dir.glob("checkpoint-*")) if path.is_dir()]
+        return {
+            "model_path": str(final_dir),
+            "final_model_path": str(final_dir),
+            "phase_output_dir": str(output_dir),
+            "checkpoint_dirs": checkpoint_dirs,
+            "global_step": int(getattr(phase, "max_steps", 0) or 0),
+            "training_loss": 0.0,
+            "train_rows": len(rows),
+            "tuning_mode": str(tuning_mode).strip().lower() or "full",
+            "is_full_finetune": str(tuning_mode).strip().lower() != "lora",
+            "resumed_skipped": True,
+        }
+
+    resume_checkpoint = _latest_local_checkpoint(output_dir)
+    resume_is_full_state = bool(
+        resume_checkpoint is not None
+        and (resume_checkpoint / "optimizer.pt").exists()
+        and (resume_checkpoint / "trainer_state.json").exists()
+    )
+    if resume_checkpoint is None:
+        downloaded = _maybe_download_phase_checkpoints_from_hf(output_dir, run_dir_for_resume)
+        if downloaded is not None:
+            resume_checkpoint = downloaded
+            resume_is_full_state = bool(
+                (downloaded / "optimizer.pt").exists()
+                and (downloaded / "trainer_state.json").exists()
+            )
+
+    # If the resume checkpoint is weights-only (e.g. recovered from HF Hub
+    # which intentionally drops optimizer state to keep uploads small),
+    # warm-start the model from those weights and start a fresh trainer
+    # state. Better than restarting from the base model.
+    warm_start_from: Path | None = None
+    if resume_checkpoint is not None and not resume_is_full_state:
+        warm_start_from = resume_checkpoint
+        resume_checkpoint = None
+
+    if warm_start_from is not None:
+        model_name_or_path = str(warm_start_from)
+
     dataset = Dataset.from_list(rows)
     args = _safe_build_grpo_config(
         phase=phase,
@@ -753,8 +924,6 @@ def _train_grpo_phase(
             raise RuntimeError("Installed TRL version does not expose peft_config in GRPOTrainer.")
         trainer_kwargs["peft_config"] = _build_lora_config(lora)
 
-    phase_label = str(run_name).strip() or str(output_dir.name)
-    reward_class_name = type(reward_function).__name__
     print(
         f"[self_play] Starting phase: {phase_label} rows={len(rows)} "
         f"max_steps={phase.max_steps}",
@@ -769,6 +938,17 @@ def _train_grpo_phase(
         f"per_device_train_batch_size={phase.per_device_train_batch_size}",
         flush=True,
     )
+    if resume_checkpoint is not None:
+        print(
+            f"[self_play][resume] phase={phase_label} resuming (full state) from checkpoint={resume_checkpoint}",
+            flush=True,
+        )
+    elif warm_start_from is not None:
+        print(
+            f"[self_play][resume] phase={phase_label} warm-starting from weights only at {warm_start_from} "
+            f"(no optimizer state available)",
+            flush=True,
+        )
     strict_asserts = str(os.getenv("OSINT_TRAIN_STRICT_ASSERTS", "")).strip().lower() in {"1", "true", "yes", "on"}
     trainer = GRPOTrainer(**trainer_kwargs)
     tracked_params = [
@@ -780,7 +960,10 @@ def _train_grpo_phase(
         name: float(param.detach().float().abs().mean().item())
         for name, param in tracked_params
     }
-    train_output = trainer.train()
+    if resume_checkpoint is not None:
+        train_output = trainer.train(resume_from_checkpoint=str(resume_checkpoint))
+    else:
+        train_output = trainer.train()
 
     final_dir = output_dir / "final_model"
     trainer.save_model(str(final_dir))
