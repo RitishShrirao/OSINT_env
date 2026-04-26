@@ -135,20 +135,20 @@ In the self-play setting, the generator and solver have different reward functio
 
 For the **generator**, the training reward is a weighted objective over four core terms:
 
-\[
+$$
 R_{\text{gen}} =
-w_v R_{\text{validity}} +
-w_h R_{\text{hardness}} +
-w_d R_{\text{diversity}} +
-w_c R_{\text{consistency}}
-\]
+w_v\, R_{\text{validity}} +
+w_h\, R_{\text{hardness}} +
+w_d\, R_{\text{diversity}} +
+w_c\, R_{\text{consistency}}
+$$
 
 where:
 
-- \(R_{\text{validity}}\) checks that the proposed task is well-formed and bounded
-- \(R_{\text{hardness}}\) is higher when the frozen solver fails the generated task
-- \(R_{\text{diversity}}\) penalizes near-duplicate generations
-- \(R_{\text{consistency}}\) rewards graph-grounded, replayable tasks
+- $R_{\text{validity}}$ checks that the proposed task is well-formed and bounded
+- $R_{\text{hardness}}$ is higher when the frozen solver fails the generated task
+- $R_{\text{diversity}}$ penalizes near-duplicate generations
+- $R_{\text{consistency}}$ rewards graph-grounded, replayable tasks
 
 In `swarm_v2`, this goes one step further: invalid or non-replayable generations are hard-gated by validation, and the reward then emphasizes replayability, hardness, swarm diversity, and shared-context pressure. This is what keeps the generator from gaming training by emitting flashy but unusable tasks.
 
@@ -156,9 +156,9 @@ For the **solver**, the training reward reuses the environment-native answer rew
 
 The PARL-style orchestration term follows the project’s Kimi-inspired formulation:
 
-\[
-r_{\text{PARL}} = r_{\text{perf}} + \lambda_1 r_{\text{parallel}} + \lambda_2 r_{\text{finish}} + r_{\text{latency}}
-\]
+$$
+r_{\text{PARL}} = r_{\text{perf}} + \lambda_1\, r_{\text{parallel}} + \lambda_2\, r_{\text{finish}} + r_{\text{latency}}
+$$
 
 Therefore the final rewards having the components:
 
