@@ -309,20 +309,10 @@ app = FastAPI(title="OSINT OpenEnv Space", version="0.1.0")
 @app.get("/", response_class=HTMLResponse)
 def home() -> str:
     snapshot = _space_snapshot()
-    summary = snapshot["summary"]
-    compare_dashboards = snapshot.get("compare_dashboard_paths", {})
-    compare_links_html = ""
-    if compare_dashboards:
-        post_training_link = ""
-        pre_training_link = ""
-        if compare_dashboards.get("post_training"):
-            post_training_link = '<a class="button" href="/dashboard/post-training">Post-Training Dashboard</a>'
-        if compare_dashboards.get("pre_training"):
-            pre_training_link = '<a class="button secondary" href="/dashboard/pre-training">Pre-Training Dashboard</a>'
-        compare_links_html = f"<div style=\"margin-top:10px\">{post_training_link}{pre_training_link}</div>"
-    difficulty_html = "".join(
-        f"<li><strong>{level}</strong>: {count}</li>"
-        for level, count in sorted(snapshot["difficulty_counts"].items())
+    post_training_link = '<a class="button" href="/dashboard/post-training">Post-Training Dashboard</a>'
+    pre_training_link = '<a class="button secondary" href="/dashboard/pre-training">Pre-Training Dashboard</a>'
+    compare_links_html = (
+        f"<div style=\"margin-top:10px\">{post_training_link}{pre_training_link}</div>"
     )
     task_type_html = "".join(f"<li>{task_type}</li>" for task_type in snapshot["task_types"])
     return f"""<!doctype html>
@@ -354,7 +344,7 @@ def home() -> str:
     .wrap {{ max-width: 1120px; margin: 0 auto; padding: 24px; }}
     .hero, .grid {{ display: grid; gap: 16px; }}
     .hero {{ grid-template-columns: 1.5fr 1fr; }}
-    .grid {{ grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 16px; }}
+    .grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 16px; }}
     .card {{
       background: var(--card);
       border: 1px solid var(--line);
@@ -398,24 +388,13 @@ def home() -> str:
 </head>
 <body>
   <div class="wrap">
-    <div class="hero">
-      <section class="card">
-        <h1>OSINT OpenEnv Space</h1>
-        <p class="muted">A containerized OpenEnv-compatible benchmark for synthetic OSINT reasoning over profiles, forum threads, posts, aliases, organizations, locations, and event links.</p>
-        <p>The Space boots with the fixed-level benchmark so visitors get a stable environment snapshot instead of a different graph every restart.</p>
-        <a class="link" href="/api/environment">Environment JSON</a>
-        {compare_links_html}
-      </section>
-      <section class="card">
-        <h2>Included Snapshot</h2>
-        <div class="stats">
-          <div class="stat"><div class="k">Tasks</div><div class="v">{snapshot["task_count"]}</div></div>
-          <div class="stat"><div class="k">Provider</div><div class="v">{snapshot["config"]["llm_provider"]}</div></div>
-          <div class="stat"><div class="k">Score</div><div class="v">{summary["leaderboard_score"]:.3f}</div></div>
-          <div class="stat"><div class="k">Success</div><div class="v">{summary["task_success_rate"]:.3f}</div></div>
-        </div>
-      </section>
-    </div>
+    <section class="card">
+      <h1>OSINT OpenEnv Space</h1>
+      <p class="muted">A containerized OpenEnv-compatible benchmark for synthetic OSINT reasoning over profiles, forum threads, posts, aliases, organizations, locations, and event links.</p>
+      <p>The Space boots with the fixed-level benchmark so visitors get a stable environment snapshot instead of a different graph every restart.</p>
+      <a class="link" href="/api/environment">Environment JSON</a>
+      {compare_links_html}
+    </section>
 
     <div class="grid">
       <section class="card">
@@ -425,10 +404,6 @@ def home() -> str:
           <li><code>ADD_EDGE</code>: add a hypothesized relation to the working graph.</li>
           <li><code>ANSWER</code>: submit the final node id answer.</li>
         </ul>
-      </section>
-      <section class="card">
-        <h2>Difficulty Mix</h2>
-        <ul>{difficulty_html}</ul>
       </section>
       <section class="card">
         <h2>Task Families</h2>
