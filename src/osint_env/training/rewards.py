@@ -1094,6 +1094,22 @@ class AnswererRewardFunction:
         self.reward_model = build_reward_model(graph)
         self.pipeline_mode = str(pipeline_mode).strip().lower() or "legacy"
         self.parl_max_parallel_hint = max(0, int(parl_max_parallel_hint or 0))
+        # Mirror GeneratorRewardFunction observability: TRL's GRPOTrainer
+        # already logs `rewards/AnswererRewardFunction/{mean,std}` to W&B
+        # at every `logging_steps`, but we ALSO publish a per-batch debug
+        # snapshot so the [reward_debug][last_batch] line appears in stdout
+        # for the answerer phase, exactly like it does for the generator.
+        self._debug_batches_seen = 0
+        self._debug_reward_window: list[float] = []
+        self._debug_last_batch: dict[str, Any] = {}
+
+    @staticmethod
+    def _std(values: list[float]) -> float:
+        if len(values) <= 1:
+            return 0.0
+        mean = sum(values) / len(values)
+        variance = sum((value - mean) ** 2 for value in values) / len(values)
+        return variance ** 0.5
 
     @staticmethod
     def _parse_support_edges(value: Any) -> list[Edge]:
@@ -1172,6 +1188,8 @@ class AnswererRewardFunction:
         **kwargs: Any,
     ) -> list[float]:
         rewards: list[float] = []
+        success_count = 0
+        graph_f1_sum = 0.0
 
         for idx, completion in enumerate(completions):
             completion_text = decode_completion_text(completion)
@@ -1204,6 +1222,45 @@ class AnswererRewardFunction:
                 model=self.reward_model,
                 difficulty=difficulty_level,
             )
-            rewards.append(self._extract_orchestrator_reward(completion_text, breakdown.total))
+            final_reward = self._extract_orchestrator_reward(completion_text, breakdown.total)
+            rewards.append(final_reward)
+
+            if predicted_answer and target_answer and normalize_answer(predicted_answer) == target_answer:
+                success_count += 1
+            graph_f1_sum += float(getattr(breakdown, "graph_f1", 0.0) or 0.0)
+
+        # Mirror GeneratorRewardFunction debug surface so the answerer reward
+        # is visible to the same downstream tooling (printed by
+        # `_train_grpo_phase` and forwarded to W&B by TRL).
+        self._debug_batches_seen += 1
+        self._debug_reward_window.extend(rewards)
+        self._debug_reward_window = self._debug_reward_window[-512:]
+        batch_size = max(1, len(rewards))
+        batch_mean = float(sum(rewards) / batch_size)
+        batch_std = float(self._std(rewards))
+        advantages = [float(value - batch_mean) for value in rewards]
+        self._debug_last_batch = {
+            "batch_rewards": list(rewards),
+            "batch_reward_mean": batch_mean,
+            "batch_reward_std": batch_std,
+            "advantage_proxy_min": min(advantages) if advantages else 0.0,
+            "advantage_proxy_max": max(advantages) if advantages else 0.0,
+            "advantage_proxy_std": float(self._std(advantages)),
+            "exact_match_count": int(success_count),
+            "exact_match_ratio": float(success_count / batch_size),
+            "avg_graph_f1": float(graph_f1_sum / batch_size),
+        }
+        if self._debug_batches_seen % 10 == 0:
+            window_std = self._std(self._debug_reward_window)
+            print(
+                "[reward_debug][answerer] "
+                f"batches={self._debug_batches_seen} "
+                f"window_reward_std={window_std:.6f} "
+                f"last_batch_mean={batch_mean:.6f} "
+                f"last_batch_std={batch_std:.6f} "
+                f"exact_match_ratio={self._debug_last_batch['exact_match_ratio']:.3f} "
+                f"avg_graph_f1={self._debug_last_batch['avg_graph_f1']:.3f}",
+                flush=True,
+            )
 
         return rewards

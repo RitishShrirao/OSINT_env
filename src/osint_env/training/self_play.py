@@ -4,6 +4,7 @@ import inspect
 import json
 import os
 import re
+import time
 from dataclasses import dataclass
 from pathlib import Path
 import random
@@ -753,7 +754,21 @@ def _train_grpo_phase(
         trainer_kwargs["peft_config"] = _build_lora_config(lora)
 
     phase_label = str(run_name).strip() or str(output_dir.name)
-    print(f"[self_play] Starting phase: {phase_label} rows={len(rows)} max_steps={phase.max_steps}")
+    reward_class_name = type(reward_function).__name__
+    print(
+        f"[self_play] Starting phase: {phase_label} rows={len(rows)} "
+        f"max_steps={phase.max_steps}",
+        flush=True,
+    )
+    print(
+        f"[self_play][reward_setup] phase={phase_label} "
+        f"reward_function={reward_class_name} "
+        f"wandb_metric=rewards/{reward_class_name}/mean "
+        f"logging_steps={phase.logging_steps} "
+        f"num_generations={phase.num_generations} "
+        f"per_device_train_batch_size={phase.per_device_train_batch_size}",
+        flush=True,
+    )
     strict_asserts = str(os.getenv("OSINT_TRAIN_STRICT_ASSERTS", "")).strip().lower() in {"1", "true", "yes", "on"}
     trainer = GRPOTrainer(**trainer_kwargs)
     tracked_params = [
@@ -873,11 +888,35 @@ def _train_grpo_phase(
 
     reward_debug = getattr(reward_function, "_debug_last_batch", None)
     if isinstance(reward_debug, dict):
-        print(f"[reward_debug][last_batch] {phase_label} {json.dumps(reward_debug, sort_keys=True)}")
+        print(
+            f"[reward_debug][last_batch] {phase_label} reward_function={reward_class_name} "
+            f"{json.dumps(reward_debug, sort_keys=True)}",
+            flush=True,
+        )
+
+    if reward_values:
+        print(
+            f"[self_play][reward_history] {phase_label} reward_function={reward_class_name} "
+            f"steps_logged={len(reward_values)} "
+            f"reward_first={reward_values[0]:.6f} "
+            f"reward_last={reward_values[-1]:.6f} "
+            f"reward_mean={(sum(reward_values) / len(reward_values)):.6f} "
+            f"reward_min={min(reward_values):.6f} "
+            f"reward_max={max(reward_values):.6f} "
+            f"wandb_metric=rewards/{reward_class_name}/mean",
+            flush=True,
+        )
+    else:
+        print(
+            f"[self_play][reward_history] {phase_label} reward_function={reward_class_name} "
+            "no_reward_logs_in_state (TRL never wrote a 'reward' field; check logging_steps / num_generations)",
+            flush=True,
+        )
 
     print(
         "[self_play] Finished phase: "
-        f"{phase_label} global_step={global_step} training_loss={training_loss} output={final_dir}"
+        f"{phase_label} global_step={global_step} training_loss={training_loss} output={final_dir}",
+        flush=True,
     )
     return result
 
@@ -956,30 +995,52 @@ def _sample_generated_tasks_with_model(
     count: int,
     max_support_edges: int,
     max_new_tokens: int,
+    batch_size: int = 4,
 ) -> list[TaskInstance]:
     from transformers import AutoModelForCausalLM, AutoTokenizer
     import torch
 
-    if count <= 0:
+    if count <= 0 or not prompts:
         return []
 
+    print(
+        f"[self_play][sample_generator_legacy] start model={model_name_or_path} "
+        f"prompts={len(prompts)} target_valid={count} max_new_tokens={max_new_tokens}",
+        flush=True,
+    )
+    load_start = time.monotonic()
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
     if tokenizer.pad_token is None and tokenizer.eos_token is not None:
         tokenizer.pad_token = tokenizer.eos_token
+    if getattr(tokenizer, "padding_side", "right") != "left":
+        tokenizer.padding_side = "left"
     model_kwargs: dict[str, Any] = {}
     if torch.cuda.is_available():
         model_kwargs["device_map"] = "auto"
         model_kwargs["torch_dtype"] = torch.bfloat16
     model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **model_kwargs)
     model.eval()
-
     device = next(model.parameters()).device
-    generated: list[TaskInstance] = []
+    print(
+        f"[self_play][sample_generator_legacy] model_loaded device={device} "
+        f"load_elapsed={time.monotonic() - load_start:.1f}s",
+        flush=True,
+    )
 
-    for prompt in prompts:
+    generated: list[TaskInstance] = []
+    overall_start = time.monotonic()
+    effective_batch = max(1, int(batch_size or 1))
+    processed = 0
+    for batch_start in range(0, len(prompts), effective_batch):
         if len(generated) >= count:
             break
-        encoded = tokenizer(prompt, return_tensors="pt")
+        batch_prompts = prompts[batch_start : batch_start + effective_batch]
+        encoded = tokenizer(
+            batch_prompts,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+        )
         encoded = {k: v.to(device) for k, v in encoded.items()}
 
         with torch.no_grad():
@@ -993,35 +1054,52 @@ def _sample_generated_tasks_with_model(
                 pad_token_id=tokenizer.eos_token_id,
             )
 
-        completion_ids = output[0][encoded["input_ids"].shape[1] :]
-        completion = tokenizer.decode(completion_ids, skip_special_tokens=True)
-        candidate = parse_generated_task_completion(completion, max_support_edges=max_support_edges)
-        if not candidate.is_valid:
-            continue
+        input_len = encoded["input_ids"].shape[1]
+        for row_offset in range(len(batch_prompts)):
+            completion_ids = output[row_offset][input_len:]
+            completion = tokenizer.decode(completion_ids, skip_special_tokens=True)
+            candidate = parse_generated_task_completion(completion, max_support_edges=max_support_edges)
+            processed += 1
+            if not candidate.is_valid:
+                continue
 
-        metadata = {
-            "generated_by": "generator_model",
-            "round": round_index,
-            "difficulty": "hard",
-            "scenario": "adversarial_trace",
-            "grader": {
-                "type": "difficulty_exact_match",
-                "answer_type": "node_id",
-                "case_sensitive": True,
-                "reward_profile": "hard",
-            },
-        }
-        generated.append(
-            TaskInstance(
-                task_id=f"adv_r{round_index}_{len(generated)}",
-                task_type=candidate.task_type,
-                question=candidate.question,
-                answer=candidate.answer,
-                supporting_edges=list(candidate.supporting_edges),
-                metadata=metadata,
+            metadata = {
+                "generated_by": "generator_model",
+                "round": round_index,
+                "difficulty": "hard",
+                "scenario": "adversarial_trace",
+                "grader": {
+                    "type": "difficulty_exact_match",
+                    "answer_type": "node_id",
+                    "case_sensitive": True,
+                    "reward_profile": "hard",
+                },
+            }
+            generated.append(
+                TaskInstance(
+                    task_id=f"adv_r{round_index}_{len(generated)}",
+                    task_type=candidate.task_type,
+                    question=candidate.question,
+                    answer=candidate.answer,
+                    supporting_edges=list(candidate.supporting_edges),
+                    metadata=metadata,
+                )
             )
+            if len(generated) >= count:
+                break
+
+        print(
+            f"[self_play][sample_generator_legacy] processed={processed}/{len(prompts)} "
+            f"valid={len(generated)}/{count} "
+            f"elapsed={time.monotonic() - overall_start:.1f}s",
+            flush=True,
         )
 
+    print(
+        f"[self_play][sample_generator_legacy] finished generated={len(generated)}/{count} "
+        f"total_elapsed={time.monotonic() - overall_start:.1f}s",
+        flush=True,
+    )
     return generated
 
 
@@ -1083,13 +1161,25 @@ def _generate_answerer_completion_texts_with_model(
     model_name_or_path: str,
     prompts: list[str],
     max_new_tokens: int,
+    batch_size: int = 4,
 ) -> list[str]:
     from transformers import AutoModelForCausalLM, AutoTokenizer
     import torch
 
+    if not prompts:
+        return []
+
+    print(
+        f"[self_play][sample_answerer] start model={model_name_or_path} "
+        f"prompts={len(prompts)} max_new_tokens={max_new_tokens}",
+        flush=True,
+    )
+    load_start = time.monotonic()
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
     if tokenizer.pad_token is None and tokenizer.eos_token is not None:
         tokenizer.pad_token = tokenizer.eos_token
+    if getattr(tokenizer, "padding_side", "right") != "left":
+        tokenizer.padding_side = "left"
 
     model_kwargs: dict[str, Any] = {}
     if torch.cuda.is_available():
@@ -1098,10 +1188,24 @@ def _generate_answerer_completion_texts_with_model(
     model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **model_kwargs)
     model.eval()
     device = next(model.parameters()).device
+    print(
+        f"[self_play][sample_answerer] model_loaded device={device} "
+        f"load_elapsed={time.monotonic() - load_start:.1f}s",
+        flush=True,
+    )
 
     completions: list[str] = []
-    for prompt in prompts:
-        encoded = tokenizer(prompt, return_tensors="pt")
+    overall_start = time.monotonic()
+    effective_batch = max(1, int(batch_size or 1))
+    processed = 0
+    for batch_start in range(0, len(prompts), effective_batch):
+        batch_prompts = prompts[batch_start : batch_start + effective_batch]
+        encoded = tokenizer(
+            batch_prompts,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+        )
         encoded = {key: value.to(device) for key, value in encoded.items()}
         with torch.no_grad():
             output = model.generate(
@@ -1110,8 +1214,22 @@ def _generate_answerer_completion_texts_with_model(
                 do_sample=False,
                 pad_token_id=tokenizer.eos_token_id,
             )
-        completion_ids = output[0][encoded["input_ids"].shape[1] :]
-        completions.append(tokenizer.decode(completion_ids, skip_special_tokens=True))
+        input_len = encoded["input_ids"].shape[1]
+        for row_offset in range(len(batch_prompts)):
+            completion_ids = output[row_offset][input_len:]
+            completions.append(tokenizer.decode(completion_ids, skip_special_tokens=True))
+        processed += len(batch_prompts)
+        print(
+            f"[self_play][sample_answerer] processed={processed}/{len(prompts)} "
+            f"elapsed={time.monotonic() - overall_start:.1f}s",
+            flush=True,
+        )
+
+    print(
+        f"[self_play][sample_answerer] finished completions={len(completions)} "
+        f"total_elapsed={time.monotonic() - overall_start:.1f}s",
+        flush=True,
+    )
     return completions
 
 
@@ -1404,40 +1522,74 @@ def _sample_swarm_v2_completion_texts_with_model(
     from transformers import AutoModelForCausalLM, AutoTokenizer
     import torch
 
-    if count <= 0:
+    if count <= 0 or not prompts:
         return []
 
+    print(
+        f"[self_play][sample_generator] start model={model_name_or_path} "
+        f"prompts={len(prompts)} target_valid={count} "
+        f"max_new_tokens={cfg.generated_task_max_new_tokens}",
+        flush=True,
+    )
+    load_start = time.monotonic()
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
     if tokenizer.pad_token is None and tokenizer.eos_token is not None:
         tokenizer.pad_token = tokenizer.eos_token
+    if getattr(tokenizer, "padding_side", "right") != "left":
+        tokenizer.padding_side = "left"
     model_kwargs: dict[str, Any] = {}
     if torch.cuda.is_available():
         model_kwargs["device_map"] = "auto"
         model_kwargs["torch_dtype"] = torch.bfloat16
     model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **model_kwargs)
     model.eval()
-
     device = next(model.parameters()).device
-    completions: list[str] = []
+    print(
+        f"[self_play][sample_generator] model_loaded device={device} "
+        f"load_elapsed={time.monotonic() - load_start:.1f}s",
+        flush=True,
+    )
+
     validator = SwarmV2ReplayValidator(
         graph=env.graph,
         validation=cfg.swarm_v2.validation,
         shared_context=cfg.swarm_v2.shared_context,
         seen_questions=seen_questions,
     )
-    for prompt in prompts:
-        if len(completions) >= count:
-            break
-        encoded = tokenizer(prompt, return_tensors="pt")
-        encoded = {key: value.to(device) for key, value in encoded.items()}
+    completions: list[str] = []
+    valid_count = 0
+    batch_size = max(1, int(getattr(cfg.generator_phase, "generation_batch_size", 4) or 4))
+    max_new_tokens = max(64, int(cfg.generated_task_max_new_tokens))
+    decode_schedule = [(0.7, 0.9), (0.5, 0.85), (0.3, 0.8)]
+    overall_start = time.monotonic()
 
-        best_completion = ""
-        best_score = -999
-        for attempt_idx, (temperature, top_p) in enumerate([(0.7, 0.9), (0.5, 0.85), (0.3, 0.8)]):
+    pending_indices = list(range(len(prompts)))
+    best_completions: dict[int, str] = {}
+    best_scores: dict[int, int] = {}
+    valid_marks: dict[int, bool] = {}
+
+    for attempt_idx, (temperature, top_p) in enumerate(decode_schedule):
+        if not pending_indices:
+            break
+        attempt_start = time.monotonic()
+        next_pending: list[int] = []
+        processed = 0
+        for batch_start in range(0, len(pending_indices), batch_size):
+            batch_indices = pending_indices[batch_start : batch_start + batch_size]
+            batch_prompts = [prompts[i] for i in batch_indices]
+            encoded = tokenizer(
+                batch_prompts,
+                return_tensors="pt",
+                padding=True,
+                truncation=True,
+                max_length=int(getattr(cfg.generator_phase, "max_prompt_length", 1024) or 1024),
+            )
+            encoded = {key: value.to(device) for key, value in encoded.items()}
+
             with torch.no_grad():
                 output = model.generate(
                     **encoded,
-                    max_new_tokens=max(64, int(cfg.generated_task_max_new_tokens)),
+                    max_new_tokens=max_new_tokens,
                     do_sample=True,
                     top_p=top_p,
                     temperature=temperature,
@@ -1445,22 +1597,63 @@ def _sample_swarm_v2_completion_texts_with_model(
                     pad_token_id=tokenizer.eos_token_id,
                 )
 
-            completion_ids = output[0][encoded["input_ids"].shape[1] :]
-            completion = tokenizer.decode(completion_ids, skip_special_tokens=True)
-            candidate = parse_generated_task_completion(
-                completion,
-                max_support_edges=cfg.swarm_v2.validation.max_support_edges,
+            input_len = encoded["input_ids"].shape[1]
+            for row_offset, prompt_idx in enumerate(batch_indices):
+                completion_ids = output[row_offset][input_len:]
+                completion = tokenizer.decode(completion_ids, skip_special_tokens=True)
+                candidate = parse_generated_task_completion(
+                    completion,
+                    max_support_edges=cfg.swarm_v2.validation.max_support_edges,
+                )
+                validation = validator.validate(candidate)
+                score = (
+                    int(bool(candidate.question))
+                    + int(bool(candidate.answer))
+                    + len(candidate.supporting_edges)
+                )
+                if validation.is_valid:
+                    if not valid_marks.get(prompt_idx):
+                        valid_count += 1
+                    valid_marks[prompt_idx] = True
+                    best_completions[prompt_idx] = completion
+                    best_scores[prompt_idx] = score
+                else:
+                    if score > best_scores.get(prompt_idx, -999):
+                        best_scores[prompt_idx] = score
+                        best_completions[prompt_idx] = completion
+                    if not valid_marks.get(prompt_idx):
+                        next_pending.append(prompt_idx)
+
+            processed += len(batch_indices)
+            print(
+                f"[self_play][sample_generator] attempt={attempt_idx + 1}/{len(decode_schedule)} "
+                f"processed={processed}/{len(pending_indices)} "
+                f"valid_so_far={valid_count}/{len(prompts)} "
+                f"target_valid={count} "
+                f"elapsed={time.monotonic() - overall_start:.1f}s",
+                flush=True,
             )
-            validation = validator.validate(candidate)
-            score = int(bool(candidate.question)) + int(bool(candidate.answer)) + len(candidate.supporting_edges)
-            if validation.is_valid:
-                print(f"[self_play][generation_retry] valid_completion attempt={attempt_idx + 1}")
-                best_completion = completion
+            if valid_count >= count:
                 break
-            if score > best_score:
-                best_score = score
-                best_completion = completion
-        completions.append(best_completion)
+        print(
+            f"[self_play][sample_generator] attempt={attempt_idx + 1} done "
+            f"valid={valid_count}/{len(prompts)} "
+            f"attempt_elapsed={time.monotonic() - attempt_start:.1f}s",
+            flush=True,
+        )
+        if valid_count >= count:
+            break
+        pending_indices = next_pending
+
+    for prompt_idx in range(len(prompts)):
+        completions.append(best_completions.get(prompt_idx, ""))
+
+    print(
+        f"[self_play][sample_generator] finished completions={len(completions)} "
+        f"valid={valid_count}/{len(prompts)} target_valid={count} "
+        f"total_elapsed={time.monotonic() - overall_start:.1f}s",
+        flush=True,
+    )
     return completions
 
 
