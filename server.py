@@ -39,8 +39,8 @@ SPACE_DASHBOARD = Path("artifacts/space_dashboard.html")
 LATEST_BASELINE_OUTPUT = Path("artifacts/baselines/openai_fixed_levels_latest.json")
 LATEST_EVALUATION_OUTPUT = Path("artifacts/latest_evaluation.json")
 OPENENV_SPEC_PATH = Path("openenv.yaml")
-COMPARE_FINETUNED_DASHBOARD = Path("artifacts/local_hf_eval_round_006/post_training_benchmark_dashboard.html")
-COMPARE_BASE_DASHBOARD = Path("artifacts/local_hf_eval_round_006/post_training_benchmark_dashboard_original.html")
+POST_TRAINING_DASHBOARD = Path("artifacts/local_hf_eval_round_006/post_training_benchmark_dashboard.html")
+PRE_TRAINING_DASHBOARD = Path("artifacts/local_hf_eval_round_006/pre_training_benchmark_dashboard_original.html")
 
 _SESSION_LOCK = Lock()
 _SESSIONS: dict[str, OSINTEnvironment] = {}
@@ -253,8 +253,8 @@ def _preview_snapshot() -> dict[str, Any]:
 def _space_snapshot() -> dict[str, Any]:
     snapshot = dict(_base_environment_snapshot())
     compare_dashboards = {
-        "finetuned": str(COMPARE_FINETUNED_DASHBOARD),
-        "base": str(COMPARE_BASE_DASHBOARD),
+        "post_training": str(POST_TRAINING_DASHBOARD),
+        "pre_training": str(PRE_TRAINING_DASHBOARD),
     }
     available_compare_dashboards = {
         name: path for name, path in compare_dashboards.items() if Path(path).exists()
@@ -313,13 +313,13 @@ def home() -> str:
     compare_dashboards = snapshot.get("compare_dashboard_paths", {})
     compare_links_html = ""
     if compare_dashboards:
-        finetuned_link = ""
-        base_link = ""
-        if compare_dashboards.get("finetuned"):
-            finetuned_link = '<a class="button" href="/dashboard/finetuned">Finetuned Dashboard</a>'
-        if compare_dashboards.get("base"):
-            base_link = '<a class="button secondary" href="/dashboard/base">Base Dashboard</a>'
-        compare_links_html = f"<div style=\"margin-top:10px\">{finetuned_link}{base_link}</div>"
+        post_training_link = ""
+        pre_training_link = ""
+        if compare_dashboards.get("post_training"):
+            post_training_link = '<a class="button" href="/dashboard/post-training">Post-Training Dashboard</a>'
+        if compare_dashboards.get("pre_training"):
+            pre_training_link = '<a class="button secondary" href="/dashboard/pre-training">Pre-Training Dashboard</a>'
+        compare_links_html = f"<div style=\"margin-top:10px\">{post_training_link}{pre_training_link}</div>"
     difficulty_html = "".join(
         f"<li><strong>{level}</strong>: {count}</li>"
         for level, count in sorted(snapshot["difficulty_counts"].items())
@@ -403,7 +403,6 @@ def home() -> str:
         <h1>OSINT OpenEnv Space</h1>
         <p class="muted">A containerized OpenEnv-compatible benchmark for synthetic OSINT reasoning over profiles, forum threads, posts, aliases, organizations, locations, and event links.</p>
         <p>The Space boots with the fixed-level benchmark so visitors get a stable environment snapshot instead of a different graph every restart.</p>
-        <a class="button" href="/dashboard">Open Dashboard</a>
         <a class="link" href="/api/environment">Environment JSON</a>
         {compare_links_html}
       </section>
@@ -585,18 +584,28 @@ def dashboard() -> FileResponse:
     return FileResponse(snapshot["dashboard_path"], media_type="text/html")
 
 
+@app.get("/dashboard/post-training")
+def dashboard_post_training() -> FileResponse:
+    if not POST_TRAINING_DASHBOARD.exists():
+        raise HTTPException(status_code=404, detail="Post-training dashboard not found")
+    return FileResponse(POST_TRAINING_DASHBOARD, media_type="text/html")
+
+
+@app.get("/dashboard/pre-training")
+def dashboard_pre_training() -> FileResponse:
+    if not PRE_TRAINING_DASHBOARD.exists():
+        raise HTTPException(status_code=404, detail="Pre-training dashboard not found")
+    return FileResponse(PRE_TRAINING_DASHBOARD, media_type="text/html")
+
+
 @app.get("/dashboard/finetuned")
-def dashboard_finetuned() -> FileResponse:
-    if not COMPARE_FINETUNED_DASHBOARD.exists():
-        raise HTTPException(status_code=404, detail="Finetuned dashboard not found")
-    return FileResponse(COMPARE_FINETUNED_DASHBOARD, media_type="text/html")
+def dashboard_finetuned_alias() -> FileResponse:
+    return dashboard_post_training()
 
 
 @app.get("/dashboard/base")
-def dashboard_base() -> FileResponse:
-    if not COMPARE_BASE_DASHBOARD.exists():
-        raise HTTPException(status_code=404, detail="Base dashboard not found")
-    return FileResponse(COMPARE_BASE_DASHBOARD, media_type="text/html")
+def dashboard_base_alias() -> FileResponse:
+    return dashboard_pre_training()
 
 
 if __name__ == "__main__":
