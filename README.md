@@ -358,6 +358,48 @@ Example test command against the deployed Space:
 API_BASE_URL=https://api.openai.com/v1 MODEL_NAME=gpt-5.4-mini OPENAI_API_KEY=your_key SPACE_URL=https://siddeshwar1625-osint.hf.space python inference.py
 ```
 
+## Hugging Face Space — Variables And Secrets
+
+All settings below are read by `server.py`, `scripts/space_start.sh`, and `src/osint_env/training/self_play.py` at Space boot. Configure them under **Settings → Variables and secrets** on the Space. Secrets are stored encrypted; plain variables are visible in the UI.
+
+### Secrets (sensitive — store as **Secrets**)
+
+- `HF_TOKEN` — Hugging Face auth token used for downloading gated models and uploading checkpoints to your model repo (aliases also accepted: `HUGGINGFACE_HUB_TOKEN`, `HUGGING_FACE_HUB_TOKEN`).
+- `WANDB_API_KEY` — Weights & Biases API key; enables remote training dashboards (loss, KL, reward curves) during self-play.
+- `OPENAI_API_KEY` — OpenAI key used by `inference.py` and the OpenAI baseline; only required when the LLM provider is `openai`.
+
+### Server / runtime variables
+
+- `PORT` — Port uvicorn binds to (default `7860`; HF sets this automatically).
+- `OSINT_ENV_CONFIG` — Path to the shared environment config JSON (default `datasets/fixed_levels/shared_config_fixed_levels.json`).
+- `OSINT_ENV_SEED_FILE` — Path to the fixed-task seed file used by the live Space (default `datasets/fixed_levels/seed_fixed_levels.json`).
+- `OSINT_SPACE_LLM_PROVIDER` — LLM provider for the live demo and `/api/environment` (default `mock`; set `openai` to use a real model).
+- `OSINT_SPACE_LLM_MODEL` — Model name when provider is `openai` (default `gpt-4o-mini`).
+
+### Self-play training (boot-time) variables
+
+- `RUN_SELF_PLAY_TRAINING` — `1` to run self-play training on Space boot, `0` to skip (default `1`).
+- `RUN_SELF_PLAY_DRY_RUN` — `1` materializes artifacts without GRPO updates; useful for verifying wiring (default `0`).
+- `RUN_SPACE_API_SERVER` — `1` to start uvicorn alongside training, `0` for training-only mode (default `1`).
+- `TRAIN_SELF_PLAY_CONFIG_PATH` — Training config JSON (default `config/self_play_training_hf_l40s_full.json`).
+- `TRAIN_ENV_CONFIG_PATH` — Environment config consumed by the training run (default `config/shared_config.json`).
+- `TRAIN_SELF_PLAY_OUTPUT_DIR` — Override for where training artifacts and checkpoints are written.
+- `TRAIN_LOG_PATH` — File the supervised training process writes stdout/stderr to (default `/tmp/self_play_training.log`).
+- `OSINT_TRAIN_STRICT_ASSERTS` — `1` makes training fail fast when reward variance, KL, loss, grad norms, or parameter updates stay zero (default off).
+
+### Checkpoint upload (HF Hub) variables
+
+- `OSINT_HF_CHECKPOINT_REPO_ID` — Force checkpoint uploads into a specific HF model repo (e.g. `Siddeshwar1625/osint-checkpoints-final`). When unset, a name is derived from `SPACE_ID`.
+- `OSINT_HF_CHECKPOINT_REPO_TYPE` — Repo type for uploads (`model` by default; can be `dataset`).
+- `OSINT_HF_CHECKPOINT_REPO_PRIVATE` — `0` to create/update a public checkpoint repo (default `1`/private).
+- `OSINT_HF_CHECKPOINT_REPO_SUFFIX` — Suffix appended when the repo name is derived from `SPACE_ID` (default `-checkpoints`).
+- `OSINT_HF_CHECKPOINT_PATH_PREFIX` — Subdirectory inside the repo where checkpoints are written.
+- `OSINT_HF_UPLOAD_ON_SAVE` — `0` disables automatic upload of every new `checkpoint-*` directory (default `1`).
+
+### Auto-populated by the Space (read-only)
+
+- `SPACE_ID` / `HF_SPACE_ID` — Set by Hugging Face; consumed when deriving a default checkpoint repo name.
+
 ## Docker And Hugging Face Space
 
 The repository is ready for a Docker-based Hugging Face Space:
