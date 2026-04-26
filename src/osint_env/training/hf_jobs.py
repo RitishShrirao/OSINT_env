@@ -265,10 +265,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--train-config",
-        default=os.getenv("TRAIN_SELF_PLAY_CONFIG_PATH", "config/self_play_training_hf_a10g_smoke.json"),
+        default=os.getenv("TRAIN_SELF_PLAY_CONFIG_PATH", "config/self_play_training_hf_l40s_full.json"),
         help="Training config path inside the training image or checked-out repo.",
     )
-    parser.add_argument("--flavor", default=os.getenv("HF_JOB_FLAVOR", "a10g-small"))
+    parser.add_argument("--flavor", default=os.getenv("HF_JOB_FLAVOR", "l40s"))
     parser.add_argument("--timeout", default=os.getenv("HF_JOB_TIMEOUT", "8h"))
     parser.add_argument("--namespace", default=os.getenv("HF_JOB_NAMESPACE", ""))
     parser.add_argument("--run-name", default=os.getenv("HF_JOB_RUN_NAME", "osint-self-play-job"))
