@@ -18,6 +18,7 @@ COPY --chown=user datasets $HOME/app/datasets
 COPY --chown=user docs $HOME/app/docs
 COPY --chown=user scripts $HOME/app/scripts
 COPY --chown=user server.py $HOME/app/server.py
+COPY --chown=user artifacts $HOME/app/artifacts
 
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -e ".[train]" && \

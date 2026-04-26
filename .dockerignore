@@ -5,5 +5,14 @@ __pycache__
 *.pyo
 *.pyd
 .Python
-artifacts
 tests
+
+# Block heavy training outputs by default but keep the small evaluation /
+# baseline / dashboard artifacts that the Space UI needs at runtime.
+artifacts/*
+!artifacts/baselines
+!artifacts/baselines/**
+!artifacts/local_hf_eval_round_006
+!artifacts/local_hf_eval_round_006/**
+!artifacts/latest_evaluation.json
+!artifacts/leaderboard.json
