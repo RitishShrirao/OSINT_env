@@ -1,5 +1,9 @@
 #!/bin/sh
-set -eu
+# Intentionally NOT running with `set -e`: a training failure must not
+# bring down the API server. The Space's HTTP endpoints (dashboards,
+# /healthz, /api/environment) need to stay reachable even if the
+# self-play job crashes.
+set -u
 
 _is_true() {
   case "${1:-}" in
@@ -15,37 +19,38 @@ RUN_FLAG="${RUN_SELF_PLAY_TRAINING:-1}"
 DRY_RUN_FLAG="${RUN_SELF_PLAY_DRY_RUN:-0}"
 SERVE_API_FLAG="${RUN_SPACE_API_SERVER:-1}"
 PORT_VALUE="${PORT:-7860}"
-UVICORN_LOG_PATH="${UVICORN_LOG_PATH:-/tmp/uvicorn.log}"
+TRAIN_LOG_PATH="${TRAIN_LOG_PATH:-/tmp/self_play_training.log}"
 
 UVICORN_PID=""
+TRAIN_PID=""
 
-_start_api_server_background() {
+_start_api_server_foreground_or_die() {
   if ! _is_true "$SERVE_API_FLAG"; then
-    echo "[space_start] RUN_SPACE_API_SERVER disabled. Skipping API server."
-    return
+    echo "[space_start] RUN_SPACE_API_SERVER disabled. Nothing to serve."
+    exit 0
   fi
-  echo "[space_start] Starting API server in background on port ${PORT_VALUE} (logs: ${UVICORN_LOG_PATH})."
-  # API server runs in background ONLY for HF healthchecks. Training is the
-  # primary process. If HF infrastructure SIGTERMs the container we still
-  # want training to receive the signal and flush a final checkpoint, not
-  # to silently die because PID 1 (uvicorn previously) exited first.
-  uvicorn server:app --host 0.0.0.0 --port "${PORT_VALUE}" \
-    >"${UVICORN_LOG_PATH}" 2>&1 &
+  echo "[space_start] Starting API server (foreground) on port ${PORT_VALUE}."
+  uvicorn server:app --host 0.0.0.0 --port "${PORT_VALUE}" &
   UVICORN_PID=$!
   echo "[space_start] uvicorn pid=${UVICORN_PID}"
 }
 
-_stop_api_server() {
+_stop_children() {
+  if [ -n "${TRAIN_PID}" ] && kill -0 "${TRAIN_PID}" 2>/dev/null; then
+    echo "[space_start] Forwarding shutdown to training pid=${TRAIN_PID}."
+    kill "${TRAIN_PID}" 2>/dev/null || true
+  fi
   if [ -n "${UVICORN_PID}" ] && kill -0 "${UVICORN_PID}" 2>/dev/null; then
     echo "[space_start] Stopping uvicorn pid=${UVICORN_PID}."
     kill "${UVICORN_PID}" 2>/dev/null || true
-    wait "${UVICORN_PID}" 2>/dev/null || true
   fi
 }
 
-trap '_stop_api_server' EXIT INT TERM
+# Only forward shutdown signals; do NOT kill children on every EXIT
+# (otherwise a crashed training run would tear down uvicorn too).
+trap '_stop_children; exit 0' INT TERM
 
-_train_self_play() {
+_run_training_supervised() {
   if [ -n "${TRAIN_OUTPUT_DIR}" ]; then
     OUTPUT_ARG="--train-output-dir ${TRAIN_OUTPUT_DIR}"
   else
@@ -53,18 +58,34 @@ _train_self_play() {
   fi
 
   if _is_true "$DRY_RUN_FLAG"; then
-    echo "[space_start] Running self-play in dry-run mode."
+    echo "[space_start] Running self-play in dry-run mode (logs: ${TRAIN_LOG_PATH})."
     # shellcheck disable=SC2086
-    osint-env train-self-play --config "${ENV_CONFIG_PATH}" --train-config "${TRAIN_CONFIG_PATH}" ${OUTPUT_ARG} --dry-run
+    osint-env train-self-play --config "${ENV_CONFIG_PATH}" --train-config "${TRAIN_CONFIG_PATH}" ${OUTPUT_ARG} --dry-run \
+      > "${TRAIN_LOG_PATH}" 2>&1 &
   else
-    echo "[space_start] Running self-play training (foreground)."
+    echo "[space_start] Running self-play training in background (logs: ${TRAIN_LOG_PATH})."
     # shellcheck disable=SC2086
-    osint-env train-self-play --config "${ENV_CONFIG_PATH}" --train-config "${TRAIN_CONFIG_PATH}" ${OUTPUT_ARG}
+    osint-env train-self-play --config "${ENV_CONFIG_PATH}" --train-config "${TRAIN_CONFIG_PATH}" ${OUTPUT_ARG} \
+      > "${TRAIN_LOG_PATH}" 2>&1 &
   fi
+  TRAIN_PID=$!
+  echo "[space_start] training pid=${TRAIN_PID}"
 
-  echo "[space_start] Self-play command completed."
-  echo "[space_start] Training end: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  # Watcher subshell: if training exits with non-zero status, log the
+  # failure but do NOT propagate it to the parent script. Uvicorn must
+  # keep serving so the dashboards stay reachable.
+  (
+    wait "${TRAIN_PID}" 2>/dev/null
+    rc=$?
+    if [ "${rc}" -eq 0 ]; then
+      echo "[space_start] Self-play training finished cleanly (rc=0)."
+    else
+      echo "[space_start] Self-play training exited rc=${rc}. API server will stay up; see ${TRAIN_LOG_PATH}."
+    fi
+  ) &
 }
+
+_start_api_server_foreground_or_die
 
 if _is_true "$RUN_FLAG"; then
   echo "[space_start] RUN_SELF_PLAY_TRAINING enabled."
@@ -77,20 +98,14 @@ if _is_true "$RUN_FLAG"; then
   if [ -n "${OSINT_HF_CHECKPOINT_REPO_ID:-}" ]; then
     echo "[space_start] HF checkpoint repo: ${OSINT_HF_CHECKPOINT_REPO_ID}"
   fi
-  _start_api_server_background
-  # Run training in the FOREGROUND so the script (and therefore PID 1)
-  # blocks until training is finished. A graceful SIGTERM from HF will
-  # propagate to the training process via the shell's signal handling
-  # and the trap above will cleanly stop uvicorn afterwards.
-  _train_self_play
-  echo "[space_start] Training finished. Keeping API server alive for log inspection."
-  if [ -n "${UVICORN_PID}" ] && kill -0 "${UVICORN_PID}" 2>/dev/null; then
-    wait "${UVICORN_PID}"
-  fi
+  _run_training_supervised
 else
   echo "[space_start] RUN_SELF_PLAY_TRAINING disabled. Skipping self-play run."
-  _start_api_server_background
-  if [ -n "${UVICORN_PID}" ] && kill -0 "${UVICORN_PID}" 2>/dev/null; then
-    wait "${UVICORN_PID}"
-  fi
+fi
+
+# Block on uvicorn so the container stays alive as long as the API
+# server is healthy. If uvicorn exits (e.g. real platform shutdown),
+# we exit the script normally.
+if [ -n "${UVICORN_PID}" ]; then
+  wait "${UVICORN_PID}"
 fi
