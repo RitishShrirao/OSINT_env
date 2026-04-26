@@ -284,8 +284,6 @@ def _space_snapshot() -> dict[str, Any]:
             )
             if dashboard_path.exists():
                 snapshot["dashboard_path"] = str(dashboard_path)
-            if COMPARE_FINETUNED_DASHBOARD.exists():
-                snapshot["dashboard_path"] = str(COMPARE_FINETUNED_DASHBOARD)
             return snapshot
 
         env = _build_environment()
@@ -296,16 +294,12 @@ def _space_snapshot() -> dict[str, Any]:
             output_path=str(SPACE_DASHBOARD),
         )
         snapshot["dashboard_path"] = dashboard_path
-        if COMPARE_FINETUNED_DASHBOARD.exists():
-            snapshot["dashboard_path"] = str(COMPARE_FINETUNED_DASHBOARD)
         return snapshot
 
     preview = _preview_snapshot()
     preview["source"] = "preview"
     if available_compare_dashboards:
         preview["compare_dashboard_paths"] = available_compare_dashboards
-        if COMPARE_FINETUNED_DASHBOARD.exists():
-            preview["dashboard_path"] = str(COMPARE_FINETUNED_DASHBOARD)
     return preview
 
 
