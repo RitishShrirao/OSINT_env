@@ -2,6 +2,8 @@
 
 🤖 **Checkpoint:** [Siddeshwar1625/osint-checkpoints-final](https://huggingface.co/Siddeshwar1625/osint-checkpoints-final)
 
+📊 **Training run (W&B):** [osint-self-play-train](https://wandb.ai/siddeshwar2004-international-institute-of-information-te/osint-self-play-train)
+
 Most agent benchmarks are still too clean.
 
 They assume the world is cooperative, the evidence is tidy, and the shortest path to the answer is also the most obvious one. Real OSINT is the opposite. People hide. Identities splinter across aliases. Threads derail. Posts mislead on purpose. Useful evidence is mixed with decoys, soft contradictions, and deliberate attempts to waste an investigator's time.
