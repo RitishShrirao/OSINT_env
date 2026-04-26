@@ -18,6 +18,8 @@ short_description: Docker OSINT benchmark with fixed OpenEnv tasks.
 
 # OSINT OpenEnv
 
+📑 **Slide deck:** [TraceNet.pdf (Google Drive)](https://drive.google.com/file/d/14GyDrtIei54C4RHokOI-mLf12B_OOzPX/view?usp=sharing)
+
 OSINT OpenEnv is a synthetic benchmark environment for tool-using agents that must recover identities, trace events, and link entities across noisy multi-platform records. The project is designed to feel like a compact OSINT workflow rather than a raw QA dataset: agents query mock profiles, posts, forum threads, and semantic memory, build a working graph, and then submit an answer.
 
 The motivation is to provide a reproducible OpenEnv-compatible environment for evaluating graph-building and tool-using reasoning without depending on live web data, unstable APIs, or private corpora. That makes it useful for local development, regression testing, and hosted demos such as a Docker-based Hugging Face Space.
