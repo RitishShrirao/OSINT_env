@@ -1309,6 +1309,13 @@ def _sample_generated_tasks_with_model(
         )
         encoded = {k: v.to(device) for k, v in encoded.items()}
 
+        print(
+            f"[self_play][sample_legacy] batch_start={batch_start}/{len(prompts)} "
+            f"batch_size={len(batch_prompts)} max_new_tokens={max(64, int(max_new_tokens))} "
+            f"input_len={encoded['input_ids'].shape[1]} generating...",
+            flush=True,
+        )
+        batch_t0 = time.monotonic()
         with torch.no_grad():
             output = model.generate(
                 **encoded,
@@ -1319,6 +1326,11 @@ def _sample_generated_tasks_with_model(
                 num_return_sequences=1,
                 pad_token_id=tokenizer.eos_token_id,
             )
+        print(
+            f"[self_play][sample_legacy] batch_start={batch_start} "
+            f"generate_elapsed={time.monotonic() - batch_t0:.1f}s",
+            flush=True,
+        )
 
         input_len = encoded["input_ids"].shape[1]
         for row_offset in range(len(batch_prompts)):
@@ -1473,6 +1485,13 @@ def _generate_answerer_completion_texts_with_model(
             truncation=True,
         )
         encoded = {key: value.to(device) for key, value in encoded.items()}
+        print(
+            f"[self_play][sample_answerer] batch_start={batch_start}/{len(prompts)} "
+            f"batch_size={len(batch_prompts)} max_new_tokens={max(16, int(max_new_tokens))} "
+            f"input_len={encoded['input_ids'].shape[1]} generating...",
+            flush=True,
+        )
+        batch_t0 = time.monotonic()
         with torch.no_grad():
             output = model.generate(
                 **encoded,
@@ -1487,6 +1506,7 @@ def _generate_answerer_completion_texts_with_model(
         processed += len(batch_prompts)
         print(
             f"[self_play][sample_answerer] processed={processed}/{len(prompts)} "
+            f"generate_elapsed={time.monotonic() - batch_t0:.1f}s "
             f"elapsed={time.monotonic() - overall_start:.1f}s",
             flush=True,
         )
@@ -1852,6 +1872,16 @@ def _sample_swarm_v2_completion_texts_with_model(
             )
             encoded = {key: value.to(device) for key, value in encoded.items()}
 
+            print(
+                f"[self_play][sample_generator] attempt={attempt_idx + 1}/{len(decode_schedule)} "
+                f"batch_start={batch_start}/{len(pending_indices)} "
+                f"batch_size={len(batch_indices)} "
+                f"max_new_tokens={max_new_tokens} "
+                f"input_len={encoded['input_ids'].shape[1]} "
+                f"generating...",
+                flush=True,
+            )
+            batch_t0 = time.monotonic()
             with torch.no_grad():
                 output = model.generate(
                     **encoded,
@@ -1862,6 +1892,11 @@ def _sample_swarm_v2_completion_texts_with_model(
                     num_return_sequences=1,
                     pad_token_id=tokenizer.eos_token_id,
                 )
+            print(
+                f"[self_play][sample_generator] attempt={attempt_idx + 1}/{len(decode_schedule)} "
+                f"batch_start={batch_start} generate_elapsed={time.monotonic() - batch_t0:.1f}s",
+                flush=True,
+            )
 
             input_len = encoded["input_ids"].shape[1]
             for row_offset, prompt_idx in enumerate(batch_indices):
