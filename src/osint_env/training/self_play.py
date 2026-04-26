@@ -1664,6 +1664,24 @@ def _run_post_training_evaluation(
                         "support_edge_count": len(support_edges),
                         "predicted_edge_count": len(pred_edges),
                         "completion_length": len(completion_text),
+                        "pred_edges": [
+                            {
+                                "src": edge.src,
+                                "rel": edge.rel,
+                                "dst": edge.dst,
+                                "confidence": float(edge.confidence),
+                            }
+                            for edge in pred_edges
+                        ],
+                        "truth_edges": [
+                            {
+                                "src": edge.src,
+                                "rel": edge.rel,
+                                "dst": edge.dst,
+                                "confidence": float(edge.confidence),
+                            }
+                            for edge in support_edges
+                        ],
                     }
                 )
 

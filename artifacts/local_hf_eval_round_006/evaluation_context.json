@@ -1,0 +1,17 @@
+{
+  "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "dashboard_paths": {
+    "finetuned": "artifacts/local_hf_eval_round_006/post_training_benchmark_dashboard.html",
+    "original": "artifacts/local_hf_eval_round_006/post_training_benchmark_dashboard_original.html"
+  },
+  "downloaded_finetuned_model": "artifacts/hf_downloads/self_play_hf_l40s_full/round_006/answerer_train/final_model",
+  "env_llm_seeding_enabled": false,
+  "environment_llm_provider": "mock",
+  "evaluation_path": "artifacts/local_hf_eval_round_006/post_training_evaluation.json",
+  "leaderboard_path": "artifacts/local_hf_eval_round_006/post_training_compare_leaderboard.json",
+  "pipeline_mode": "swarm_v2",
+  "repo_id": "Siddeshwar1625/osint-checkpoints",
+  "repo_type": "model",
+  "run_prefix": "self_play_hf_l40s_full",
+  "summary_path": "artifacts/hf_downloads/self_play_hf_l40s_full/self_play_summary.json"
+}

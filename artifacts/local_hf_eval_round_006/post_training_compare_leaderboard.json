@@ -1,0 +1,68 @@
+[
+  {
+    "config": {
+      "source": "post_training_evaluation"
+    },
+    "episodes": 24,
+    "metrics": {
+      "avg_compactness_reward": 0.0,
+      "avg_connectivity_gain_reward": 0.0,
+      "avg_connectivity_reward": 0.0,
+      "avg_diversity_reward": 0.0,
+      "avg_entity_informativeness_reward": 0.0,
+      "avg_format_reward": 0.0,
+      "avg_graph_f1": 0.0,
+      "avg_knowledge_carrier_reward": 0.0,
+      "avg_knowledge_indexing_reward": 0.0,
+      "avg_relation_informativeness_reward": 0.0,
+      "avg_reward": 0.8995857577183174,
+      "avg_soft_shaping_reward": 0.0,
+      "avg_spawn_count": 0.0,
+      "avg_spawn_critical_steps": 0.0,
+      "avg_steps_to_solution": 0.0,
+      "deanonymization_accuracy": 0.0,
+      "leaderboard_score": 0.28997928788591587,
+      "retrieval_signal": 0.0,
+      "spawn_completion_rate": 0.0,
+      "spawn_signal": 0.0,
+      "structural_signal": 0.0,
+      "task_success_rate": 0.875,
+      "tool_efficiency": 0.0
+    },
+    "run_id": "post_train_01",
+    "run_name": "finetuned_answerer"
+  },
+  {
+    "config": {
+      "source": "post_training_evaluation"
+    },
+    "episodes": 24,
+    "metrics": {
+      "avg_compactness_reward": 0.0,
+      "avg_connectivity_gain_reward": 0.0,
+      "avg_connectivity_reward": 0.0,
+      "avg_diversity_reward": 0.0,
+      "avg_entity_informativeness_reward": 0.0,
+      "avg_format_reward": 0.0,
+      "avg_graph_f1": 0.5347222222222222,
+      "avg_knowledge_carrier_reward": 0.0,
+      "avg_knowledge_indexing_reward": 0.0,
+      "avg_relation_informativeness_reward": 0.0,
+      "avg_reward": 0.5195708125237718,
+      "avg_soft_shaping_reward": 0.0,
+      "avg_spawn_count": 0.0,
+      "avg_spawn_critical_steps": 0.0,
+      "avg_steps_to_solution": 0.0,
+      "deanonymization_accuracy": 0.0,
+      "leaderboard_score": 0.13292298507063305,
+      "retrieval_signal": 0.0,
+      "spawn_completion_rate": 0.0,
+      "spawn_signal": 0.0,
+      "structural_signal": 0.0,
+      "task_success_rate": 0.0,
+      "tool_efficiency": 0.0
+    },
+    "run_id": "post_train_02",
+    "run_name": "original_answerer"
+  }
+]

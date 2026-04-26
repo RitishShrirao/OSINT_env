@@ -1,0 +1,6012 @@
+[
+  {
+    "answer": "user_25",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_30",
+            "rel": "alias_of",
+            "src": "alias_30_572"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_25",
+            "rel": "connected_to",
+            "src": "user_30"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_25"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_delhi",
+            "rel": "located_in",
+            "src": "user_25"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_30"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_30"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_6",
+            "rel": "connected_to",
+            "src": "user_25"
+          }
+        ],
+        "nodes": [
+          "alias_30_572",
+          "loc_delhi",
+          "loc_hyderabad",
+          "org_northbridge",
+          "user_25",
+          "user_30",
+          "user_6"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_30_572 --alias_of--> user_30",
+        "path_agent_1: user_30 --connected_to--> user_25",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=0"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_30",
+              "rel": "alias_of",
+              "src": "alias_30_572"
+            },
+            "hop_index": 0,
+            "node_id": "alias_30_572"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_30",
+                "rel": "alias_of",
+                "src": "alias_30_572"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_25",
+              "rel": "connected_to",
+              "src": "user_30"
+            },
+            "hop_index": 1,
+            "node_id": "user_30"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_25",
+                "rel": "connected_to",
+                "src": "user_30"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_hyderabad",
+                "rel": "located_in",
+                "src": "user_30"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_30"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_30",
+                "rel": "alias_of",
+                "src": "alias_30_572"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_25",
+                "rel": "connected_to",
+                "src": "user_30"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_30",
+                "rel": "alias_of",
+                "src": "alias_30_572"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_25",
+                "rel": "connected_to",
+                "src": "user_30"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "user_25"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_30_572 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.09090909090909091,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "user_25",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_30",
+            "rel": "alias_of",
+            "src": "alias_30_572"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_25",
+            "rel": "connected_to",
+            "src": "user_30"
+          }
+        ],
+        "replayed_question": "If you start at alias_30_572 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_30_572 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_30",
+        "rel": "alias_of",
+        "src": "alias_30_572"
+      },
+      {
+        "confidence": 0.8,
+        "dst": "user_25",
+        "rel": "connected_to",
+        "src": "user_30"
+      }
+    ],
+    "task_id": "swarm_v2_r7_0",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "loc_pune",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_11",
+            "rel": "connected_to",
+            "src": "user_37"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_11"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_0"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_6"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_9"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_11"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "user_11",
+            "rel": "alias_of",
+            "src": "alias_11_684"
+          }
+        ],
+        "nodes": [
+          "alias_11_684",
+          "loc_pune",
+          "org_northbridge",
+          "user_0",
+          "user_11",
+          "user_3",
+          "user_37",
+          "user_6",
+          "user_9"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: user_37 --connected_to--> user_11",
+        "path_agent_1: user_11 --located_in--> loc_pune",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=1"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_11",
+              "rel": "connected_to",
+              "src": "user_37"
+            },
+            "hop_index": 0,
+            "node_id": "user_37"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_11",
+                "rel": "connected_to",
+                "src": "user_37"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_delhi",
+                "rel": "located_in",
+                "src": "user_37"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_37"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_11"
+            },
+            "hop_index": 1,
+            "node_id": "user_11"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_11"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_11"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_11",
+                "rel": "connected_to",
+                "src": "user_37"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_11"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_11",
+                "rel": "connected_to",
+                "src": "user_37"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_11"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "loc_pune"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at user_37 and follow the relation path connected_to -> located_in, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.21666666666666667,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "loc_pune",
+        "replayed_edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_11",
+            "rel": "connected_to",
+            "src": "user_37"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_11"
+          }
+        ],
+        "replayed_question": "If you start at user_37 and follow the relation path connected_to -> located_in, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at user_37 and follow the relation path connected_to -> located_in, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 0.8,
+        "dst": "user_11",
+        "rel": "connected_to",
+        "src": "user_37"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "loc_pune",
+        "rel": "located_in",
+        "src": "user_11"
+      }
+    ],
+    "task_id": "swarm_v2_r7_1",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "loc_hyderabad",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_24",
+            "rel": "alias_of",
+            "src": "alias_24_458"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_24"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_2"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_24"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_30"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_35"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_36"
+          }
+        ],
+        "nodes": [
+          "alias_24_458",
+          "loc_hyderabad",
+          "org_northbridge",
+          "user_2",
+          "user_24",
+          "user_30",
+          "user_35",
+          "user_36"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_24_458 --alias_of--> user_24",
+        "path_agent_1: user_24 --located_in--> loc_hyderabad",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=2"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_24",
+              "rel": "alias_of",
+              "src": "alias_24_458"
+            },
+            "hop_index": 0,
+            "node_id": "alias_24_458"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_24",
+                "rel": "alias_of",
+                "src": "alias_24_458"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "loc_hyderabad",
+              "rel": "located_in",
+              "src": "user_24"
+            },
+            "hop_index": 1,
+            "node_id": "user_24"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "loc_hyderabad",
+                "rel": "located_in",
+                "src": "user_24"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_24"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_24",
+                "rel": "alias_of",
+                "src": "alias_24_458"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_hyderabad",
+                "rel": "located_in",
+                "src": "user_24"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_24",
+                "rel": "alias_of",
+                "src": "alias_24_458"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_hyderabad",
+                "rel": "located_in",
+                "src": "user_24"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "loc_hyderabad"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_24_458 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.21666666666666667,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "loc_hyderabad",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_24",
+            "rel": "alias_of",
+            "src": "alias_24_458"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_24"
+          }
+        ],
+        "replayed_question": "If you start at alias_24_458 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_24_458 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_24",
+        "rel": "alias_of",
+        "src": "alias_24_458"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "loc_hyderabad",
+        "rel": "located_in",
+        "src": "user_24"
+      }
+    ],
+    "task_id": "swarm_v2_r7_2",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "loc_bengaluru",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_4",
+            "rel": "alias_of",
+            "src": "alias_4_664"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_4"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_1"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_4"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_5"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_7"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_8"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_10"
+          }
+        ],
+        "nodes": [
+          "alias_4_664",
+          "loc_bengaluru",
+          "org_helios_labs",
+          "user_1",
+          "user_10",
+          "user_4",
+          "user_5",
+          "user_7",
+          "user_8"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_4_664 --alias_of--> user_4",
+        "path_agent_1: user_4 --located_in--> loc_bengaluru",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=3"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_4",
+              "rel": "alias_of",
+              "src": "alias_4_664"
+            },
+            "hop_index": 0,
+            "node_id": "alias_4_664"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_4",
+                "rel": "alias_of",
+                "src": "alias_4_664"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_4"
+            },
+            "hop_index": 1,
+            "node_id": "user_4"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_13",
+                "rel": "connected_to",
+                "src": "user_4"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_4"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_4"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_4",
+                "rel": "alias_of",
+                "src": "alias_4_664"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_4"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_4",
+                "rel": "alias_of",
+                "src": "alias_4_664"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_4"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "loc_bengaluru"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_4_664 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "loc_bengaluru",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_4",
+            "rel": "alias_of",
+            "src": "alias_4_664"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_4"
+          }
+        ],
+        "replayed_question": "If you start at alias_4_664 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_4_664 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_4",
+        "rel": "alias_of",
+        "src": "alias_4_664"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "loc_bengaluru",
+        "rel": "located_in",
+        "src": "user_4"
+      }
+    ],
+    "task_id": "swarm_v2_r7_3",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "user_3",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_39",
+            "rel": "alias_of",
+            "src": "alias_39_951"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_3",
+            "rel": "connected_to",
+            "src": "user_39"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "user_3",
+            "rel": "alias_of",
+            "src": "alias_3_544"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_39"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_39"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_39",
+            "rel": "connected_to",
+            "src": "user_23"
+          }
+        ],
+        "nodes": [
+          "alias_39_951",
+          "alias_3_544",
+          "loc_pune",
+          "org_northbridge",
+          "user_23",
+          "user_3",
+          "user_39"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_39_951 --alias_of--> user_39",
+        "path_agent_1: user_39 --connected_to--> user_3",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=4"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            "hop_index": 0,
+            "node_id": "alias_39_951"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_39",
+                "rel": "alias_of",
+                "src": "alias_39_951"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_39"
+            },
+            "hop_index": 1,
+            "node_id": "user_39"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_39"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_39"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_39"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_39",
+                "rel": "alias_of",
+                "src": "alias_39_951"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_39"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_39",
+                "rel": "alias_of",
+                "src": "alias_39_951"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_39"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "user_3"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_39_951 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "user_3",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_39",
+            "rel": "alias_of",
+            "src": "alias_39_951"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_3",
+            "rel": "connected_to",
+            "src": "user_39"
+          }
+        ],
+        "replayed_question": "If you start at alias_39_951 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_39_951 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_39",
+        "rel": "alias_of",
+        "src": "alias_39_951"
+      },
+      {
+        "confidence": 0.8,
+        "dst": "user_3",
+        "rel": "connected_to",
+        "src": "user_39"
+      }
+    ],
+    "task_id": "swarm_v2_r7_4",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "org_northbridge",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_20",
+            "rel": "alias_of",
+            "src": "alias_20_174"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_20"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_7"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_10"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_11"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_12"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_13"
+          }
+        ],
+        "nodes": [
+          "alias_20_174",
+          "org_northbridge",
+          "user_10",
+          "user_11",
+          "user_12",
+          "user_13",
+          "user_20",
+          "user_3",
+          "user_7"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_20_174 --alias_of--> user_20",
+        "path_agent_1: user_20 --works_at--> org_northbridge",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=5"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_20",
+              "rel": "alias_of",
+              "src": "alias_20_174"
+            },
+            "hop_index": 0,
+            "node_id": "alias_20_174"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_20",
+                "rel": "alias_of",
+                "src": "alias_20_174"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_20"
+            },
+            "hop_index": 1,
+            "node_id": "user_20"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "loc_delhi",
+                "rel": "located_in",
+                "src": "user_20"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_20"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_20",
+                "rel": "alias_of",
+                "src": "alias_20_174"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_20"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_20",
+                "rel": "alias_of",
+                "src": "alias_20_174"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_20"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "org_northbridge"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_20_174 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.21666666666666667,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "org_northbridge",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_20",
+            "rel": "alias_of",
+            "src": "alias_20_174"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_20"
+          }
+        ],
+        "replayed_question": "If you start at alias_20_174 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_20_174 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_20",
+        "rel": "alias_of",
+        "src": "alias_20_174"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "org_northbridge",
+        "rel": "works_at",
+        "src": "user_20"
+      }
+    ],
+    "task_id": "swarm_v2_r7_5",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "org_helios_labs",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_34",
+            "rel": "alias_of",
+            "src": "alias_34_511"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_34"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_0"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_4"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_5"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_8"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_16"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_26"
+          }
+        ],
+        "nodes": [
+          "alias_34_511",
+          "org_helios_labs",
+          "user_0",
+          "user_16",
+          "user_26",
+          "user_34",
+          "user_4",
+          "user_5",
+          "user_8"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_34_511 --alias_of--> user_34",
+        "path_agent_1: user_34 --works_at--> org_helios_labs",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=6"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_34",
+              "rel": "alias_of",
+              "src": "alias_34_511"
+            },
+            "hop_index": 0,
+            "node_id": "alias_34_511"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_34",
+                "rel": "alias_of",
+                "src": "alias_34_511"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "org_helios_labs",
+              "rel": "works_at",
+              "src": "user_34"
+            },
+            "hop_index": 1,
+            "node_id": "user_34"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_6",
+                "rel": "connected_to",
+                "src": "user_34"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_34"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_34"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_34",
+                "rel": "alias_of",
+                "src": "alias_34_511"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_34"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_34",
+                "rel": "alias_of",
+                "src": "alias_34_511"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_34"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "org_helios_labs"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_34_511 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "org_helios_labs",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_34",
+            "rel": "alias_of",
+            "src": "alias_34_511"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_34"
+          }
+        ],
+        "replayed_question": "If you start at alias_34_511 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_34_511 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_34",
+        "rel": "alias_of",
+        "src": "alias_34_511"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "org_helios_labs",
+        "rel": "works_at",
+        "src": "user_34"
+      }
+    ],
+    "task_id": "swarm_v2_r7_6",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "user_12",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_3",
+            "rel": "alias_of",
+            "src": "alias_3_544"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_12",
+            "rel": "connected_to",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_12"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_12"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_3",
+            "rel": "connected_to",
+            "src": "user_39"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_3",
+            "rel": "connected_to",
+            "src": "user_38"
+          }
+        ],
+        "nodes": [
+          "alias_3_544",
+          "loc_pune",
+          "org_northbridge",
+          "user_12",
+          "user_3",
+          "user_38",
+          "user_39"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_3_544 --alias_of--> user_3",
+        "path_agent_1: user_3 --connected_to--> user_12",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=7"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "alias_of",
+              "src": "alias_3_544"
+            },
+            "hop_index": 0,
+            "node_id": "alias_3_544"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_3",
+                "rel": "alias_of",
+                "src": "alias_3_544"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            },
+            "hop_index": 1,
+            "node_id": "user_3"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_3"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_3",
+                "rel": "alias_of",
+                "src": "alias_3_544"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_3",
+                "rel": "alias_of",
+                "src": "alias_3_544"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "user_12"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_3_544 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "user_12",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_3",
+            "rel": "alias_of",
+            "src": "alias_3_544"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_12",
+            "rel": "connected_to",
+            "src": "user_3"
+          }
+        ],
+        "replayed_question": "If you start at alias_3_544 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_3_544 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_3",
+        "rel": "alias_of",
+        "src": "alias_3_544"
+      },
+      {
+        "confidence": 0.8,
+        "dst": "user_12",
+        "rel": "connected_to",
+        "src": "user_3"
+      }
+    ],
+    "task_id": "swarm_v2_r7_7",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "loc_pune",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_3",
+            "rel": "alias_of",
+            "src": "alias_3_544"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_0"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_6"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_9"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_11"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_12"
+          }
+        ],
+        "nodes": [
+          "alias_3_544",
+          "loc_pune",
+          "org_northbridge",
+          "user_0",
+          "user_11",
+          "user_12",
+          "user_3",
+          "user_6",
+          "user_9"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_3_544 --alias_of--> user_3",
+        "path_agent_1: user_3 --located_in--> loc_pune",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=8"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "alias_of",
+              "src": "alias_3_544"
+            },
+            "hop_index": 0,
+            "node_id": "alias_3_544"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_3",
+                "rel": "alias_of",
+                "src": "alias_3_544"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_3"
+            },
+            "hop_index": 1,
+            "node_id": "user_3"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_3"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_3",
+                "rel": "alias_of",
+                "src": "alias_3_544"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_3"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_3",
+                "rel": "alias_of",
+                "src": "alias_3_544"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_3"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "loc_pune"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_3_544 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.7666666666666667,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "loc_pune",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_3",
+            "rel": "alias_of",
+            "src": "alias_3_544"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_3"
+          }
+        ],
+        "replayed_question": "If you start at alias_3_544 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_3_544 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_3",
+        "rel": "alias_of",
+        "src": "alias_3_544"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "loc_pune",
+        "rel": "located_in",
+        "src": "user_3"
+      }
+    ],
+    "task_id": "swarm_v2_r7_8",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "user_12",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_3",
+            "rel": "connected_to",
+            "src": "user_39"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_12",
+            "rel": "connected_to",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "user_3",
+            "rel": "alias_of",
+            "src": "alias_3_544"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_12"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_12"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_39"
+          }
+        ],
+        "nodes": [
+          "alias_3_544",
+          "loc_pune",
+          "org_northbridge",
+          "user_12",
+          "user_3",
+          "user_39"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: user_39 --connected_to--> user_3",
+        "path_agent_1: user_3 --connected_to--> user_12",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=9"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_39"
+            },
+            "hop_index": 0,
+            "node_id": "user_39"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_39"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_39"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_39"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            },
+            "hop_index": 1,
+            "node_id": "user_3"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_3"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_39"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_39"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "user_12"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at user_39 and follow the relation path connected_to -> connected_to, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.275,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "user_12",
+        "replayed_edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_3",
+            "rel": "connected_to",
+            "src": "user_39"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_12",
+            "rel": "connected_to",
+            "src": "user_3"
+          }
+        ],
+        "replayed_question": "If you start at user_39 and follow the relation path connected_to -> connected_to, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at user_39 and follow the relation path connected_to -> connected_to, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 0.8,
+        "dst": "user_3",
+        "rel": "connected_to",
+        "src": "user_39"
+      },
+      {
+        "confidence": 0.8,
+        "dst": "user_12",
+        "rel": "connected_to",
+        "src": "user_3"
+      }
+    ],
+    "task_id": "swarm_v2_r7_9",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "loc_bengaluru",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_4",
+            "rel": "alias_of",
+            "src": "alias_4_664"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_13",
+            "rel": "connected_to",
+            "src": "user_4"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_13"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_1"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_4"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_4"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_5"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_7"
+          }
+        ],
+        "nodes": [
+          "alias_4_664",
+          "loc_bengaluru",
+          "org_helios_labs",
+          "user_1",
+          "user_13",
+          "user_4",
+          "user_5",
+          "user_7"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_4_664 --alias_of--> user_4",
+        "path_agent_1: user_4 --connected_to--> user_13",
+        "path_agent_2: user_13 --located_in--> loc_bengaluru",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=3 candidate=10"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_4",
+              "rel": "alias_of",
+              "src": "alias_4_664"
+            },
+            "hop_index": 0,
+            "node_id": "alias_4_664"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_4",
+                "rel": "alias_of",
+                "src": "alias_4_664"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_13",
+              "rel": "connected_to",
+              "src": "user_4"
+            },
+            "hop_index": 1,
+            "node_id": "user_4"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_13",
+                "rel": "connected_to",
+                "src": "user_4"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_4"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_4"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_13"
+            },
+            "hop_index": 2,
+            "node_id": "user_13"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_13"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_13"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_4",
+                "rel": "alias_of",
+                "src": "alias_4_664"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_13",
+                "rel": "connected_to",
+                "src": "user_4"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_13"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_4",
+                "rel": "alias_of",
+                "src": "alias_4_664"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_13",
+                "rel": "connected_to",
+                "src": "user_4"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_13"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "loc_bengaluru"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_4_664 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 3,
+        "context_nodes": 4,
+        "duplicate_similarity": 0.7833333333333333,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "loc_bengaluru",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_4",
+            "rel": "alias_of",
+            "src": "alias_4_664"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_13",
+            "rel": "connected_to",
+            "src": "user_4"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_13"
+          }
+        ],
+        "replayed_question": "If you start at alias_4_664 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_4_664 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_4",
+        "rel": "alias_of",
+        "src": "alias_4_664"
+      },
+      {
+        "confidence": 0.8,
+        "dst": "user_13",
+        "rel": "connected_to",
+        "src": "user_4"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "loc_bengaluru",
+        "rel": "located_in",
+        "src": "user_13"
+      }
+    ],
+    "task_id": "swarm_v2_r7_10",
+    "task_type": "swarm_v2_3hop_trace"
+  },
+  {
+    "answer": "org_apex_dynamics",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_18",
+            "rel": "connected_to",
+            "src": "user_16"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_apex_dynamics",
+            "rel": "works_at",
+            "src": "user_18"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_apex_dynamics",
+            "rel": "works_at",
+            "src": "user_1"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_apex_dynamics",
+            "rel": "works_at",
+            "src": "user_2"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_apex_dynamics",
+            "rel": "works_at",
+            "src": "user_6"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_apex_dynamics",
+            "rel": "works_at",
+            "src": "user_9"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_16"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_delhi",
+            "rel": "located_in",
+            "src": "user_16"
+          }
+        ],
+        "nodes": [
+          "loc_delhi",
+          "org_apex_dynamics",
+          "org_helios_labs",
+          "user_1",
+          "user_16",
+          "user_18",
+          "user_2",
+          "user_6",
+          "user_9"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: user_16 --connected_to--> user_18",
+        "path_agent_1: user_18 --works_at--> org_apex_dynamics",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=11"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_18",
+              "rel": "connected_to",
+              "src": "user_16"
+            },
+            "hop_index": 0,
+            "node_id": "user_16"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_18",
+                "rel": "connected_to",
+                "src": "user_16"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_delhi",
+                "rel": "located_in",
+                "src": "user_16"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_16"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "org_apex_dynamics",
+              "rel": "works_at",
+              "src": "user_18"
+            },
+            "hop_index": 1,
+            "node_id": "user_18"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_18"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_apex_dynamics",
+                "rel": "works_at",
+                "src": "user_18"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_18",
+                "rel": "connected_to",
+                "src": "user_16"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_apex_dynamics",
+                "rel": "works_at",
+                "src": "user_18"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_18",
+                "rel": "connected_to",
+                "src": "user_16"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_apex_dynamics",
+                "rel": "works_at",
+                "src": "user_18"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "org_apex_dynamics"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at user_16 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.275,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "org_apex_dynamics",
+        "replayed_edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_18",
+            "rel": "connected_to",
+            "src": "user_16"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_apex_dynamics",
+            "rel": "works_at",
+            "src": "user_18"
+          }
+        ],
+        "replayed_question": "If you start at user_16 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at user_16 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 0.8,
+        "dst": "user_18",
+        "rel": "connected_to",
+        "src": "user_16"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "org_apex_dynamics",
+        "rel": "works_at",
+        "src": "user_18"
+      }
+    ],
+    "task_id": "swarm_v2_r7_11",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "org_northbridge",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_12",
+            "rel": "connected_to",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_12"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "user_3",
+            "rel": "alias_of",
+            "src": "alias_3_544"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_7"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_10"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_11"
+          }
+        ],
+        "nodes": [
+          "alias_3_544",
+          "loc_pune",
+          "org_northbridge",
+          "user_10",
+          "user_11",
+          "user_12",
+          "user_3",
+          "user_7"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: user_3 --connected_to--> user_12",
+        "path_agent_1: user_12 --works_at--> org_northbridge",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=12"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            },
+            "hop_index": 0,
+            "node_id": "user_3"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_3"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_12"
+            },
+            "hop_index": 1,
+            "node_id": "user_12"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_12"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_12"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_12"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_12"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "org_northbridge"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at user_3 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "org_northbridge",
+        "replayed_edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_12",
+            "rel": "connected_to",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_12"
+          }
+        ],
+        "replayed_question": "If you start at user_3 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at user_3 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 0.8,
+        "dst": "user_12",
+        "rel": "connected_to",
+        "src": "user_3"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "org_northbridge",
+        "rel": "works_at",
+        "src": "user_12"
+      }
+    ],
+    "task_id": "swarm_v2_r7_12",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "org_northbridge",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_25",
+            "rel": "connected_to",
+            "src": "user_30"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_25"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_7"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_10"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_11"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_12"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_13"
+          }
+        ],
+        "nodes": [
+          "org_northbridge",
+          "user_10",
+          "user_11",
+          "user_12",
+          "user_13",
+          "user_25",
+          "user_3",
+          "user_30",
+          "user_7"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: user_30 --connected_to--> user_25",
+        "path_agent_1: user_25 --works_at--> org_northbridge",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=13"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_25",
+              "rel": "connected_to",
+              "src": "user_30"
+            },
+            "hop_index": 0,
+            "node_id": "user_30"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_25",
+                "rel": "connected_to",
+                "src": "user_30"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_hyderabad",
+                "rel": "located_in",
+                "src": "user_30"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_30"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_25"
+            },
+            "hop_index": 1,
+            "node_id": "user_25"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_6",
+                "rel": "connected_to",
+                "src": "user_25"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_delhi",
+                "rel": "located_in",
+                "src": "user_25"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_25"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_25",
+                "rel": "connected_to",
+                "src": "user_30"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_25"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_25",
+                "rel": "connected_to",
+                "src": "user_30"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_25"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "org_northbridge"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at user_30 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "org_northbridge",
+        "replayed_edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_25",
+            "rel": "connected_to",
+            "src": "user_30"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_25"
+          }
+        ],
+        "replayed_question": "If you start at user_30 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at user_30 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 0.8,
+        "dst": "user_25",
+        "rel": "connected_to",
+        "src": "user_30"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "org_northbridge",
+        "rel": "works_at",
+        "src": "user_25"
+      }
+    ],
+    "task_id": "swarm_v2_r7_13",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "org_northbridge",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_11",
+            "rel": "alias_of",
+            "src": "alias_11_684"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_11"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_7"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_10"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_11"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_12"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_13"
+          }
+        ],
+        "nodes": [
+          "alias_11_684",
+          "loc_pune",
+          "org_northbridge",
+          "user_10",
+          "user_11",
+          "user_12",
+          "user_13",
+          "user_3",
+          "user_7"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_11_684 --alias_of--> user_11",
+        "path_agent_1: user_11 --works_at--> org_northbridge",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=14"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_11",
+              "rel": "alias_of",
+              "src": "alias_11_684"
+            },
+            "hop_index": 0,
+            "node_id": "alias_11_684"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_11",
+                "rel": "alias_of",
+                "src": "alias_11_684"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_11"
+            },
+            "hop_index": 1,
+            "node_id": "user_11"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_11"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_11"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_11",
+                "rel": "alias_of",
+                "src": "alias_11_684"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_11"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_11",
+                "rel": "alias_of",
+                "src": "alias_11_684"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_11"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "org_northbridge"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_11_684 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "org_northbridge",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_11",
+            "rel": "alias_of",
+            "src": "alias_11_684"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_11"
+          }
+        ],
+        "replayed_question": "If you start at alias_11_684 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_11_684 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_11",
+        "rel": "alias_of",
+        "src": "alias_11_684"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "org_northbridge",
+        "rel": "works_at",
+        "src": "user_11"
+      }
+    ],
+    "task_id": "swarm_v2_r7_14",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "loc_hyderabad",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_29",
+            "rel": "alias_of",
+            "src": "alias_29_495"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_35",
+            "rel": "connected_to",
+            "src": "user_29"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_35"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_2"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_24"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_29"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_delhi",
+            "rel": "located_in",
+            "src": "user_29"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_30"
+          }
+        ],
+        "nodes": [
+          "alias_29_495",
+          "loc_delhi",
+          "loc_hyderabad",
+          "org_helios_labs",
+          "user_2",
+          "user_24",
+          "user_29",
+          "user_30",
+          "user_35"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_29_495 --alias_of--> user_29",
+        "path_agent_1: user_29 --connected_to--> user_35",
+        "path_agent_2: user_35 --located_in--> loc_hyderabad",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=3 candidate=15"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_29",
+              "rel": "alias_of",
+              "src": "alias_29_495"
+            },
+            "hop_index": 0,
+            "node_id": "alias_29_495"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_29",
+                "rel": "alias_of",
+                "src": "alias_29_495"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_35",
+              "rel": "connected_to",
+              "src": "user_29"
+            },
+            "hop_index": 1,
+            "node_id": "user_29"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_35",
+                "rel": "connected_to",
+                "src": "user_29"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_delhi",
+                "rel": "located_in",
+                "src": "user_29"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_29"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "loc_hyderabad",
+              "rel": "located_in",
+              "src": "user_35"
+            },
+            "hop_index": 2,
+            "node_id": "user_35"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "loc_hyderabad",
+                "rel": "located_in",
+                "src": "user_35"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_35"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_29",
+                "rel": "alias_of",
+                "src": "alias_29_495"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_35",
+                "rel": "connected_to",
+                "src": "user_29"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_hyderabad",
+                "rel": "located_in",
+                "src": "user_35"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_29",
+                "rel": "alias_of",
+                "src": "alias_29_495"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_35",
+                "rel": "connected_to",
+                "src": "user_29"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_hyderabad",
+                "rel": "located_in",
+                "src": "user_35"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "loc_hyderabad"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_29_495 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 3,
+        "context_nodes": 4,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "loc_hyderabad",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_29",
+            "rel": "alias_of",
+            "src": "alias_29_495"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_35",
+            "rel": "connected_to",
+            "src": "user_29"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_hyderabad",
+            "rel": "located_in",
+            "src": "user_35"
+          }
+        ],
+        "replayed_question": "If you start at alias_29_495 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_29_495 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_29",
+        "rel": "alias_of",
+        "src": "alias_29_495"
+      },
+      {
+        "confidence": 0.8,
+        "dst": "user_35",
+        "rel": "connected_to",
+        "src": "user_29"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "loc_hyderabad",
+        "rel": "located_in",
+        "src": "user_35"
+      }
+    ],
+    "task_id": "swarm_v2_r7_15",
+    "task_type": "swarm_v2_3hop_trace"
+  },
+  {
+    "answer": "loc_bengaluru",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_38",
+            "rel": "alias_of",
+            "src": "alias_38_337"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_38"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_1"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_4"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_5"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_7"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_8"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_10"
+          }
+        ],
+        "nodes": [
+          "alias_38_337",
+          "loc_bengaluru",
+          "user_1",
+          "user_10",
+          "user_38",
+          "user_4",
+          "user_5",
+          "user_7",
+          "user_8"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_38_337 --alias_of--> user_38",
+        "path_agent_1: user_38 --located_in--> loc_bengaluru",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=16"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_38",
+              "rel": "alias_of",
+              "src": "alias_38_337"
+            },
+            "hop_index": 0,
+            "node_id": "alias_38_337"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_38",
+                "rel": "alias_of",
+                "src": "alias_38_337"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_38"
+            },
+            "hop_index": 1,
+            "node_id": "user_38"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_38"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_38"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_apex_dynamics",
+                "rel": "works_at",
+                "src": "user_38"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_38",
+                "rel": "alias_of",
+                "src": "alias_38_337"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_38"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_38",
+                "rel": "alias_of",
+                "src": "alias_38_337"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_38"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "loc_bengaluru"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_38_337 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "loc_bengaluru",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_38",
+            "rel": "alias_of",
+            "src": "alias_38_337"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_38"
+          }
+        ],
+        "replayed_question": "If you start at alias_38_337 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_38_337 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_38",
+        "rel": "alias_of",
+        "src": "alias_38_337"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "loc_bengaluru",
+        "rel": "located_in",
+        "src": "user_38"
+      }
+    ],
+    "task_id": "swarm_v2_r7_16",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "user_12",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_3",
+            "rel": "connected_to",
+            "src": "user_38"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_12",
+            "rel": "connected_to",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "user_3",
+            "rel": "alias_of",
+            "src": "alias_3_544"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_12"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_12"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_apex_dynamics",
+            "rel": "works_at",
+            "src": "user_38"
+          }
+        ],
+        "nodes": [
+          "alias_3_544",
+          "loc_pune",
+          "org_apex_dynamics",
+          "org_northbridge",
+          "user_12",
+          "user_3",
+          "user_38"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: user_38 --connected_to--> user_3",
+        "path_agent_1: user_3 --connected_to--> user_12",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=17"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_38"
+            },
+            "hop_index": 0,
+            "node_id": "user_38"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_38"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_38"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_apex_dynamics",
+                "rel": "works_at",
+                "src": "user_38"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            },
+            "hop_index": 1,
+            "node_id": "user_3"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_3"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_38"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_38"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "user_12"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at user_38 and follow the relation path connected_to -> connected_to, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "user_12",
+        "replayed_edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_3",
+            "rel": "connected_to",
+            "src": "user_38"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_12",
+            "rel": "connected_to",
+            "src": "user_3"
+          }
+        ],
+        "replayed_question": "If you start at user_38 and follow the relation path connected_to -> connected_to, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at user_38 and follow the relation path connected_to -> connected_to, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 0.8,
+        "dst": "user_3",
+        "rel": "connected_to",
+        "src": "user_38"
+      },
+      {
+        "confidence": 0.8,
+        "dst": "user_12",
+        "rel": "connected_to",
+        "src": "user_3"
+      }
+    ],
+    "task_id": "swarm_v2_r7_17",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "org_northbridge",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_39",
+            "rel": "alias_of",
+            "src": "alias_39_951"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_39"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_7"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_10"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_11"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_12"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_13"
+          }
+        ],
+        "nodes": [
+          "alias_39_951",
+          "org_northbridge",
+          "user_10",
+          "user_11",
+          "user_12",
+          "user_13",
+          "user_3",
+          "user_39",
+          "user_7"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_39_951 --alias_of--> user_39",
+        "path_agent_1: user_39 --works_at--> org_northbridge",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=19"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            "hop_index": 0,
+            "node_id": "alias_39_951"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_39",
+                "rel": "alias_of",
+                "src": "alias_39_951"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_39"
+            },
+            "hop_index": 1,
+            "node_id": "user_39"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_39"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_39"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_39"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_39",
+                "rel": "alias_of",
+                "src": "alias_39_951"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_39"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_39",
+                "rel": "alias_of",
+                "src": "alias_39_951"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_39"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "org_northbridge"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_39_951 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.7666666666666667,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "org_northbridge",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_39",
+            "rel": "alias_of",
+            "src": "alias_39_951"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_39"
+          }
+        ],
+        "replayed_question": "If you start at alias_39_951 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_39_951 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_39",
+        "rel": "alias_of",
+        "src": "alias_39_951"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "org_northbridge",
+        "rel": "works_at",
+        "src": "user_39"
+      }
+    ],
+    "task_id": "swarm_v2_r7_18",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "loc_pune",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_6",
+            "rel": "connected_to",
+            "src": "user_34"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_6"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_0"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_apex_dynamics",
+            "rel": "works_at",
+            "src": "user_6"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_9"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_11"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_12"
+          }
+        ],
+        "nodes": [
+          "loc_pune",
+          "org_apex_dynamics",
+          "user_0",
+          "user_11",
+          "user_12",
+          "user_3",
+          "user_34",
+          "user_6",
+          "user_9"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: user_34 --connected_to--> user_6",
+        "path_agent_1: user_6 --located_in--> loc_pune",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=20"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_6",
+              "rel": "connected_to",
+              "src": "user_34"
+            },
+            "hop_index": 0,
+            "node_id": "user_34"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_6",
+                "rel": "connected_to",
+                "src": "user_34"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_34"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_34"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_6"
+            },
+            "hop_index": 1,
+            "node_id": "user_6"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_0",
+                "rel": "connected_to",
+                "src": "user_6"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_6"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_apex_dynamics",
+                "rel": "works_at",
+                "src": "user_6"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_6",
+                "rel": "connected_to",
+                "src": "user_34"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_6"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 0.8,
+                "dst": "user_6",
+                "rel": "connected_to",
+                "src": "user_34"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_6"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "loc_pune"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at user_34 and follow the relation path connected_to -> located_in, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "loc_pune",
+        "replayed_edges": [
+          {
+            "confidence": 0.8,
+            "dst": "user_6",
+            "rel": "connected_to",
+            "src": "user_34"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_6"
+          }
+        ],
+        "replayed_question": "If you start at user_34 and follow the relation path connected_to -> located_in, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at user_34 and follow the relation path connected_to -> located_in, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 0.8,
+        "dst": "user_6",
+        "rel": "connected_to",
+        "src": "user_34"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "loc_pune",
+        "rel": "located_in",
+        "src": "user_6"
+      }
+    ],
+    "task_id": "swarm_v2_r7_19",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "loc_bengaluru",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_32",
+            "rel": "alias_of",
+            "src": "alias_32_394"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_32"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_1"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_4"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_5"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_7"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_8"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_10"
+          }
+        ],
+        "nodes": [
+          "alias_32_394",
+          "loc_bengaluru",
+          "user_1",
+          "user_10",
+          "user_32",
+          "user_4",
+          "user_5",
+          "user_7",
+          "user_8"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_32_394 --alias_of--> user_32",
+        "path_agent_1: user_32 --located_in--> loc_bengaluru",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=21"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_32",
+              "rel": "alias_of",
+              "src": "alias_32_394"
+            },
+            "hop_index": 0,
+            "node_id": "alias_32_394"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_32",
+                "rel": "alias_of",
+                "src": "alias_32_394"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_32"
+            },
+            "hop_index": 1,
+            "node_id": "user_32"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_32"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_32"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_32",
+                "rel": "alias_of",
+                "src": "alias_32_394"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_32"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_32",
+                "rel": "alias_of",
+                "src": "alias_32_394"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_32"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "loc_bengaluru"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_32_394 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.44999999999999996,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "loc_bengaluru",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_32",
+            "rel": "alias_of",
+            "src": "alias_32_394"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_bengaluru",
+            "rel": "located_in",
+            "src": "user_32"
+          }
+        ],
+        "replayed_question": "If you start at alias_32_394 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_32_394 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_32",
+        "rel": "alias_of",
+        "src": "alias_32_394"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "loc_bengaluru",
+        "rel": "located_in",
+        "src": "user_32"
+      }
+    ],
+    "task_id": "swarm_v2_r7_20",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "org_northbridge",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_30",
+            "rel": "alias_of",
+            "src": "alias_30_572"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_30"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_7"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_10"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_11"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_12"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_13"
+          }
+        ],
+        "nodes": [
+          "alias_30_572",
+          "org_northbridge",
+          "user_10",
+          "user_11",
+          "user_12",
+          "user_13",
+          "user_3",
+          "user_30",
+          "user_7"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_30_572 --alias_of--> user_30",
+        "path_agent_1: user_30 --works_at--> org_northbridge",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=23"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_30",
+              "rel": "alias_of",
+              "src": "alias_30_572"
+            },
+            "hop_index": 0,
+            "node_id": "alias_30_572"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_30",
+                "rel": "alias_of",
+                "src": "alias_30_572"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_30"
+            },
+            "hop_index": 1,
+            "node_id": "user_30"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_25",
+                "rel": "connected_to",
+                "src": "user_30"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_hyderabad",
+                "rel": "located_in",
+                "src": "user_30"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_30"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_30",
+                "rel": "alias_of",
+                "src": "alias_30_572"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_30"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_30",
+                "rel": "alias_of",
+                "src": "alias_30_572"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_30"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "org_northbridge"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_30_572 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.7666666666666667,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "org_northbridge",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_30",
+            "rel": "alias_of",
+            "src": "alias_30_572"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_30"
+          }
+        ],
+        "replayed_question": "If you start at alias_30_572 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_30_572 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_30",
+        "rel": "alias_of",
+        "src": "alias_30_572"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "org_northbridge",
+        "rel": "works_at",
+        "src": "user_30"
+      }
+    ],
+    "task_id": "swarm_v2_r7_21",
+    "task_type": "swarm_v2_2hop_trace"
+  },
+  {
+    "answer": "loc_pune",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_39",
+            "rel": "alias_of",
+            "src": "alias_39_951"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_3",
+            "rel": "connected_to",
+            "src": "user_39"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_0"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_northbridge",
+            "rel": "works_at",
+            "src": "user_3"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "user_3",
+            "rel": "alias_of",
+            "src": "alias_3_544"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_6"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_9"
+          }
+        ],
+        "nodes": [
+          "alias_39_951",
+          "alias_3_544",
+          "loc_pune",
+          "org_northbridge",
+          "user_0",
+          "user_3",
+          "user_39",
+          "user_6",
+          "user_9"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_39_951 --alias_of--> user_39",
+        "path_agent_1: user_39 --connected_to--> user_3",
+        "path_agent_2: user_3 --located_in--> loc_pune",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=3 candidate=24"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            "hop_index": 0,
+            "node_id": "alias_39_951"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_39",
+                "rel": "alias_of",
+                "src": "alias_39_951"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_39"
+            },
+            "hop_index": 1,
+            "node_id": "user_39"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_39"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_39"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_39"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_3"
+            },
+            "hop_index": 2,
+            "node_id": "user_3"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 0.8,
+                "dst": "user_12",
+                "rel": "connected_to",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_3"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_northbridge",
+                "rel": "works_at",
+                "src": "user_3"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_39",
+                "rel": "alias_of",
+                "src": "alias_39_951"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_39"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_3"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_39",
+                "rel": "alias_of",
+                "src": "alias_39_951"
+              },
+              {
+                "confidence": 0.8,
+                "dst": "user_3",
+                "rel": "connected_to",
+                "src": "user_39"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "loc_pune",
+                "rel": "located_in",
+                "src": "user_3"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "loc_pune"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_39_951 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 3,
+        "context_nodes": 4,
+        "duplicate_similarity": 0.7833333333333333,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "loc_pune",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_39",
+            "rel": "alias_of",
+            "src": "alias_39_951"
+          },
+          {
+            "confidence": 0.8,
+            "dst": "user_3",
+            "rel": "connected_to",
+            "src": "user_39"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "loc_pune",
+            "rel": "located_in",
+            "src": "user_3"
+          }
+        ],
+        "replayed_question": "If you start at alias_39_951 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_39_951 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_39",
+        "rel": "alias_of",
+        "src": "alias_39_951"
+      },
+      {
+        "confidence": 0.8,
+        "dst": "user_3",
+        "rel": "connected_to",
+        "src": "user_39"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "loc_pune",
+        "rel": "located_in",
+        "src": "user_3"
+      }
+    ],
+    "task_id": "swarm_v2_r7_22",
+    "task_type": "swarm_v2_3hop_trace"
+  },
+  {
+    "answer": "org_helios_labs",
+    "metadata": {
+      "canonical_graph": {
+        "edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_32",
+            "rel": "alias_of",
+            "src": "alias_32_394"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_32"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_0"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_4"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_5"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_8"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_16"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_26"
+          }
+        ],
+        "nodes": [
+          "alias_32_394",
+          "org_helios_labs",
+          "user_0",
+          "user_16",
+          "user_26",
+          "user_32",
+          "user_4",
+          "user_5",
+          "user_8"
+        ]
+      },
+      "difficulty": "hard",
+      "generated_by": "swarm_v2_generator",
+      "grader": {
+        "answer_type": "node_id",
+        "case_sensitive": true,
+        "reward_profile": "hard",
+        "type": "difficulty_exact_match"
+      },
+      "round": 7,
+      "scenario": "swarm_v2_trace",
+      "shared_context_budget": {
+        "max_edges": 8,
+        "max_nodes": 14,
+        "target_pressure": 0.85
+      },
+      "subagent_outputs": [
+        "path_agent_0: alias_32_394 --alias_of--> user_32",
+        "path_agent_1: user_32 --works_at--> org_helios_labs",
+        "question_agent: emitted deterministic relation-path question for round 7",
+        "context_agent: shared context path_size=2 candidate=25"
+      ],
+      "tool_trace": [
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "user_32",
+              "rel": "alias_of",
+              "src": "alias_32_394"
+            },
+            "hop_index": 0,
+            "node_id": "alias_32_394"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "user_32",
+                "rel": "alias_of",
+                "src": "alias_32_394"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "expected_edge": {
+              "confidence": 1.0,
+              "dst": "org_helios_labs",
+              "rel": "works_at",
+              "src": "user_32"
+            },
+            "hop_index": 1,
+            "node_id": "user_32"
+          },
+          "output": {
+            "neighbors": [
+              {
+                "confidence": 1.0,
+                "dst": "loc_bengaluru",
+                "rel": "located_in",
+                "src": "user_32"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_32"
+              }
+            ]
+          },
+          "tool_name": "enumerate_neighbors"
+        },
+        {
+          "args": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_32",
+                "rel": "alias_of",
+                "src": "alias_32_394"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_32"
+              }
+            ]
+          },
+          "output": {
+            "path": [
+              {
+                "confidence": 1.0,
+                "dst": "user_32",
+                "rel": "alias_of",
+                "src": "alias_32_394"
+              },
+              {
+                "confidence": 1.0,
+                "dst": "org_helios_labs",
+                "rel": "works_at",
+                "src": "user_32"
+              }
+            ]
+          },
+          "tool_name": "trace_path"
+        },
+        {
+          "args": {
+            "strategy": "path_dst"
+          },
+          "output": {
+            "answer": "org_helios_labs"
+          },
+          "tool_name": "select_answer"
+        },
+        {
+          "args": {
+            "style": "relation_path_v1"
+          },
+          "output": {
+            "question": "If you start at alias_32_394 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?"
+          },
+          "tool_name": "emit_question"
+        }
+      ],
+      "validation": {
+        "context_edges": 2,
+        "context_nodes": 3,
+        "duplicate_similarity": 0.7666666666666667,
+        "is_valid": true,
+        "reasons": [],
+        "replayed_answer": "org_helios_labs",
+        "replayed_edges": [
+          {
+            "confidence": 1.0,
+            "dst": "user_32",
+            "rel": "alias_of",
+            "src": "alias_32_394"
+          },
+          {
+            "confidence": 1.0,
+            "dst": "org_helios_labs",
+            "rel": "works_at",
+            "src": "user_32"
+          }
+        ],
+        "replayed_question": "If you start at alias_32_394 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+        "unique_path_count": 1
+      }
+    },
+    "question": "If you start at alias_32_394 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+    "supporting_edges": [
+      {
+        "confidence": 1.0,
+        "dst": "user_32",
+        "rel": "alias_of",
+        "src": "alias_32_394"
+      },
+      {
+        "confidence": 1.0,
+        "dst": "org_helios_labs",
+        "rel": "works_at",
+        "src": "user_32"
+      }
+    ],
+    "task_id": "swarm_v2_r7_23",
+    "task_type": "swarm_v2_2hop_trace"
+  }
+]

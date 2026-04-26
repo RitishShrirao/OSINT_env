@@ -1,0 +1,1685 @@
+{
+  "answerer_models": {
+    "finetuned_answerer": "artifacts/hf_downloads/self_play_hf_l40s_full/round_006/answerer_train/final_model",
+    "original_answerer": "Qwen/Qwen2.5-0.5B-Instruct"
+  },
+  "generated_tasks_path": "artifacts/local_hf_eval_round_006/post_training_eval_generated_tasks.json",
+  "generator_model": "artifacts/hf_downloads/self_play_hf_l40s_full/round_006/answerer_train/final_model",
+  "model_evaluations": {
+    "finetuned_answerer": {
+      "episodes": [
+        {
+          "agent_answer": "user_25",
+          "completion_length": 547,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_30_572 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "user_25",
+          "task_id": "swarm_v2_r7_0",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_30",
+              "rel": "alias_of",
+              "src": "alias_30_572"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_25",
+              "rel": "connected_to",
+              "src": "user_30"
+            }
+          ]
+        },
+        {
+          "agent_answer": "loc_pune",
+          "completion_length": 552,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at user_37 and follow the relation path connected_to -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "loc_pune",
+          "task_id": "swarm_v2_r7_1",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_11",
+              "rel": "connected_to",
+              "src": "user_37"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_11"
+            }
+          ]
+        },
+        {
+          "agent_answer": "loc_hyderabad",
+          "completion_length": 553,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_24_458 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "loc_hyderabad",
+          "task_id": "swarm_v2_r7_2",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_24",
+              "rel": "alias_of",
+              "src": "alias_24_458"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_hyderabad",
+              "rel": "located_in",
+              "src": "user_24"
+            }
+          ]
+        },
+        {
+          "agent_answer": "loc_bengaluru",
+          "completion_length": 599,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_4_664 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "loc_bengaluru",
+          "task_id": "swarm_v2_r7_3",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_4",
+              "rel": "alias_of",
+              "src": "alias_4_664"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_4"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_3",
+          "completion_length": 563,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_39_951 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "user_3",
+          "task_id": "swarm_v2_r7_4",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_39"
+            }
+          ]
+        },
+        {
+          "agent_answer": "org_northbridge",
+          "completion_length": 595,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_20_174 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_5",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_20",
+              "rel": "alias_of",
+              "src": "alias_20_174"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_20"
+            }
+          ]
+        },
+        {
+          "agent_answer": "org_helios_labs",
+          "completion_length": 556,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_34_511 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "org_helios_labs",
+          "task_id": "swarm_v2_r7_6",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_34",
+              "rel": "alias_of",
+              "src": "alias_34_511"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_helios_labs",
+              "rel": "works_at",
+              "src": "user_34"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_12",
+          "completion_length": 577,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_3_544 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "user_12",
+          "task_id": "swarm_v2_r7_7",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "alias_of",
+              "src": "alias_3_544"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            }
+          ]
+        },
+        {
+          "agent_answer": "loc_pune",
+          "completion_length": 582,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_3_544 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "loc_pune",
+          "task_id": "swarm_v2_r7_8",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "alias_of",
+              "src": "alias_3_544"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_3"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_12",
+          "completion_length": 595,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at user_39 and follow the relation path connected_to -> connected_to, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "user_12",
+          "task_id": "swarm_v2_r7_9",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_39"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_1",
+          "completion_length": 579,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_4_664 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+          "reward": 0.6704928651250475,
+          "success": 0,
+          "support_edge_count": 3,
+          "task_answer": "loc_bengaluru",
+          "task_id": "swarm_v2_r7_10",
+          "task_type": "swarm_v2_3hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_4",
+              "rel": "alias_of",
+              "src": "alias_4_664"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_13",
+              "rel": "connected_to",
+              "src": "user_4"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_13"
+            }
+          ]
+        },
+        {
+          "agent_answer": "org_apex_dynamics",
+          "completion_length": 552,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at user_16 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "org_apex_dynamics",
+          "task_id": "swarm_v2_r7_11",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_18",
+              "rel": "connected_to",
+              "src": "user_16"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_apex_dynamics",
+              "rel": "works_at",
+              "src": "user_18"
+            }
+          ]
+        },
+        {
+          "agent_answer": "org_northbridge",
+          "completion_length": 555,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at user_3 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_12",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_12"
+            }
+          ]
+        },
+        {
+          "agent_answer": "org_northbridge",
+          "completion_length": 603,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at user_30 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_13",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_25",
+              "rel": "connected_to",
+              "src": "user_30"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_25"
+            }
+          ]
+        },
+        {
+          "agent_answer": "org_northbridge",
+          "completion_length": 568,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_11_684 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_14",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_11",
+              "rel": "alias_of",
+              "src": "alias_11_684"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_11"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_35",
+          "completion_length": 547,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_29_495 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+          "reward": 0.6704928651250475,
+          "success": 0,
+          "support_edge_count": 3,
+          "task_answer": "loc_hyderabad",
+          "task_id": "swarm_v2_r7_15",
+          "task_type": "swarm_v2_3hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_29",
+              "rel": "alias_of",
+              "src": "alias_29_495"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_35",
+              "rel": "connected_to",
+              "src": "user_29"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_hyderabad",
+              "rel": "located_in",
+              "src": "user_35"
+            }
+          ]
+        },
+        {
+          "agent_answer": "loc_bengaluru",
+          "completion_length": 548,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_38_337 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "loc_bengaluru",
+          "task_id": "swarm_v2_r7_16",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_38",
+              "rel": "alias_of",
+              "src": "alias_38_337"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_38"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_12",
+          "completion_length": 547,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at user_38 and follow the relation path connected_to -> connected_to, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "user_12",
+          "task_id": "swarm_v2_r7_17",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_38"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            }
+          ]
+        },
+        {
+          "agent_answer": "org_northbridge",
+          "completion_length": 555,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_39_951 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_18",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_39"
+            }
+          ]
+        },
+        {
+          "agent_answer": "loc_pune",
+          "completion_length": 555,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at user_34 and follow the relation path connected_to -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "loc_pune",
+          "task_id": "swarm_v2_r7_19",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_6",
+              "rel": "connected_to",
+              "src": "user_34"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_6"
+            }
+          ]
+        },
+        {
+          "agent_answer": "loc_bengaluru",
+          "completion_length": 599,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_32_394 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "loc_bengaluru",
+          "task_id": "swarm_v2_r7_20",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_32",
+              "rel": "alias_of",
+              "src": "alias_32_394"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_32"
+            }
+          ]
+        },
+        {
+          "agent_answer": "org_northbridge",
+          "completion_length": 561,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_30_572 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_21",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_30",
+              "rel": "alias_of",
+              "src": "alias_30_572"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_30"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_3",
+          "completion_length": 553,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_39_951 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+          "reward": 0.6704928651250475,
+          "success": 0,
+          "support_edge_count": 3,
+          "task_answer": "loc_pune",
+          "task_id": "swarm_v2_r7_22",
+          "task_type": "swarm_v2_3hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_39"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_3"
+            }
+          ]
+        },
+        {
+          "agent_answer": "org_helios_labs",
+          "completion_length": 556,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_32_394 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.9323133138030703,
+          "success": 1,
+          "support_edge_count": 2,
+          "task_answer": "org_helios_labs",
+          "task_id": "swarm_v2_r7_23",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_32",
+              "rel": "alias_of",
+              "src": "alias_32_394"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_helios_labs",
+              "rel": "works_at",
+              "src": "user_32"
+            }
+          ]
+        }
+      ],
+      "model_path": "artifacts/hf_downloads/self_play_hf_l40s_full/round_006/answerer_train/final_model",
+      "summary": {
+        "avg_completion_length": 566.5416666666666,
+        "avg_graph_f1": 0.0,
+        "avg_reward": 0.8995857577183174,
+        "episodes": 24,
+        "task_success_rate": 0.875
+      }
+    },
+    "original_answerer": {
+      "episodes": [
+        {
+          "agent_answer": "{\"answer\":\"user_30\",\"supporting_edges\":[{\"src\":\"alias_30_572\",\"rel\":\"alias_of\",\"dst\":\"user_30\",\"confidence\":1.0},{\"src\":\"user_30\",\"rel\":\"connected_to\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"user_30\",\"rel\":\"connected_to\",\"dst\":\"loc_delhi\",\"confidence\":1.0},{\"src\":\"user_30\",\"rel\":\"connected_to\",\"dst\":\"loc_hyderabad\",\"confidence\":1.0},{\"src\":\"user_30\",\"rel\":\"connected_to\",\"dst",
+          "completion_length": 388,
+          "graph_f1": 0.6666666666666666,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_30",
+              "rel": "alias_of",
+              "src": "alias_30_572"
+            }
+          ],
+          "predicted_edge_count": 1,
+          "question": "If you start at alias_30_572 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+          "reward": 0.4462659972989426,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "user_25",
+          "task_id": "swarm_v2_r7_0",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_30",
+              "rel": "alias_of",
+              "src": "alias_30_572"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_25",
+              "rel": "connected_to",
+              "src": "user_30"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_3",
+          "completion_length": 445,
+          "graph_f1": 0.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "connected_to",
+              "src": "user_37"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "located_in",
+              "src": "loc_pune"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at user_37 and follow the relation path connected_to -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.5084758288369232,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "loc_pune",
+          "task_id": "swarm_v2_r7_1",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_11",
+              "rel": "connected_to",
+              "src": "user_37"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_11"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_24\",\"supporting_edges\":[{\"src\":\"alias_24_458\",\"rel\":\"alias_of\",\"dst\":\"user_24\",\"confidence\":1.0},{\"src\":\"user_24\",\"rel\":\"located_in\",\"dst\":\"loc_hyderabad\",\"confidence\":1.0},{\"src\":\"loc_hyderabad\",\"rel\":\"located_in\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"org_northbridge\",\"rel\":\"works_at\",\"dst\":\"user_24\",\"confidence\":1.0},{\"src\":\"user_24\",\"rel\":\"located_in\",",
+          "completion_length": 387,
+          "graph_f1": 1.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_24",
+              "rel": "alias_of",
+              "src": "alias_24_458"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_hyderabad",
+              "rel": "located_in",
+              "src": "user_24"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at alias_24_458 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.5018390028775422,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "loc_hyderabad",
+          "task_id": "swarm_v2_r7_2",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_24",
+              "rel": "alias_of",
+              "src": "alias_24_458"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_hyderabad",
+              "rel": "located_in",
+              "src": "user_24"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_7\",\"supporting_edges\":[{\"src\":\"alias_4_664\",\"rel\":\"alias_of\",\"dst\":\"user_7\",\"confidence\":1.0},{\"src\":\"user_7\",\"rel\":\"located_in\",\"dst\":\"loc_bengaluru\",\"confidence\":1.0},{\"src\":\"loc_bengaluru\",\"rel\":\"located_in\",\"dst\":\"org_helios_labs\",\"confidence\":1.0},{\"src\":\"org_helios_labs\",\"rel\":\"works_at\",\"dst\":\"user_4\",\"confidence\":1.0},{\"src\":\"user_4\",\"rel\":\"located_in\",",
+          "completion_length": 381,
+          "graph_f1": 1.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_4",
+              "rel": "alias_of",
+              "src": "alias_4_664"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_4"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at alias_4_664 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.5000528755950792,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "loc_bengaluru",
+          "task_id": "swarm_v2_r7_3",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_4",
+              "rel": "alias_of",
+              "src": "alias_4_664"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_4"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_3\",\"supporting_edges\":[{\"src\":\"alias_39_951\",\"rel\":\"alias_of\",\"dst\":\"user_3\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"connected_to\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"connected_to\",\"dst\":\"loc_pune\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"connected_to\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"connected_to\",\"dst\":\"user_39\",",
+          "completion_length": 396,
+          "graph_f1": 1.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_39"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at alias_39_951 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+          "reward": 0.5017743415980812,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "user_3",
+          "task_id": "swarm_v2_r7_4",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_39"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_7",
+          "completion_length": 387,
+          "graph_f1": 0.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_7",
+              "rel": "alias_of",
+              "src": "alias_20_174"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_7"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at alias_20_174 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.7089737433490155,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_5",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_20",
+              "rel": "alias_of",
+              "src": "alias_20_174"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_20"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_34\",\"supporting_edges\":[{\"src\":\"alias_34_511\",\"rel\":\"alias_of\",\"dst\":\"user_34\",\"confidence\":1.0},{\"src\":\"user_34\",\"rel\":\"works_at\",\"dst\":\"org_helios_labs\",\"confidence\":1.0},{\"src\":\"org_helios_labs\",\"rel\":\"works_at\",\"dst\":\"user_0\",\"confidence\":1.0},{\"src\":\"user_0\",\"rel\":\"works_at\",\"dst\":\"user_16\",\"confidence\":1.0},{\"src\":\"user_16\",\"rel\":\"works",
+          "completion_length": 361,
+          "graph_f1": 1.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_34",
+              "rel": "alias_of",
+              "src": "alias_34_511"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_helios_labs",
+              "rel": "works_at",
+              "src": "user_34"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at alias_34_511 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.49966549250864506,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "org_helios_labs",
+          "task_id": "swarm_v2_r7_6",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_34",
+              "rel": "alias_of",
+              "src": "alias_34_511"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_helios_labs",
+              "rel": "works_at",
+              "src": "user_34"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_3\",\"supporting_edges\":[{\"src\":\"alias_3_544\",\"rel\":\"alias_of\",\"dst\":\"user_3\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"connected_to\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"connected_to\",\"dst\":\"loc_pune\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"connected_to\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"connected_to\",\"dst\":\"loc_pune\",\"confidence\":",
+          "completion_length": 408,
+          "graph_f1": 0.6666666666666666,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "alias_of",
+              "src": "alias_3_544"
+            }
+          ],
+          "predicted_edge_count": 1,
+          "question": "If you start at alias_3_544 and follow the relation path alias_of -> connected_to, which entity do you reach after 2 hops?",
+          "reward": 0.4454139519345446,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "user_12",
+          "task_id": "swarm_v2_r7_7",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "alias_of",
+              "src": "alias_3_544"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_3\",\"supporting_edges\":[{\"src\":\"alias_3_544\",\"rel\":\"alias_of\",\"dst\":\"user_3\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"located_in\",\"dst\":\"loc_pune\",\"confidence\":1.0},{\"src\":\"loc_pune\",\"rel\":\"located_in\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"org_northbridge\",\"rel\":\"works_at\",\"dst\":\"user_3\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"located_in\",\"dst\":\"user_6\",\"confidence\":",
+          "completion_length": 398,
+          "graph_f1": 1.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "alias_of",
+              "src": "alias_3_544"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_3"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at alias_3_544 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.4994635369242434,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "loc_pune",
+          "task_id": "swarm_v2_r7_8",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "alias_of",
+              "src": "alias_3_544"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_3"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_3",
+          "completion_length": 423,
+          "graph_f1": 0.5,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_39"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "connected_to",
+              "src": "user_3"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at user_39 and follow the relation path connected_to -> connected_to, which entity do you reach after 2 hops?",
+          "reward": 0.6989023123676081,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "user_12",
+          "task_id": "swarm_v2_r7_9",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_39"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_7\",\"supporting_edges\":[{\"src\":\"alias_4_664\",\"rel\":\"alias_of\",\"dst\":\"user_7\",\"confidence\":1.0},{\"src\":\"user_7\",\"rel\":\"connected_to\",\"dst\":\"loc_bengaluru\",\"confidence\":1.0},{\"src\":\"loc_bengaluru\",\"rel\":\"located_in\",\"dst\":\"user_7\",\"confidence\":1.0},{\"src\":\"user_7\",\"rel\":\"located_in\",\"dst\":\"org_helios_labs\",\"confidence\":1.0},{\"src\":\"org_helios_labs\",\"rel\":\"works_at\",",
+          "completion_length": 383,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_4_664 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+          "reward": 0.39524653939368076,
+          "success": 0,
+          "support_edge_count": 3,
+          "task_answer": "loc_bengaluru",
+          "task_id": "swarm_v2_r7_10",
+          "task_type": "swarm_v2_3hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_4",
+              "rel": "alias_of",
+              "src": "alias_4_664"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_13",
+              "rel": "connected_to",
+              "src": "user_4"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_13"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"org_apex_dynamics\",\"supporting_edges\":[{\"src\":\"user_16\",\"rel\":\"connected_to\",\"dst\":\"org_apex_dynamics\",\"confidence\":1.0},{\"src\":\"org_apex_dynamics\",\"rel\":\"works_at\",\"dst\":\"user_18\",\"confidence\":1.0},{\"src\":\"user_18\",\"rel\":\"connected_to\",\"dst\":\"org_apex_dynamics\",\"confidence\":1.0},{\"src\":\"org_apex_dynamics\",\"rel\":\"works_at\",\"dst\":\"user_1\",\"confidence\":1.0},{\"src\":\"user_1\",\"rel\":\"connected_to\",\"dst",
+          "completion_length": 411,
+          "graph_f1": 1.0,
+          "pred_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_18",
+              "rel": "connected_to",
+              "src": "user_16"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_apex_dynamics",
+              "rel": "works_at",
+              "src": "user_18"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at user_16 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.5363758482799911,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "org_apex_dynamics",
+          "task_id": "swarm_v2_r7_11",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_18",
+              "rel": "connected_to",
+              "src": "user_16"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_apex_dynamics",
+              "rel": "works_at",
+              "src": "user_18"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"org_northbridge\",\"supporting_edges\":[{\"src\":\"user_3\",\"rel\":\"connected_to\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"org_northbridge\",\"rel\":\"works_at\",\"dst\":\"user_3\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"connected_to\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"org_northbridge\",\"rel\":\"works_at\",\"dst\":\"user_3\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"connected_to\",\"dst\":\"org_northbridge\",\"confidence\":",
+          "completion_length": 431,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at user_3 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.39524653939368076,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_12",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_12"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_7",
+          "completion_length": 418,
+          "graph_f1": 0.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "connected_to",
+              "src": "user_30"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "user_7",
+              "rel": "works_at",
+              "src": "org_northbridge"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at user_30 and follow the relation path connected_to -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.7410081838633457,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_13",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_25",
+              "rel": "connected_to",
+              "src": "user_30"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_25"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_7\",\"supporting_edges\":[{\"src\":\"alias_11_684\",\"rel\":\"alias_of\",\"dst\":\"user_7\",\"confidence\":1.0},{\"src\":\"user_7\",\"rel\":\"works_at\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"org_northbridge\",\"rel\":\"works_at\",\"dst\":\"user_10\",\"confidence\":1.0},{\"src\":\"user_10\",\"rel\":\"located_in\",\"dst\":\"loc_pune\",\"confidence\":1.0},{\"src\":\"loc_pune\",\"rel\":\"located_in\",\"dst\":\"org_north",
+          "completion_length": 387,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_11_684 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.39524653939368076,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_14",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_11",
+              "rel": "alias_of",
+              "src": "alias_11_684"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_11"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_35\",\"supporting_edges\":[{\"src\":\"alias_29_495\",\"rel\":\"alias_of\",\"dst\":\"user_35\",\"confidence\":1.0},{\"src\":\"user_35\",\"rel\":\"connected_to\",\"dst\":\"loc_hyderabad\",\"confidence\":1.0},{\"src\":\"loc_hyderabad\",\"rel\":\"located_in\",\"dst\":\"user_35\",\"confidence\":1.0},{\"src\":\"user_35\",\"rel\":\"located_in\",\"dst\":\"org_helios_labs\",\"confidence\":1.0},{\"src\":\"org_helios_labs\",\"rel",
+          "completion_length": 375,
+          "graph_f1": 0.5,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "loc_hyderabad",
+              "rel": "located_in",
+              "src": "user_35"
+            }
+          ],
+          "predicted_edge_count": 1,
+          "question": "If you start at alias_29_495 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+          "reward": 0.42825354331930193,
+          "success": 0,
+          "support_edge_count": 3,
+          "task_answer": "loc_hyderabad",
+          "task_id": "swarm_v2_r7_15",
+          "task_type": "swarm_v2_3hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_29",
+              "rel": "alias_of",
+              "src": "alias_29_495"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_35",
+              "rel": "connected_to",
+              "src": "user_29"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_hyderabad",
+              "rel": "located_in",
+              "src": "user_35"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_7\",\"supporting_edges\":[{\"src\":\"alias_38_337\",\"rel\":\"alias_of\",\"dst\":\"user_7\",\"confidence\":1.0},{\"src\":\"user_7\",\"rel\":\"located_in\",\"dst\":\"loc_bengaluru\",\"confidence\":1.0},{\"src\":\"loc_bengaluru\",\"rel\":\"located_in\",\"dst\":\"user_1\",\"confidence\":1.0},{\"src\":\"user_1\",\"rel\":\"located_in\",\"dst\":\"user_4\",\"confidence\":1.0},{\"src\":\"user_4\",\"rel\":\"located_in\",\"dst\":\"user_5",
+          "completion_length": 378,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_38_337 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.39524653939368076,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "loc_bengaluru",
+          "task_id": "swarm_v2_r7_16",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_38",
+              "rel": "alias_of",
+              "src": "alias_38_337"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_38"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_3",
+          "completion_length": 391,
+          "graph_f1": 0.5,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_38"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "user_38",
+              "rel": "connected_to",
+              "src": "user_3"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at user_38 and follow the relation path connected_to -> connected_to, which entity do you reach after 2 hops?",
+          "reward": 0.6997365142465289,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "user_12",
+          "task_id": "swarm_v2_r7_17",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_38"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_12",
+              "rel": "connected_to",
+              "src": "user_3"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_39\",\"supporting_edges\":[{\"src\":\"alias_39_951\",\"rel\":\"alias_of\",\"dst\":\"user_39\",\"confidence\":1.0},{\"src\":\"user_39\",\"rel\":\"works_at\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"org_northbridge\",\"rel\":\"works_at\",\"dst\":\"user_3\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"works_at\",\"dst\":\"user_10\",\"confidence\":1.0},{\"src\":\"user_10\",\"rel\":\"works_at\",\"dst\":",
+          "completion_length": 373,
+          "graph_f1": 1.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_39"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at alias_39_951 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.49900727548994456,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_18",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_39"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_3\",\"supporting_edges\":[{\"src\":\"user_34\",\"rel\":\"connected_to\",\"dst\":\"user_6\",\"confidence\":1.0},{\"src\":\"user_6\",\"rel\":\"located_in\",\"dst\":\"loc_pune\",\"confidence\":1.0},{\"src\":\"loc_pune\",\"rel\":\"located_in\",\"dst\":\"org_apex_dynamics\",\"confidence\":1.0},{\"src\":\"org_apex_dynamics\",\"rel\":\"works_at\",\"dst\":\"user_6\",\"confidence\":1.0}],\"orchestrator\":{\"spawn_count\":1,\"finished_subtasks\":0,\"critical_steps\":0",
+          "completion_length": 412,
+          "graph_f1": 1.0,
+          "pred_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_6",
+              "rel": "connected_to",
+              "src": "user_34"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_6"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at user_34 and follow the relation path connected_to -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.5347671871919794,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "loc_pune",
+          "task_id": "swarm_v2_r7_19",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 0.8,
+              "dst": "user_6",
+              "rel": "connected_to",
+              "src": "user_34"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_6"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_7\",\"supporting_edges\":[{\"src\":\"alias_32_394\",\"rel\":\"alias_of\",\"dst\":\"user_7\",\"confidence\":1.0},{\"src\":\"user_7\",\"rel\":\"located_in\",\"dst\":\"loc_bengaluru\",\"confidence\":1.0},{\"src\":\"loc_bengaluru\",\"rel\":\"located_in\",\"dst\":\"user_1\",\"confidence\":1.0},{\"src\":\"user_1\",\"rel\":\"located_in\",\"dst\":\"user_4\",\"confidence\":1.0},{\"src\":\"user_4\",\"rel\":\"located_in\",\"dst\":\"user_5",
+          "completion_length": 378,
+          "graph_f1": 0.0,
+          "pred_edges": [],
+          "predicted_edge_count": 0,
+          "question": "If you start at alias_32_394 and follow the relation path alias_of -> located_in, which entity do you reach after 2 hops?",
+          "reward": 0.39524653939368076,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "loc_bengaluru",
+          "task_id": "swarm_v2_r7_20",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_32",
+              "rel": "alias_of",
+              "src": "alias_32_394"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_bengaluru",
+              "rel": "located_in",
+              "src": "user_32"
+            }
+          ]
+        },
+        {
+          "agent_answer": "{\"answer\":\"user_30\",\"supporting_edges\":[{\"src\":\"alias_30_572\",\"rel\":\"alias_of\",\"dst\":\"user_30\",\"confidence\":1.0},{\"src\":\"user_30\",\"rel\":\"works_at\",\"dst\":\"org_northbridge\",\"confidence\":1.0},{\"src\":\"org_northbridge\",\"rel\":\"works_at\",\"dst\":\"user_3\",\"confidence\":1.0},{\"src\":\"user_3\",\"rel\":\"works_at\",\"dst\":\"user_10\",\"confidence\":1.0},{\"src\":\"user_10\",\"rel\":\"works_at\",\"dst\":",
+          "completion_length": 373,
+          "graph_f1": 1.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_30",
+              "rel": "alias_of",
+              "src": "alias_30_572"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_30"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at alias_30_572 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.4998888700517808,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "org_northbridge",
+          "task_id": "swarm_v2_r7_21",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_30",
+              "rel": "alias_of",
+              "src": "alias_30_572"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_northbridge",
+              "rel": "works_at",
+              "src": "user_30"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_3",
+          "completion_length": 431,
+          "graph_f1": 0.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "connected_to",
+              "src": "user_3"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "user_3",
+              "rel": "located_in",
+              "src": "loc_pune"
+            }
+          ],
+          "predicted_edge_count": 3,
+          "question": "If you start at alias_39_951 and follow the relation path alias_of -> connected_to -> located_in, which entity do you reach after 3 hops?",
+          "reward": 0.468212688181137,
+          "success": 0,
+          "support_edge_count": 3,
+          "task_answer": "loc_pune",
+          "task_id": "swarm_v2_r7_22",
+          "task_type": "swarm_v2_3hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_39",
+              "rel": "alias_of",
+              "src": "alias_39_951"
+            },
+            {
+              "confidence": 0.8,
+              "dst": "user_3",
+              "rel": "connected_to",
+              "src": "user_39"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "loc_pune",
+              "rel": "located_in",
+              "src": "user_3"
+            }
+          ]
+        },
+        {
+          "agent_answer": "user_32",
+          "completion_length": 434,
+          "graph_f1": 1.0,
+          "pred_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_32",
+              "rel": "alias_of",
+              "src": "alias_32_394"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_helios_labs",
+              "rel": "works_at",
+              "src": "user_32"
+            }
+          ],
+          "predicted_edge_count": 2,
+          "question": "If you start at alias_32_394 and follow the relation path alias_of -> works_at, which entity do you reach after 2 hops?",
+          "reward": 0.7753896096874865,
+          "success": 0,
+          "support_edge_count": 2,
+          "task_answer": "org_helios_labs",
+          "task_id": "swarm_v2_r7_23",
+          "task_type": "swarm_v2_2hop_trace",
+          "truth_edges": [
+            {
+              "confidence": 1.0,
+              "dst": "user_32",
+              "rel": "alias_of",
+              "src": "alias_32_394"
+            },
+            {
+              "confidence": 1.0,
+              "dst": "org_helios_labs",
+              "rel": "works_at",
+              "src": "user_32"
+            }
+          ]
+        }
+      ],
+      "model_path": "Qwen/Qwen2.5-0.5B-Instruct",
+      "summary": {
+        "avg_completion_length": 397.875,
+        "avg_graph_f1": 0.5347222222222222,
+        "avg_reward": 0.5195708125237718,
+        "episodes": 24,
+        "task_success_rate": 0.0
+      }
+    }
+  },
+  "pipeline_mode": "swarm_v2",
+  "skipped": false,
+  "summary": {
+    "compared_models": [
+      "finetuned_answerer",
+      "original_answerer"
+    ],
+    "delta_vs_original": {
+      "avg_graph_f1": -0.5347222222222222,
+      "avg_reward": 0.3800149451945456,
+      "task_success_rate": 0.875
+    },
+    "finetuned_answerer": {
+      "avg_completion_length": 566.5416666666666,
+      "avg_graph_f1": 0.0,
+      "avg_reward": 0.8995857577183174,
+      "episodes": 24,
+      "task_success_rate": 0.875
+    },
+    "generated_task_count": 24,
+    "generator_valid_rate": 0.5,
+    "original_answerer": {
+      "avg_completion_length": 397.875,
+      "avg_graph_f1": 0.5347222222222222,
+      "avg_reward": 0.5195708125237718,
+      "episodes": 24,
+      "task_success_rate": 0.0
+    },
+    "top_generator_invalid_reasons": [
+      [
+        "duplicate_or_near_duplicate",
+        3
+      ]
+    ]
+  },
+  "validation_reports_path": "artifacts/local_hf_eval_round_006/post_training_eval_validation_reports.json"
+}

@@ -1,7 +1,6 @@
 *.pyc
 blueprint.txt
 *.egg-info
-artifacts/*
 *.html
 osint_dashboard.html
 .venv/
@@ -10,3 +9,5 @@ metaQA/
 .codex
 TODO.txt
 uv.lock
+artifacts/hf_downloads/*
+artifacts/local_bin/*

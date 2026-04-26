@@ -1,0 +1,117 @@
+{
+  "episodes": [
+    {
+      "agent_answer": "user_bharat",
+      "graph_f1": 0.5714285714285715,
+      "pred_edges": [
+        {
+          "confidence": 1.0,
+          "dst": "user_ivy",
+          "rel": "alias_of",
+          "src": "alias_orchidfox"
+        },
+        {
+          "confidence": 1.0,
+          "dst": "post_midnight_manifest",
+          "rel": "authored_post",
+          "src": "alias_orchidfox"
+        }
+      ],
+      "question": "alias_orchidfox -> post_midnight_manifest -> loc_dockyard17 -> connected collaborator on event_project_lantern. Who is it?",
+      "reward": 4.375796665887621,
+      "reward_components": {
+        "compactness": 0.0,
+        "connectivity": -0.15,
+        "connectivity_gain": 0.2,
+        "correctness": 1.15,
+        "diversity": 0.12666666666666665,
+        "duplicate_edge_penalty": -0.3,
+        "efficiency": 0.08833333333333335,
+        "entity_informativeness": 0.0036675120354726642,
+        "format_reward": 0.15,
+        "global_accuracy": 1.7,
+        "graph_f1": 0.31428571428571433,
+        "invalid_tool_penalty": 0.0,
+        "knowledge_carrier": 0.5,
+        "knowledge_indexing": 0.12272727272727273,
+        "relation_informativeness": 0.08384894230149129,
+        "repetition_penalty": 0.0,
+        "soft_shaping": 0.3,
+        "spawn_auxiliary": 0.3280854063558518,
+        "spawn_breadth": 2.0,
+        "spawn_count": 4.0,
+        "spawn_critical_steps": 6.0,
+        "spawn_depth": 2.0,
+        "spawn_finished_subtasks": 4.0,
+        "tool_novelty": -0.30000000000000004,
+        "tool_relevance": 0.05818181818181818,
+        "total": 4.589529441349951
+      },
+      "spawn_count": 4,
+      "spawn_critical_steps": 6,
+      "steps": 9,
+      "success": 1,
+      "task_answer": "user_bharat",
+      "task_id": "seed_task_0",
+      "task_type": "fixed_trace",
+      "tool_calls": 4,
+      "truth_edges": [
+        {
+          "confidence": 1.0,
+          "dst": "user_ivy",
+          "rel": "alias_of",
+          "src": "alias_orchidfox"
+        },
+        {
+          "confidence": 1.0,
+          "dst": "post_midnight_manifest",
+          "rel": "authored_post",
+          "src": "alias_orchidfox"
+        },
+        {
+          "confidence": 1.0,
+          "dst": "loc_dockyard17",
+          "rel": "references",
+          "src": "post_midnight_manifest"
+        },
+        {
+          "confidence": 0.95,
+          "dst": "user_bharat",
+          "rel": "connected_to",
+          "src": "user_ivy"
+        },
+        {
+          "confidence": 0.9,
+          "dst": "event_project_lantern",
+          "rel": "collaborates_on",
+          "src": "user_bharat"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "avg_compactness_reward": 0.0,
+    "avg_connectivity_gain_reward": 0.2,
+    "avg_connectivity_reward": -0.15,
+    "avg_diversity_reward": 0.12666666666666665,
+    "avg_entity_informativeness_reward": 0.0036675120354726642,
+    "avg_format_reward": 0.15,
+    "avg_graph_f1": 0.5714285714285715,
+    "avg_knowledge_carrier_reward": 0.5,
+    "avg_knowledge_indexing_reward": 0.12272727272727273,
+    "avg_relation_informativeness_reward": 0.08384894230149129,
+    "avg_reward": 4.375796665887621,
+    "avg_soft_shaping_reward": 0.3,
+    "avg_spawn_count": 4.0,
+    "avg_spawn_critical_steps": 6.0,
+    "avg_steps_to_solution": 9.0,
+    "deanonymization_accuracy": 0.0,
+    "leaderboard_score": 0.6775552197990489,
+    "retrieval_signal": 0.7179545454545455,
+    "spawn_completion_rate": 1.0,
+    "spawn_signal": 0.6666666666666666,
+    "structural_signal": 0.5190032908673928,
+    "task_success_rate": 1.0,
+    "tool_efficiency": 0.5
+  }
+}

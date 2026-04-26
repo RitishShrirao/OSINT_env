@@ -39,6 +39,8 @@ SPACE_DASHBOARD = Path("artifacts/space_dashboard.html")
 LATEST_BASELINE_OUTPUT = Path("artifacts/baselines/openai_fixed_levels_latest.json")
 LATEST_EVALUATION_OUTPUT = Path("artifacts/latest_evaluation.json")
 OPENENV_SPEC_PATH = Path("openenv.yaml")
+COMPARE_FINETUNED_DASHBOARD = Path("artifacts/local_hf_eval_round_006/post_training_benchmark_dashboard.html")
+COMPARE_BASE_DASHBOARD = Path("artifacts/local_hf_eval_round_006/post_training_benchmark_dashboard_original.html")
 
 _SESSION_LOCK = Lock()
 _SESSIONS: dict[str, OSINTEnvironment] = {}
@@ -250,6 +252,15 @@ def _preview_snapshot() -> dict[str, Any]:
 
 def _space_snapshot() -> dict[str, Any]:
     snapshot = dict(_base_environment_snapshot())
+    compare_dashboards = {
+        "finetuned": str(COMPARE_FINETUNED_DASHBOARD),
+        "base": str(COMPARE_BASE_DASHBOARD),
+    }
+    available_compare_dashboards = {
+        name: path for name, path in compare_dashboards.items() if Path(path).exists()
+    }
+    if available_compare_dashboards:
+        snapshot["compare_dashboard_paths"] = available_compare_dashboards
 
     baseline_payload = _load_json(LATEST_BASELINE_OUTPUT)
     evaluation_payload = _load_json(LATEST_EVALUATION_OUTPUT)
@@ -273,6 +284,8 @@ def _space_snapshot() -> dict[str, Any]:
             )
             if dashboard_path.exists():
                 snapshot["dashboard_path"] = str(dashboard_path)
+            if COMPARE_FINETUNED_DASHBOARD.exists():
+                snapshot["dashboard_path"] = str(COMPARE_FINETUNED_DASHBOARD)
             return snapshot
 
         env = _build_environment()
@@ -283,10 +296,16 @@ def _space_snapshot() -> dict[str, Any]:
             output_path=str(SPACE_DASHBOARD),
         )
         snapshot["dashboard_path"] = dashboard_path
+        if COMPARE_FINETUNED_DASHBOARD.exists():
+            snapshot["dashboard_path"] = str(COMPARE_FINETUNED_DASHBOARD)
         return snapshot
 
     preview = _preview_snapshot()
     preview["source"] = "preview"
+    if available_compare_dashboards:
+        preview["compare_dashboard_paths"] = available_compare_dashboards
+        if COMPARE_FINETUNED_DASHBOARD.exists():
+            preview["dashboard_path"] = str(COMPARE_FINETUNED_DASHBOARD)
     return preview
 
 
@@ -297,6 +316,16 @@ app = FastAPI(title="OSINT OpenEnv Space", version="0.1.0")
 def home() -> str:
     snapshot = _space_snapshot()
     summary = snapshot["summary"]
+    compare_dashboards = snapshot.get("compare_dashboard_paths", {})
+    compare_links_html = ""
+    if compare_dashboards:
+        finetuned_link = ""
+        base_link = ""
+        if compare_dashboards.get("finetuned"):
+            finetuned_link = '<a class="button" href="/dashboard/finetuned">Finetuned Dashboard</a>'
+        if compare_dashboards.get("base"):
+            base_link = '<a class="button secondary" href="/dashboard/base">Base Dashboard</a>'
+        compare_links_html = f"<div style=\"margin-top:10px\">{finetuned_link}{base_link}</div>"
     difficulty_html = "".join(
         f"<li><strong>{level}</strong>: {count}</li>"
         for level, count in sorted(snapshot["difficulty_counts"].items())
@@ -354,6 +383,9 @@ def home() -> str:
       background: var(--brand);
       margin-right: 10px;
     }}
+    a.button.secondary {{
+      background: var(--accent);
+    }}
     a.link {{
       color: var(--accent);
       text-decoration: none;
@@ -379,6 +411,7 @@ def home() -> str:
         <p>The Space boots with the fixed-level benchmark so visitors get a stable environment snapshot instead of a different graph every restart.</p>
         <a class="button" href="/dashboard">Open Dashboard</a>
         <a class="link" href="/api/environment">Environment JSON</a>
+        {compare_links_html}
       </section>
       <section class="card">
         <h2>Included Snapshot</h2>
@@ -556,6 +589,20 @@ def openenv_report_inference(request: OpenEnvInferenceReportRequest) -> OpenEnvI
 def dashboard() -> FileResponse:
     snapshot = _space_snapshot()
     return FileResponse(snapshot["dashboard_path"], media_type="text/html")
+
+
+@app.get("/dashboard/finetuned")
+def dashboard_finetuned() -> FileResponse:
+    if not COMPARE_FINETUNED_DASHBOARD.exists():
+        raise HTTPException(status_code=404, detail="Finetuned dashboard not found")
+    return FileResponse(COMPARE_FINETUNED_DASHBOARD, media_type="text/html")
+
+
+@app.get("/dashboard/base")
+def dashboard_base() -> FileResponse:
+    if not COMPARE_BASE_DASHBOARD.exists():
+        raise HTTPException(status_code=404, detail="Base dashboard not found")
+    return FileResponse(COMPARE_BASE_DASHBOARD, media_type="text/html")
 
 
 if __name__ == "__main__":
