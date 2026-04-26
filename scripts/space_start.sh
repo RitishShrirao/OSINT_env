@@ -50,6 +50,19 @@ _stop_children() {
 # (otherwise a crashed training run would tear down uvicorn too).
 trap '_stop_children; exit 0' INT TERM
 
+_resolve_train_cmd() {
+  # Prefer the installed console script when it is on PATH, otherwise
+  # fall back to `python -m osint_env.cli`. The fallback avoids rc=127
+  # ("command not found") in case the user-site bin dir is missing
+  # from PATH for some reason.
+  if command -v osint-env >/dev/null 2>&1; then
+    TRAIN_CMD="osint-env"
+  else
+    echo "[space_start] 'osint-env' not on PATH; falling back to 'python -m osint_env.cli'."
+    TRAIN_CMD="python -m osint_env.cli"
+  fi
+}
+
 _run_training_supervised() {
   if [ -n "${TRAIN_OUTPUT_DIR}" ]; then
     OUTPUT_ARG="--train-output-dir ${TRAIN_OUTPUT_DIR}"
@@ -57,19 +70,23 @@ _run_training_supervised() {
     OUTPUT_ARG=""
   fi
 
+  _resolve_train_cmd
+
+  : > "${TRAIN_LOG_PATH}" || true
+
   if _is_true "$DRY_RUN_FLAG"; then
-    echo "[space_start] Running self-play in dry-run mode (logs: ${TRAIN_LOG_PATH})."
+    echo "[space_start] Running self-play in dry-run mode (logs: ${TRAIN_LOG_PATH}; mirrored to stdout)."
     # shellcheck disable=SC2086
-    osint-env train-self-play --config "${ENV_CONFIG_PATH}" --train-config "${TRAIN_CONFIG_PATH}" ${OUTPUT_ARG} --dry-run \
-      > "${TRAIN_LOG_PATH}" 2>&1 &
+    ${TRAIN_CMD} train-self-play --config "${ENV_CONFIG_PATH}" --train-config "${TRAIN_CONFIG_PATH}" ${OUTPUT_ARG} --dry-run \
+      2>&1 | tee -a "${TRAIN_LOG_PATH}" &
   else
-    echo "[space_start] Running self-play training in background (logs: ${TRAIN_LOG_PATH})."
+    echo "[space_start] Running self-play training in background (logs: ${TRAIN_LOG_PATH}; mirrored to stdout)."
     # shellcheck disable=SC2086
-    osint-env train-self-play --config "${ENV_CONFIG_PATH}" --train-config "${TRAIN_CONFIG_PATH}" ${OUTPUT_ARG} \
-      > "${TRAIN_LOG_PATH}" 2>&1 &
+    ${TRAIN_CMD} train-self-play --config "${ENV_CONFIG_PATH}" --train-config "${TRAIN_CONFIG_PATH}" ${OUTPUT_ARG} \
+      2>&1 | tee -a "${TRAIN_LOG_PATH}" &
   fi
   TRAIN_PID=$!
-  echo "[space_start] training pid=${TRAIN_PID}"
+  echo "[space_start] training pid=${TRAIN_PID} (cmd: ${TRAIN_CMD} train-self-play)"
 
   # Watcher subshell: if training exits with non-zero status, log the
   # failure but do NOT propagate it to the parent script. Uvicorn must
